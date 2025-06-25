@@ -54,7 +54,7 @@ function FileUpload({ onUpload }) {
         try {
             const jwt = localStorage.getItem('jwt');
             const xhr = new XMLHttpRequest();
-            xhr.open('POST', 'http://localhost:3001/api/series/upload');
+            xhr.open('POST', `${API_URL}/series/upload`);
             xhr.setRequestHeader('Authorization', `Bearer ${jwt}`);
             xhr.upload.onprogress = (e) => {
                 if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 100));
