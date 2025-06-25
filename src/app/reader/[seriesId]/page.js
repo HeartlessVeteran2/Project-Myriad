@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
+import { API_URL, API_BASE_URL } from '../../../lib/config';
 
 export default function ReaderPage({ params }) {
     const { seriesId } = params;
