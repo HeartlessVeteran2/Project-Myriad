@@ -28,7 +28,7 @@ async function getSeries() {
 async function deleteSeries(id) {
     try {
         const jwt = localStorage.getItem('jwt');
-        const res = await fetch(`http://localhost:3001/api/series/${id}`, {
+        const res = await fetch(`${API_URL}/series/${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${jwt}` }
         });
