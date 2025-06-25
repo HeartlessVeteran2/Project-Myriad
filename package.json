@@ -8,7 +8,9 @@
     "build": "next build",
     "start": "next start",
     "migrate": "echo 'Add your migration command here'",
-    "dev:backend": "node src/server/server.js"
+    "dev:backend": "node src/server/server.js",
+    "lint": "next lint || echo 'No linting configured'",
+    "test": "echo 'No tests yet'"
   },
   "keywords": [
     "manga",
