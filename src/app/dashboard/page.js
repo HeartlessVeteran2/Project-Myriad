@@ -206,7 +206,7 @@ export default function Dashboard() {
                             <div key={series.id} style={{ border: '1px solid #ccc', borderRadius: 8, padding: 12, width: 180, textAlign: 'center', position: 'relative', background: '#fff', boxShadow: '0 2px 8px #0001' }}>
                                 <Link href={`/reader/${series.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                                     {series.cover_path ? (
-                                        <img src={`http://localhost:3001${series.cover_path.replace('/workspaces/Project-Myriad','')}`} alt={series.title} style={{ maxWidth: 120, maxHeight: 180, marginBottom: 8, borderRadius: 4 }} />
+                                        <img src={`${API_BASE_URL}${series.cover_path.replace(process.cwd(), '').replace(/\\/g, '/')}`} alt={series.title} style={{ maxWidth: 120, maxHeight: 180, marginBottom: 8, borderRadius: 4 }} />
                                     ) : (
                                         <div style={{ width: 120, height: 180, background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px', borderRadius: 4 }}>No Cover</div>
                                     )}
