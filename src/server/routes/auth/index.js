@@ -4,7 +4,7 @@ const { hashPassword, comparePassword, generateToken } = require('./utils');
 async function authRoutes(fastify, options) {
     // POST /api/auth/register
     fastify.post('/register', async (request, reply) => {
-        const { username, password } = request.body || request.body || request.payload || {};
+        const { username, password } = request.body || request.payload || {};
         if (!username || !password) {
             return reply.code(400).send({ error: 'Username and password required' });
         }
