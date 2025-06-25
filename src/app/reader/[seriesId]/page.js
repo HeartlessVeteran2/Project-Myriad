@@ -23,7 +23,7 @@ export default function ReaderPage({ params }) {
             setError('');
             try {
                 const jwt = localStorage.getItem('jwt');
-                const res = await fetch(`http://localhost:3001/api/series/${seriesId}/images`, {
+                const res = await fetch(`${API_URL}/series/${seriesId}/images`, {
                     headers: { 'Authorization': `Bearer ${jwt}` }
                 });
                 const data = await res.json();
