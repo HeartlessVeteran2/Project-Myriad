@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { useRef, useState, useEffect } from 'react';
+import { API_URL, API_BASE_URL } from '../../lib/config';
 
 // Helper: get reading progress from localStorage
 function getProgress(seriesId) {
