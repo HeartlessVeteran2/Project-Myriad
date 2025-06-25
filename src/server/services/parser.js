@@ -15,7 +15,8 @@ async function parseCbz(filePath) {
     // Find images (jpg/png)
     const files = fs.readdirSync(extractDir);
     const images = files.filter(f => /\.(jpe?g|png)$/i.test(f));
-    images.sort(); // Sort for reading order
+    // Natural sort for reading order (handles 1.jpg, 2.jpg, 10.jpg correctly)
+    images.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
     // Use first image as cover
     const coverPath = images.length > 0 ? path.join(extractDir, images[0]) : null;
     // Use filename (without ext) as title
