@@ -20,6 +20,8 @@ fastify.get('/', async (request, reply) => {
 
 const start = async () => {
   try {
+    const port = process.env.PORT || 3001;
+    const host = process.env.HOST || '0.0.0.0';
     // Note: It's good practice to use environment variables for port
     await fastify.listen({ port: 3001 });
   } catch (err) {
