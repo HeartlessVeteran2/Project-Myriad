@@ -25,7 +25,7 @@ async function authRoutes(fastify, options) {
 
     // POST /api/auth/login
     fastify.post('/login', async (request, reply) => {
-        const { username, password } = request.body || request.body || request.payload || {};
+        const { username, password } = request.body || request.payload || {};
         if (!username || !password) {
             return reply.code(400).send({ error: 'Username and password required' });
         }
