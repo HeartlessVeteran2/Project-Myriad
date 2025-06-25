@@ -174,7 +174,7 @@ export default function Dashboard() {
         if (!editSeries) return;
         try {
             const jwt = localStorage.getItem('jwt');
-            await fetch(`http://localhost:3001/api/series/${editSeries.id}`, {
+            await fetch(`${API_URL}/series/${editSeries.id}`, {
                 method: 'PATCH',
                 headers: { 'Authorization': `Bearer ${jwt}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ title })
