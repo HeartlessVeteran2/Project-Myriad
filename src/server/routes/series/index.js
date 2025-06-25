@@ -27,6 +27,9 @@ async function seriesRoutes(fastify, options) {
             if (!allowedExts.includes(ext)) {
                 return reply.code(400).send({ error: 'Only .cbz or .zip files are supported' });
             }
+            if (!allowedTypes.includes(data.mimetype)) {
+                return reply.code(400).send({ error: 'Invalid file type. Only CBZ/ZIP files are allowed.' });
+            }
             const uploadDir = path.join(__dirname, '../../../uploads');
             if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
             const filePath = path.join(uploadDir, `${Date.now()}_${data.filename}`);
