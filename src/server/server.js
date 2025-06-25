@@ -5,6 +5,10 @@ const multipart = require('@fastify/multipart');
 
 // Register plugins
 fastify.register(cors, { origin: true });
+fastify.register(cors, { 
+  origin: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL : true,
+  credentials: true 
+});
 fastify.register(multipart);
 
 // Register API routes
