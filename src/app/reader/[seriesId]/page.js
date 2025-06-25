@@ -60,7 +60,7 @@ export default function ReaderPage({ params }) {
         <div>
             <h1>Reader</h1>
             <div style={{ textAlign: 'center' }}>
-                <img src={`http://localhost:3001${images[page]}`} alt={`Page ${page + 1}`} style={{ maxWidth: '100%', maxHeight: '80vh', borderRadius: 8, boxShadow: '0 2px 8px #0002' }} />
+                <img src={`${API_BASE_URL}${images[page]}`} alt={`Page ${page + 1}`} style={{ maxWidth: '100%', maxHeight: '80vh', borderRadius: 8, boxShadow: '0 2px 8px #0002' }} />
             </div>
             <div style={{ marginTop: 20, textAlign: 'center' }}>
                 <button onClick={prevPage} disabled={page === 0}>Previous</button>
