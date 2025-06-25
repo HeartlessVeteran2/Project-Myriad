@@ -23,7 +23,7 @@ const start = async () => {
     const port = process.env.PORT || 3001;
     const host = process.env.HOST || '0.0.0.0';
     // Note: It's good practice to use environment variables for port
-    await fastify.listen({ port: 3001 });
+    await fastify.listen({ port, host });
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
