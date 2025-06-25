@@ -13,9 +13,15 @@ The definitive platform for manga and anime enthusiasts.
 
 - **Unified Library:** Manage your local files and online sources all in one place.
 - **The Vault:** A powerful, offline-first manager for your local manga (`.cbz`, `.cbr`) and anime files.
-- **The Browser:** An extensible system to browse and read/watch from various online sources.
-- **AI-Powered Discovery:** Get recommendations based on art style, your reading habits, and more.
-- **Community Focused:** Share collections, build collaborative guides, and enjoy your hobbies with others.
+- **Drag-and-Drop Upload:** Easily add new manga by dragging `.cbz` or `.zip` files onto the dashboard.
+- **Progress Tracking:** Resume reading where you left off, with per-series progress bars and "Continue Reading" buttons.
+- **Edit & Delete:** Rename or remove series directly from the dashboard.
+- **Search & Sort:** Quickly find and organize your collection.
+- **Responsive Gallery:** View your collection in a modern, mobile-friendly grid.
+- **Reader:** Read manga with keyboard navigation, thumbnails, and progress tracking.
+- **The Browser:** An extensible system to browse and read/watch from various online sources. *(Planned)*
+- **AI-Powered Discovery:** Get recommendations based on art style, your reading habits, and more. *(Planned)*
+- **Community Focused:** Share collections, build collaborative guides, and enjoy your hobbies with others. *(Planned)*
 
 ---
 
@@ -34,8 +40,7 @@ Example:
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) (v18+ recommended)
-- [Docker](https://www.docker.com/) (optional, for containerized deployment)
-- [PostgreSQL](https://www.postgresql.org/) (if running without Docker)
+- [PostgreSQL](https://www.postgresql.org/)
 
 ### Local Installation
 
@@ -51,24 +56,46 @@ npm install
 cp .env.example .env
 # Edit .env as needed
 
-# Set up the database (if not using Docker)
-# Example for PostgreSQL:
+# Set up the database
 createdb myriad_db
+psql -U <your_user> -d myriad_db -f src/server/schema.sql
 
-# Run database migrations (if applicable)
-# npm run migrate
+# Start the backend (Fastify API)
+npm run dev:backend
 
-# Start the development server
+# Start the frontend (Next.js)
 npm run dev
 ```
 
 Visit [http://localhost:3000](http://localhost:3000) to access the app.
 
-### Docker Deployment
+---
 
-```bash
-docker compose up --build
-```
+## 🖥️ Usage
+
+### Dashboard
+- **Upload:** Drag and drop `.cbz` or `.zip` files, or use the file picker.
+- **Search/Sort:** Use the search bar and sort dropdown to find series.
+- **Edit:** Click the edit button to rename a series.
+- **Delete:** Remove a series with the delete button.
+- **Continue Reading:** Jump to your last read page with one click.
+
+### Reader
+- **Navigation:** Use next/previous buttons or arrow keys.
+- **Thumbnails:** Toggle a thumbnail grid for quick navigation.
+- **Progress:** Your reading progress is saved automatically.
+
+---
+
+## 🛠️ API Endpoints (Local Dev)
+
+- `POST /api/auth/register` — Register a new user
+- `POST /api/auth/login` — Log in and receive a JWT
+- `GET /api/series` — List your series
+- `POST /api/series/upload` — Upload a new series (`.cbz`/`.zip`)
+- `PATCH /api/series/:id` — Edit a series title
+- `DELETE /api/series/:id` — Delete a series
+- `GET /api/series/:id/images` — Get image URLs for a series
 
 ---
 
@@ -89,7 +116,6 @@ We are building Myriad in phases. You can follow our progress on our [Project Bo
 - **Frontend:** React (with Next.js)
 - **Backend:** Node.js (with Fastify)
 - **Database:** PostgreSQL
-- **Deployment:** Docker, GitHub Actions
 
 ---
 
