@@ -14,7 +14,7 @@ function setProgress(seriesId, page) {
 async function getSeries() {
     try {
         const jwt = localStorage.getItem('jwt');
-        const res = await fetch('http://localhost:3001/api/series', {
+        const res = await fetch(`${API_URL}/series`, {
             headers: { 'Authorization': `Bearer ${jwt}` }
         });
         const data = await res.json();
