@@ -73,7 +73,7 @@ export default function ReaderPage({ params }) {
                     {images.map((img, idx) => (
                         <img
                             key={img}
-                            src={`http://localhost:3001${img}`}
+                            src={`${API_BASE_URL}${img}`}
                             alt={`Thumb ${idx + 1}`}
                             style={{ width: 60, height: 80, objectFit: 'cover', border: idx === page ? '2px solid #0070f3' : '1px solid #ccc', borderRadius: 4, cursor: 'pointer' }}
                             onClick={() => setPage(idx)}
