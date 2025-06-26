@@ -10,7 +10,7 @@ fastify.register(multipart);
 // Register API routes
 fastify.register(registerRoutes);
 
-fastify.get('/', async (request, reply) => {
+fastify.get('/', async () => {
   return { hello: 'Project Myriad Backend' };
 });
 

@@ -1,7 +1,7 @@
 const db = require('../../db');
 const { hashPassword, comparePassword, generateToken } = require('./utils');
 
-async function authRoutes(fastify, options) {
+async function authRoutes(fastify) {
     // POST /api/auth/register
     fastify.post('/register', async (request, reply) => {
         const { username, password } = request.body || request.payload || {};

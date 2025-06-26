@@ -26,7 +26,7 @@ async function parseCbz(filePath) {
 
 // TODO: Implement .cbr (rar) parsing logic
 async function parseCbr(filePath) {
-    console.log(`Parsing CBR file at: ${filePath}`);
+    console.warn(`CBR parsing not yet implemented for: ${filePath}`);
 }
 
 module.exports = { parseCbz, parseCbr };

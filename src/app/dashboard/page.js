@@ -1,19 +1,19 @@
+'use client';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRef, useState, useEffect } from 'react';
+import { apiConfig } from '../../lib/api-config';
 
 // Helper: get reading progress from localStorage
 function getProgress(seriesId) {
     const progress = localStorage.getItem(`progress_${seriesId}`);
     return progress ? parseInt(progress, 10) : 0;
 }
-function setProgress(seriesId, page) {
-    localStorage.setItem(`progress_${seriesId}`, page);
-}
 
 async function getSeries() {
     try {
         const jwt = localStorage.getItem('jwt');
-        const res = await fetch('http://localhost:3001/api/series', {
+        const res = await fetch(apiConfig.endpoints.series, {
             headers: { 'Authorization': `Bearer ${jwt}` }
         });
         const data = await res.json();
@@ -27,7 +27,7 @@ async function getSeries() {
 async function deleteSeries(id) {
     try {
         const jwt = localStorage.getItem('jwt');
-        const res = await fetch(`http://localhost:3001/api/series/${id}`, {
+        const res = await fetch(`${apiConfig.endpoints.series}/${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${jwt}` }
         });
@@ -53,7 +53,7 @@ function FileUpload({ onUpload }) {
         try {
             const jwt = localStorage.getItem('jwt');
             const xhr = new XMLHttpRequest();
-            xhr.open('POST', 'http://localhost:3001/api/series/upload');
+            xhr.open('POST', `${apiConfig.endpoints.series}/upload`);
             xhr.setRequestHeader('Authorization', `Bearer ${jwt}`);
             xhr.upload.onprogress = (e) => {
                 if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 100));
@@ -173,7 +173,7 @@ export default function Dashboard() {
         if (!editSeries) return;
         try {
             const jwt = localStorage.getItem('jwt');
-            await fetch(`http://localhost:3001/api/series/${editSeries.id}`, {
+            await fetch(`${apiConfig.endpoints.series}/${editSeries.id}`, {
                 method: 'PATCH',
                 headers: { 'Authorization': `Bearer ${jwt}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ title })
@@ -205,7 +205,13 @@ export default function Dashboard() {
                             <div key={series.id} style={{ border: '1px solid #ccc', borderRadius: 8, padding: 12, width: 180, textAlign: 'center', position: 'relative', background: '#fff', boxShadow: '0 2px 8px #0001' }}>
                                 <Link href={`/reader/${series.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                                     {series.cover_path ? (
-                                        <img src={`http://localhost:3001${series.cover_path.replace('/workspaces/Project-Myriad','')}`} alt={series.title} style={{ maxWidth: 120, maxHeight: 180, marginBottom: 8, borderRadius: 4 }} />
+                                        <Image 
+                                            src={`${apiConfig.baseUrl}${series.cover_path.replace('/workspaces/Project-Myriad','')}`} 
+                                            alt={series.title} 
+                                            width={120}
+                                            height={180}
+                                            style={{ maxWidth: 120, maxHeight: 180, marginBottom: 8, borderRadius: 4 }} 
+                                        />
                                     ) : (
                                         <div style={{ width: 120, height: 180, background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px', borderRadius: 4 }}>No Cover</div>
                                     )}

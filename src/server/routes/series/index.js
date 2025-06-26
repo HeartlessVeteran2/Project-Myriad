@@ -4,7 +4,7 @@ const verifyToken = require('../auth/verify');
 const path = require('path');
 const fs = require('fs');
 
-async function seriesRoutes(fastify, options) {
+async function seriesRoutes(fastify) {
     // GET /api/series - Get all series for the logged-in user
     fastify.get('/', { preHandler: verifyToken }, async (request, reply) => {
         const userId = request.user.id;

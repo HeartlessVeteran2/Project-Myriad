@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { apiConfig } from '../../../lib/api-config';
 
 export default function RegisterForm() {
     const [username, setUsername] = useState('');
@@ -14,7 +15,7 @@ export default function RegisterForm() {
         setSuccess('');
         setLoading(true);
         try {
-            const res = await fetch('http://localhost:3001/api/auth/register', {
+            const res = await fetch(apiConfig.endpoints.auth.register, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })

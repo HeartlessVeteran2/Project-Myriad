@@ -1,5 +1,7 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
+import Image from 'next/image';
+import { apiConfig } from '../../../lib/api-config';
 
 export default function ReaderPage({ params }) {
     const { seriesId } = params;
@@ -59,7 +61,13 @@ export default function ReaderPage({ params }) {
         <div>
             <h1>Reader</h1>
             <div style={{ textAlign: 'center' }}>
-                <img src={`http://localhost:3001${images[page]}`} alt={`Page ${page + 1}`} style={{ maxWidth: '100%', maxHeight: '80vh', borderRadius: 8, boxShadow: '0 2px 8px #0002' }} />
+                <Image 
+                    src={`${apiConfig.baseUrl}${images[page]}`} 
+                    alt={`Page ${page + 1}`} 
+                    width={800}
+                    height={600}
+                    style={{ maxWidth: '100%', maxHeight: '80vh', borderRadius: 8, boxShadow: '0 2px 8px #0002' }} 
+                />
             </div>
             <div style={{ marginTop: 20, textAlign: 'center' }}>
                 <button onClick={prevPage} disabled={page === 0}>Previous</button>
@@ -70,11 +78,13 @@ export default function ReaderPage({ params }) {
             {showThumbs && (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 24, justifyContent: 'center' }}>
                     {images.map((img, idx) => (
-                        <img
+                        <Image
                             key={img}
-                            src={`http://localhost:3001${img}`}
+                            src={`${apiConfig.baseUrl}${img}`}
                             alt={`Thumb ${idx + 1}`}
-                            style={{ width: 60, height: 80, objectFit: 'cover', border: idx === page ? '2px solid #0070f3' : '1px solid #ccc', borderRadius: 4, cursor: 'pointer' }}
+                            width={60}
+                            height={80}
+                            style={{ objectFit: 'cover', border: idx === page ? '2px solid #0070f3' : '1px solid #ccc', borderRadius: 4, cursor: 'pointer' }}
                             onClick={() => setPage(idx)}
                         />
                     ))}
