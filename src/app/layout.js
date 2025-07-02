@@ -1,5 +1,6 @@
 import { Inter } from 'next/font/google'
 import ErrorBoundary from '../components/ErrorBoundary'
+import '../styles/responsive.css'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -12,12 +13,22 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <header>
-          <nav style={{ padding: '1rem', borderBottom: '1px solid #eee' }}>
-            <h1>Project Myriad</h1>
-          </nav>
+        <header className="nav">
+          <div className="container">
+            <div className="nav-container">
+              <a href="/" className="nav-brand">Project Myriad</a>
+              <button className="nav-toggle" aria-label="Toggle navigation">
+                ☰
+              </button>
+              <nav className="nav-menu">
+                <a href="/dashboard" className="nav-link">Dashboard</a>
+                <a href="/upload" className="nav-link">Upload</a>
+                <a href="/settings" className="nav-link">Settings</a>
+              </nav>
+            </div>
+          </div>
         </header>
-        <main>
+        <main className="container">
           <ErrorBoundary>
             {children}
           </ErrorBoundary>

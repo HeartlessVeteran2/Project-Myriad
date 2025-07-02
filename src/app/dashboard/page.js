@@ -1,8 +1,8 @@
-'use client';
-import Link from 'next/link';
-import Image from 'next/image';
-import { useRef, useState, useEffect } from 'react';
-import { apiConfig } from '../../lib/api-config';
+import MobileFriendlyDashboard from '../../components/MobileFriendlyDashboard';
+
+export default function DashboardPage() {
+  return <MobileFriendlyDashboard />;
+}
 
 // Helper: get reading progress from localStorage
 function getProgress(seriesId) {
