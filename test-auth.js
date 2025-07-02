@@ -11,7 +11,7 @@ async function testAuth() {
     
     // Test comparePassword
     const isValid = await comparePassword(password, hash);
-    console.log('Password comparison:', isValid ? 'PASS' : 'FAIL');
+    
     
     // Test generateToken
     const token = generateToken({ id: 1, username: 'test' });
