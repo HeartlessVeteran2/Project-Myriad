@@ -6,6 +6,11 @@ const fs = require('fs');
 
 // Parse .cbz (zip) file, extract images and basic metadata
 async function parseCbz(filePath) {
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+        throw new Error(`File not found: ${filePath}`);
+    }
+    
     const extractDir = filePath + '_extracted';
     if (!fs.existsSync(extractDir)) fs.mkdirSync(extractDir, { recursive: true });
     // Extract all files
