@@ -1,6 +1,6 @@
 {
   "name": "project-myriad",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "The definitive platform for manga and anime enthusiasts. Unified library, offline-first vault, extensible browser, AI-powered discovery, and community features.",
   "main": "index.js",
   "scripts": {
@@ -10,7 +10,10 @@
     "migrate": "echo 'Add your migration command here'",
     "dev:backend": "node src/server/server.js",
     "lint": "next lint || echo 'No linting configured'",
-    "test": "echo 'No tests yet'"
+    "lint:md": "markdownlint README.md CONTRIBUTING.md CHANGELOG.md || echo 'Markdown linting not configured'",
+    "test": "echo 'No tests yet'",
+    "db:setup": "createdb myriad_db && psql -U $USER -d myriad_db -f src/server/schema.sql",
+    "db:reset": "dropdb --if-exists myriad_db && npm run db:setup"
   },
   "keywords": [
     "manga",

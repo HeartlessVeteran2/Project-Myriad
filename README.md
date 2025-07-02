@@ -87,15 +87,30 @@ Visit [http://localhost:3000](http://localhost:3000) to access the app.
 
 ---
 
-## 🛠️ API Endpoints (Local Dev)
+## 🛠️ API Endpoints
+
+The backend server runs on `http://localhost:3001` by default.
+
+### Authentication
 
 - `POST /api/auth/register` — Register a new user
 - `POST /api/auth/login` — Log in and receive a JWT
+
+### Series Management
+
 - `GET /api/series` — List your series
 - `POST /api/series/upload` — Upload a new series (`.cbz`/`.zip`)
 - `PATCH /api/series/:id` — Edit a series title
 - `DELETE /api/series/:id` — Delete a series
 - `GET /api/series/:id/images` — Get image URLs for a series
+
+### Database Schema
+
+The application uses three main tables:
+
+- `users` — User accounts with authentication
+- `series` — Manga/anime series metadata
+- `reading_progress` — Per-user reading progress tracking
 
 ---
 
@@ -113,9 +128,17 @@ We are building Myriad in phases. You can follow our progress on our [Project Bo
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** React (with Next.js)
-- **Backend:** Node.js (with Fastify)
+- **Frontend:** React 18 with Next.js 14
+- **Backend:** Node.js with Fastify 4.x
 - **Database:** PostgreSQL
+- **Key Dependencies:**
+  - `@fastify/multipart` v9.0.0 (file uploads)
+  - `@fastify/cors` v8.5.0 (CORS handling)
+  - `@fastify/static` v6.12.0 (static file serving)
+  - `bcrypt` v5.1.1 (password hashing)
+  - `jsonwebtoken` v9.0.2 (JWT authentication)
+  - `pg` v8.16.2 (PostgreSQL client)
+  - `unzipper` v0.10.14 (archive extraction)
 
 ---
 
@@ -130,7 +153,7 @@ Please read our [CONTRIBUTING.md](CONTRIBUTING.md) to get started.
 ### Community & Support
 
 - [GitHub Discussions](https://github.com/HeartlessVeteran2/Project-Myriad/discussions)
-- Raise issues or feature requests [here](https://github.com/HeartlessVeteran2/Project-Myriad/issues).
+- Raise issues or feature requests on the [GitHub Issues page](https://github.com/HeartlessVeteran2/Project-Myriad/issues).
 
 ---
 
