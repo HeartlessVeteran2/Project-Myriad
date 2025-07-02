@@ -1,4 +1,5 @@
 import { Inter } from 'next/font/google'
+import Link from 'next/link'
 import ErrorBoundary from '../components/ErrorBoundary'
 import '../styles/responsive.css'
 
@@ -16,19 +17,20 @@ export default function RootLayout({ children }) {
         <header className="nav">
           <div className="container">
             <div className="nav-container">
-              <a href="/" className="nav-brand">Project Myriad</a>
+              <Link href="/" className="nav-brand">📚 Project Myriad</Link>
               <button className="nav-toggle" aria-label="Toggle navigation">
                 ☰
               </button>
               <nav className="nav-menu">
-                <a href="/dashboard" className="nav-link">Dashboard</a>
-                <a href="/upload" className="nav-link">Upload</a>
-                <a href="/settings" className="nav-link">Settings</a>
+                <Link href="/" className="nav-link">Home</Link>
+                <Link href="/dashboard" className="nav-link">Dashboard</Link>
+                <a href="#features" className="nav-link">Features</a>
+                <a href="https://github.com/HeartlessVeteran2/Project-Myriad" target="_blank" rel="noopener noreferrer" className="nav-link">GitHub</a>
               </nav>
             </div>
           </div>
         </header>
-        <main className="container">
+        <main>
           <ErrorBoundary>
             {children}
           </ErrorBoundary>
