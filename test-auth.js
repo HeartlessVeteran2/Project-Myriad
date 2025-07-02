@@ -2,7 +2,7 @@ const { hashPassword, comparePassword, generateToken } = require('./src/server/r
 
 async function testAuth() {
   try {
-    console.log('Testing auth utils...');
+    
     
     // Test hashPassword
     const password = process.env.TEST_PASSWORD || 'defaultpassword'; // Use an environment variable for the password
