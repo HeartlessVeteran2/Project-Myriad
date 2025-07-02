@@ -11,12 +11,15 @@ jest.setTimeout(30000);
 
 // Clean up database before each test
 beforeEach(async () => {
-  if (process.env.DATABASE_URL) {
+  if (process.env.DATABASE_URL && process.env.NODE_ENV === 'test') {
     const pool = new Pool({ connectionString: process.env.DATABASE_URL });
     try {
       await pool.query('TRUNCATE TABLE reading_progress, series, users CASCADE');
     } catch (error) {
-      console.warn('Could not clean test database:', error.message);
+      // Silently ignore database cleanup errors in non-test environments
+      if (process.env.NODE_ENV === 'test') {
+        console.warn('Could not clean test database:', error.message);
+      }
     } finally {
       await pool.end();
     }

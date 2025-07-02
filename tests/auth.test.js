@@ -1,4 +1,4 @@
-const { hashPassword, comparePassword, generateToken } = require('../../src/server/routes/auth/utils');
+const { hashPassword, comparePassword, generateToken } = require('../src/server/routes/auth/utils');
 
 describe('Auth Utils', () => {
   describe('hashPassword', () => {

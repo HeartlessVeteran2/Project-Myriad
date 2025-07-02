@@ -1,5 +1,5 @@
 {
-  "testEnvironment": "node",
+  "testEnvironment": "node", 
   "setupFilesAfterEnv": ["<rootDir>/tests/setup.js"],
   "testMatch": [
     "**/__tests__/**/*.[jt]s?(x)",
@@ -14,10 +14,10 @@
   "coverageDirectory": "coverage",
   "coverageReporters": [
     "text",
-    "lcov",
+    "lcov", 
     "html"
   ],
-  "moduleNameMapping": {
+  "moduleNameMapper": {
     "^@/(.*)$": "<rootDir>/src/$1"
   },
   "testPathIgnorePatterns": [

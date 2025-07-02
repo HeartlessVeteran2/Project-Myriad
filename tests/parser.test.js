@@ -1,4 +1,4 @@
-const { parseCbz } = require('../../src/server/services/parser');
+const { parseCbz } = require('../src/server/services/parser');
 const path = require('path');
 const fs = require('fs');
 
