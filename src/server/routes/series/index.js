@@ -69,8 +69,9 @@ async function seriesRoutes(fastify, options) {
         const dir = path.dirname(series.cover_path);
         const files = fs.readdirSync(dir);
         const images = files.filter(f => /\.(jpe?g|png)$/i.test(f)).sort();
-        // Serve as URLs (static route)
-        const baseUrl = `/api/series/${seriesId}/static`;
+        // Serve as URLs (static route) - use the actual extracted folder path in the URL
+        const relativePath = path.relative(path.join(__dirname, '../../../uploads'), dir);
+        const baseUrl = `/api/series/static/${relativePath}`;
         return { images: images.map(img => `${baseUrl}/${img}`) };
     });
 

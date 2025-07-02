@@ -7,7 +7,7 @@ if (!connectionString) {
     '[WARNING] DATABASE_URL environment variable is not set. Using default credentials. ' +
     'This is insecure and should not be used in production.'
   );
-  connectionString = 'postgres://user:password@localhost:5432/myriad';
+  connectionString = 'postgres://user:password@localhost:5432/myriad_db';
 }
 
 const pool = new Pool({
