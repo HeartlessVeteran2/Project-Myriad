@@ -5,7 +5,7 @@ async function testAuth() {
     console.log('Testing auth utils...');
     
     // Test hashPassword
-    const password = 'testpassword123';
+    const password = process.env.TEST_PASSWORD || 'defaultpassword'; // Use an environment variable for the password
     const hash = await hashPassword(password);
     console.log('Hash generated:', hash ? 'YES' : 'NO');
     
