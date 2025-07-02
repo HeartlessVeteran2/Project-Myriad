@@ -1,4 +1,4 @@
-const request = require('supertest');
+// const request = require('supertest');
 const { Pool } = require('pg');
 
 // Mock database for testing
