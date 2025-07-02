@@ -1,0 +1,37 @@
+name: Database Migration
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/server/schema.sql'
+      - 'src/server/migrations/**'
+  workflow_dispatch:
+
+jobs:
+  validate-schema:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test schema migration
+        run: |
+          PGPASSWORD=postgres psql -h localhost -U postgres -d test_db -f src/server/schema.sql
+          echo "Schema migration successful"
+      - name: Validate schema structure
+        run: |
+          PGPASSWORD=postgres psql -h localhost -U postgres -d test_db -c "\dt"
+          PGPASSWORD=postgres psql -h localhost -U postgres -d test_db -c "SELECT table_name, column_name, data_type FROM information_schema.columns WHERE table_schema = 'public';"

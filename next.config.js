@@ -15,7 +15,11 @@ const nextConfig = {
     serverActions: {
       allowedOrigins: ['localhost:3000', 'localhost:3001']
     }
-  }
+  },
+  // Enable standalone output for Docker
+  output: 'standalone',
+  // Disable telemetry
+  telemetry: false,
 }
 
 module.exports = nextConfig

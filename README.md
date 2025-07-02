@@ -1,6 +1,8 @@
 # Project Myriad 📖
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/HeartlessVeteran2/Project-Myriad/ci.yml?branch=main)](https://github.com/HeartlessVeteran2/Project-Myriad/actions)
+[![Node.js CI](https://img.shields.io/github/actions/workflow/status/HeartlessVeteran2/Project-Myriad/nodejs.yml?branch=main&label=tests)](https://github.com/HeartlessVeteran2/Project-Myriad/actions)
+[![Security Audit](https://img.shields.io/github/actions/workflow/status/HeartlessVeteran2/Project-Myriad/security.yml?branch=main&label=security)](https://github.com/HeartlessVeteran2/Project-Myriad/actions)
+[![Docker Build](https://img.shields.io/github/actions/workflow/status/HeartlessVeteran2/Project-Myriad/docker.yml?branch=main&label=docker)](https://github.com/HeartlessVeteran2/Project-Myriad/actions)
 [![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue.svg)](LICENSE)
 
 The definitive platform for manga and anime enthusiasts.
@@ -40,9 +42,25 @@ Example:
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) (v18+ recommended)
-- [PostgreSQL](https://www.postgresql.org/)
+- [PostgreSQL](https://www.postgresql.org/) (v12+)
 
-### Local Installation
+### Option 1: Docker (Recommended)
+
+```bash
+# Clone the repository
+git clone https://github.com/HeartlessVeteran2/Project-Myriad.git
+cd Project-Myriad
+
+# Start with Docker Compose
+docker-compose up -d
+
+# Access the application
+# Frontend: http://localhost:3000
+# Backend API: http://localhost:3001
+# Database Admin (Adminer): http://localhost:8080
+```
+
+### Option 2: Local Development
 
 ```bash
 # Clone the repository
@@ -54,16 +72,16 @@ npm install
 
 # Set up environment variables
 cp .env.example .env
-# Edit .env as needed
+# Edit .env with your database credentials
 
 # Set up the database
-createdb myriad_db
-psql -U <your_user> -d myriad_db -f src/server/schema.sql
+createdb project_myriad
+psql -U <your_user> -d project_myriad -f src/server/schema.sql
 
 # Start the backend (Fastify API)
 npm run dev:backend
 
-# Start the frontend (Next.js)
+# In a new terminal, start the frontend (Next.js)
 npm run dev
 ```
 
@@ -101,21 +119,96 @@ Visit [http://localhost:3000](http://localhost:3000) to access the app.
 
 ## 🗺️ Project Roadmap
 
-We are building Myriad in phases. You can follow our progress on our [Project Board](https://github.com/HeartlessVeteran2/Project-Myriad/projects).
+We are building Myriad in phases. You can follow our progress on our [GitHub Project Board](https://github.com/HeartlessVeteran2/Project-Myriad/projects).
 
-- [✅] Phase 0: Project Setup & Community Guidelines  
-- [In Progress] Phase 1: The Core Vault (Local Media MVP)  
-- [Upcoming] Phase 2: The Browser (Online Source Integration)  
-- [Upcoming] Phase 3: AI & Community Enhancements  
-- [Future] Phase 4: Full Anime & Video Integration  
+### Phase 1: The Core Vault (Local Media MVP) 🟡 *In Progress*
+- [x] Basic Next.js + Fastify setup
+- [x] User authentication (JWT)
+- [x] File upload system (.cbz/.zip)
+- [x] Basic manga reader with navigation
+- [x] Progress tracking
+- [x] Series management (edit/delete)
+- [x] Docker containerization
+- [x] CI/CD pipeline setup
+- [ ] Enhanced file format support (.cbr)
+- [ ] Improved UI/UX design
+- [ ] Mobile responsiveness
+- [ ] Search and filtering improvements
+- [ ] Bulk operations
+
+### Phase 2: The Browser (Online Source Integration) 🔵 *Planned*
+- [ ] Plugin system architecture
+- [ ] Online source integrations
+- [ ] Metadata fetching and matching
+- [ ] Synchronized reading progress
+- [ ] Offline caching
+
+### Phase 3: AI & Community Enhancements 🟣 *Future*
+- [ ] AI-powered recommendations
+- [ ] Art style analysis
+- [ ] Community features
+- [ ] Social reading lists
+- [ ] Review and rating system
+
+### Phase 4: Full Anime & Video Integration 🟠 *Future*
+- [ ] Video player integration
+- [ ] Anime episode tracking
+- [ ] Multi-format support
+- [ ] Streaming integration  
+
+---
+
+## 🛠️ Development
+
+### Testing
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Generate coverage report
+npm run test:coverage
+```
+
+### Code Quality
+
+```bash
+# Lint code
+npm run lint
+
+# Fix linting issues
+npm run lint:fix
+
+# Type checking (when TypeScript is added)
+npm run type-check
+```
+
+### CI/CD
+
+This project includes comprehensive GitHub Actions workflows:
+
+- **CI Pipeline** - Automated testing, linting, and building
+- **Security Audits** - Vulnerability scanning and dependency reviews  
+- **Docker Builds** - Container image building and caching
+- **Database Testing** - Schema validation and migration testing
+- **Performance Testing** - Lighthouse and load testing
+- **Automated Deployments** - Staging and production deployments
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** React (with Next.js)
+- **Frontend:** React (with Next.js 15)
 - **Backend:** Node.js (with Fastify)
 - **Database:** PostgreSQL
+- **Authentication:** JWT
+- **File Processing:** Unzipper for .cbz files
+- **Testing:** Jest with Testing Library
+- **CI/CD:** GitHub Actions
+- **Containerization:** Docker & Docker Compose
 
 ---
 

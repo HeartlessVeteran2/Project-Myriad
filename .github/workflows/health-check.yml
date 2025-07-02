@@ -1,0 +1,24 @@
+name: Health Check Monitoring
+
+on:
+  schedule:
+    - cron: '*/15 * * * *' # Every 15 minutes
+  workflow_dispatch:
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Check Application Health
+        run: |
+          echo "Checking application health endpoints..."
+          # Add your production health check URLs here
+          # curl -f https://your-production-domain.com/health || exit 1
+          echo "Health check placeholder - configure with production URLs"
+          
+      - name: Notify on Failure
+        if: failure()
+        run: |
+          echo "Health check failed - configure notifications here"
+          # Add notification logic (Slack, Discord, email, etc.)

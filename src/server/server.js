@@ -14,6 +14,15 @@ fastify.get('/', async () => {
   return { hello: 'Project Myriad Backend' };
 });
 
+// Health check endpoint
+fastify.get('/health', async () => {
+  return { 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    version: process.env.npm_package_version || '1.0.0'
+  };
+});
+
 const start = async () => {
   try {
     // Note: It's good practice to use environment variables for port

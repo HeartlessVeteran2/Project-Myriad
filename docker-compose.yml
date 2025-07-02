@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - BACKEND_URL=http://backend:3001
+    depends_on:
+      - backend
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/project_myriad
+      - JWT_SECRET=your-jwt-secret-key
+    depends_on:
+      - postgres
+    volumes:
+      - ./src/server:/app/src/server
+
+  postgres:
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=project_myriad
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./src/server/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+
+  adminer:
+    image: adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
