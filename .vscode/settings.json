@@ -19,7 +19,7 @@
   "javascript.preferences.importModuleSpecifier": "relative",
   "eslint.workingDirectories": [
     "backend",
-    "frontend", 
+    "frontend",
     "mobile"
   ],
   "eslint.validate": [
