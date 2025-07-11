@@ -95,7 +95,7 @@
     "rollup-plugin-visualizer": "^5.9.2",
     "husky": "^8.0.3",
     "lint-staged": "^15.2.0",
-    "@lhci/cli": "^0.12.0"
+    "@lhci/cli": "^0.15.0"
   },
   "browserslist": {
     "production": [
