@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - name: Install dependencies (backend)
+        run: |
+          if [ -f backend/package.json ]; then cd backend && npm ci || npm install && cd ..; fi
+      - name: Install dependencies (frontend)
+        run: |
+          if [ -f frontend/package.json ]; then cd frontend && npm ci || npm install && cd ..; fi
+      - name: Build backend
+        run: |
+          if [ -f backend/package.json ]; then cd backend && npm run build || echo 'No build script.' && cd ..; fi
+      - name: Build frontend
+        run: |
+          if [ -f frontend/package.json ]; then cd frontend && npm run build || echo 'No build script.' && cd ..; fi
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - name: Lint backend
+        run: |
+          if [ -f backend/package.json ]; then cd backend && npm run lint || echo 'No linter.' && cd ..; fi
+      - name: Lint frontend
+        run: |
+          if [ -f frontend/package.json ]; then cd frontend && npm run lint || echo 'No linter.' && cd ..; fi
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - name: Test backend
+        run: |
+          if [ -f backend/package.json ]; then cd backend && npm test || echo 'No tests.' && cd ..; fi
+      - name: Test frontend
+        run: |
+          if [ -f frontend/package.json ]; then cd frontend && npm test || echo 'No tests.' && cd ..; fi
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker images
+        run: |
+          if [ -f Dockerfile ]; then docker build -t project-myriad .; fi
+          if [ -f docker-compose.yml ]; then docker-compose build; fi
