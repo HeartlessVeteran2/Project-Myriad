@@ -10,7 +10,7 @@ class RollbackManager {
 
   async rollbackLast() {
     console.log('Rolling back last migration...');
-    
+
     try {
       const files = await fs.readdir(this.migrationsDir);
       const migrationFiles = files
@@ -40,7 +40,7 @@ class RollbackManager {
 
   async rollbackTo(targetMigration) {
     console.log(`Rolling back to migration: ${targetMigration}`);
-    
+
     try {
       const files = await fs.readdir(this.migrationsDir);
       const migrationFiles = files
@@ -49,7 +49,7 @@ class RollbackManager {
         .reverse();
 
       const targetIndex = migrationFiles.findIndex(file => file.includes(targetMigration));
-      
+
       if (targetIndex === -1) {
         console.error('Target migration not found');
         process.exit(1);

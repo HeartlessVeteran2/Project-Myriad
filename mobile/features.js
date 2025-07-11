@@ -15,7 +15,7 @@ export const features = [
     status: 'active',
     icon: '📚',
     component: 'LibraryScreen',
-    platforms: ['ios', 'android']
+    platforms: ['ios', 'android'],
   },
   {
     id: 'extension-system',
@@ -24,7 +24,7 @@ export const features = [
     status: 'active',
     icon: '🧩',
     component: 'ExtensionScreen',
-    platforms: ['ios', 'android']
+    platforms: ['ios', 'android'],
   },
   {
     id: 'manga-reader',
@@ -33,7 +33,7 @@ export const features = [
     status: 'active',
     icon: '📖',
     component: 'MangaReaderScreen',
-    platforms: ['ios', 'android']
+    platforms: ['ios', 'android'],
   },
   {
     id: 'anime-player',
@@ -42,7 +42,7 @@ export const features = [
     status: 'active',
     icon: '🎬',
     component: 'AnimePlayerScreen',
-    platforms: ['ios', 'android']
+    platforms: ['ios', 'android'],
   },
   {
     id: 'download-manager',
@@ -51,7 +51,7 @@ export const features = [
     status: 'active',
     icon: '⬇️',
     component: 'DownloadScreen',
-    platforms: ['ios', 'android']
+    platforms: ['ios', 'android'],
   },
   {
     id: 'search-recommendations',
@@ -60,7 +60,7 @@ export const features = [
     status: 'active',
     icon: '🔍',
     component: 'SearchScreen',
-    platforms: ['ios', 'android']
+    platforms: ['ios', 'android'],
   },
   {
     id: 'tracking-sync',
@@ -69,7 +69,7 @@ export const features = [
     status: 'active',
     icon: '🔄',
     component: 'TrackingScreen',
-    platforms: ['ios', 'android']
+    platforms: ['ios', 'android'],
   },
   {
     id: 'community',
@@ -78,7 +78,7 @@ export const features = [
     status: 'active',
     icon: '👥',
     component: 'CommunityScreen',
-    platforms: ['ios', 'android']
+    platforms: ['ios', 'android'],
   },
   {
     id: 'notifications',
@@ -87,7 +87,7 @@ export const features = [
     status: 'active',
     icon: '🔔',
     component: 'NotificationSettings',
-    platforms: ['ios', 'android']
+    platforms: ['ios', 'android'],
   },
   {
     id: 'biometric-auth',
@@ -96,7 +96,7 @@ export const features = [
     status: 'active',
     icon: '🔐',
     component: 'BiometricAuth',
-    platforms: ['ios', 'android']
+    platforms: ['ios', 'android'],
   },
   {
     id: 'web3-integration',
@@ -105,19 +105,19 @@ export const features = [
     status: 'beta',
     icon: '⛓️',
     component: 'Web3Screen',
-    platforms: ['ios', 'android']
-  }
+    platforms: ['ios', 'android'],
+  },
 ];
 
 // Mobile-specific feature utilities
 export const getMobileFeatures = () => {
   const currentPlatform = Platform.OS;
-  return features.filter(feature => 
-    feature.platforms.includes(currentPlatform) || feature.platforms.includes('all')
+  return features.filter(
+    feature => feature.platforms.includes(currentPlatform) || feature.platforms.includes('all')
   );
 };
 
-export const getFeature = (id) => {
+export const getFeature = id => {
   return features.find(feature => feature.id === id);
 };
 
@@ -130,43 +130,43 @@ export const getBetaFeatures = () => {
 };
 
 // Mobile-specific feature categories
-export const getFeaturesByCategory = (category) => {
+export const getFeaturesByCategory = category => {
   const categories = {
-    'content': ['unified-library', 'manga-reader', 'anime-player'],
-    'discovery': ['search-recommendations', 'extension-system'],
-    'management': ['download-manager', 'tracking-sync'],
-    'social': ['community', 'notifications'],
-    'security': ['biometric-auth'],
-    'advanced': ['web3-integration']
+    content: ['unified-library', 'manga-reader', 'anime-player'],
+    discovery: ['search-recommendations', 'extension-system'],
+    management: ['download-manager', 'tracking-sync'],
+    social: ['community', 'notifications'],
+    security: ['biometric-auth'],
+    advanced: ['web3-integration'],
   };
-  
+
   const featureIds = categories[category] || [];
   return getMobileFeatures().filter(feature => featureIds.includes(feature.id));
 };
 
 // Platform-specific permissions
-export const getRequiredPermissions = (featureId) => {
+export const getRequiredPermissions = featureId => {
   const permissions = {
     'download-manager': {
       ios: ['WRITE_EXTERNAL_STORAGE'],
-      android: ['WRITE_EXTERNAL_STORAGE', 'READ_EXTERNAL_STORAGE']
+      android: ['WRITE_EXTERNAL_STORAGE', 'READ_EXTERNAL_STORAGE'],
     },
-    'notifications': {
+    notifications: {
       ios: ['RECEIVE_NOTIFICATIONS'],
-      android: ['RECEIVE_BOOT_COMPLETED', 'VIBRATE']
+      android: ['RECEIVE_BOOT_COMPLETED', 'VIBRATE'],
     },
     'biometric-auth': {
       ios: ['FACE_ID', 'TOUCH_ID'],
-      android: ['USE_FINGERPRINT', 'USE_BIOMETRIC']
+      android: ['USE_FINGERPRINT', 'USE_BIOMETRIC'],
     },
     'search-recommendations': {
       ios: ['MICROPHONE'],
-      android: ['RECORD_AUDIO']
+      android: ['RECORD_AUDIO'],
     },
     'anime-player': {
       ios: ['BACKGROUND_MODES'],
-      android: ['WAKE_LOCK']
-    }
+      android: ['WAKE_LOCK'],
+    },
   };
 
   const featurePermissions = permissions[featureId];
@@ -176,20 +176,20 @@ export const getRequiredPermissions = (featureId) => {
 };
 
 // Mobile-specific feature configuration
-export const getMobileFeatureConfig = (featureId) => {
+export const getMobileFeatureConfig = featureId => {
   const configs = {
     'unified-library': {
       itemsPerRow: Platform.OS === 'tablet' ? 4 : 2,
       loadMoreThreshold: 0.7,
       refreshThreshold: 100,
       cacheSize: 50,
-      offlineMode: true
+      offlineMode: true,
     },
     'manga-reader': {
       gestureZones: {
-        left: 0.3,   // 30% of screen width for previous page
-        right: 0.3,  // 30% of screen width for next page
-        center: 0.4  // 40% for menu toggle
+        left: 0.3, // 30% of screen width for previous page
+        right: 0.3, // 30% of screen width for next page
+        center: 0.4, // 40% for menu toggle
       },
       readingModes: ['single-page', 'double-page', 'webtoon', 'continuous'],
       orientationLock: true,
@@ -197,8 +197,8 @@ export const getMobileFeatureConfig = (featureId) => {
       hapticFeedback: true,
       brightness: {
         auto: true,
-        level: 0.8
-      }
+        level: 0.8,
+      },
     },
     'anime-player': {
       pictureInPicture: Platform.OS === 'ios',
@@ -210,17 +210,17 @@ export const getMobileFeatureConfig = (featureId) => {
         swipeToSeek: true,
         pinchToZoom: true,
         volumeSwipe: true,
-        brightnessSwipe: true
-      }
+        brightnessSwipe: true,
+      },
     },
     'download-manager': {
       maxConcurrentDownloads: 2, // Lower for mobile
       wifiOnlyDefault: true,
       batteryOptimization: true,
       storageLocation: 'internal', // or 'external'
-      compressionLevel: 'medium'
+      compressionLevel: 'medium',
     },
-    'notifications': {
+    notifications: {
       categories: ['updates', 'downloads', 'social', 'reminders'],
       badgeUpdates: true,
       soundEnabled: true,
@@ -228,8 +228,8 @@ export const getMobileFeatureConfig = (featureId) => {
       quietHours: {
         enabled: false,
         start: '22:00',
-        end: '08:00'
-      }
+        end: '08:00',
+      },
     },
     'biometric-auth': {
       fallbackToPin: true,
@@ -238,15 +238,15 @@ export const getMobileFeatureConfig = (featureId) => {
       prompt: {
         title: 'Authenticate',
         subtitle: 'Use your biometric to unlock',
-        description: 'Place your finger on the sensor or look at the camera'
-      }
-    }
+        description: 'Place your finger on the sensor or look at the camera',
+      },
+    },
   };
 
   return configs[featureId] || {};
 };
 
-// Native module integration  
+// Native module integration
 export const nativeModules = {};
 
 // Mock native modules for non-React Native environments
@@ -266,7 +266,7 @@ try {
 }
 
 // Check if native module is available
-export const isNativeModuleAvailable = (moduleName) => {
+export const isNativeModuleAvailable = moduleName => {
   try {
     return nativeModules[moduleName] !== undefined;
   } catch (error) {
@@ -288,20 +288,20 @@ export const getDeviceCapabilities = () => {
     camera: true,
     microphone: true,
     accelerometer: true,
-    gyroscope: true
+    gyroscope: true,
   };
 };
 
 // Performance optimization
 export const getPerformanceSettings = () => {
   const capabilities = getDeviceCapabilities();
-  
+
   return {
     imageQuality: capabilities.highEnd ? 'high' : 'medium',
     animationDuration: capabilities.lowEnd ? 150 : 300,
     cacheStrategy: capabilities.storage > 32 ? 'aggressive' : 'conservative',
     preloadPages: capabilities.ram > 4 ? 3 : 1,
-    renderAhead: capabilities.ram > 6 ? 5 : 2
+    renderAhead: capabilities.ram > 6 ? 5 : 2,
   };
 };
 
@@ -310,10 +310,10 @@ export const offlineFeatures = [
   'unified-library',
   'manga-reader',
   'download-manager',
-  'tracking-sync'
+  'tracking-sync',
 ];
 
-export const isOfflineSupported = (featureId) => {
+export const isOfflineSupported = featureId => {
   return offlineFeatures.includes(featureId);
 };
 
@@ -322,10 +322,10 @@ export const mobileFeatureStates = {
   enabled: new Set(),
   disabled: new Set(),
   settings: new Map(),
-  permissions: new Map()
+  permissions: new Map(),
 };
 
-export const requestFeaturePermissions = async (featureId) => {
+export const requestFeaturePermissions = async featureId => {
   const requiredPermissions = getRequiredPermissions(featureId);
   const grantedPermissions = {};
 
@@ -344,7 +344,7 @@ export const requestFeaturePermissions = async (featureId) => {
 };
 
 // Mock permission request function
-const requestPermission = async (permission) => {
+const requestPermission = async _permission => {
   // Mock implementation - in real app, use react-native-permissions
   return 'granted';
 };
@@ -361,10 +361,10 @@ export const initializeMobileFeatureStates = async () => {
       AsyncStorage = {
         getItem: () => Promise.resolve(null),
         setItem: () => Promise.resolve(),
-        removeItem: () => Promise.resolve()
+        removeItem: () => Promise.resolve(),
       };
     }
-    
+
     const enabledFeatures = await AsyncStorage.getItem('enabledFeatures');
     const disabledFeatures = await AsyncStorage.getItem('disabledFeatures');
     const featureSettings = await AsyncStorage.getItem('featureSettings');
@@ -372,11 +372,11 @@ export const initializeMobileFeatureStates = async () => {
     if (enabledFeatures) {
       mobileFeatureStates.enabled = new Set(JSON.parse(enabledFeatures));
     }
-    
+
     if (disabledFeatures) {
       mobileFeatureStates.disabled = new Set(JSON.parse(disabledFeatures));
     }
-    
+
     if (featureSettings) {
       const settings = JSON.parse(featureSettings);
       for (const [featureId, featureSettings] of Object.entries(settings)) {
@@ -400,11 +400,12 @@ export const platformInfo = (() => {
     return {
       os: Platform.OS,
       version: Platform.Version,
-      isTablet: Platform.isPad || (Platform.OS === 'android' && Platform.constants?.uiMode === 'tablet'),
+      isTablet:
+        Platform.isPad || (Platform.OS === 'android' && Platform.constants?.uiMode === 'tablet'),
       screenSize: {
         width: Dimensions.get('window').width,
-        height: Dimensions.get('window').height
-      }
+        height: Dimensions.get('window').height,
+      },
     };
   } catch (error) {
     // Fallback for non-React Native environments
@@ -414,8 +415,8 @@ export const platformInfo = (() => {
       isTablet: false,
       screenSize: {
         width: 1920,
-        height: 1080
-      }
+        height: 1080,
+      },
     };
   }
 })();

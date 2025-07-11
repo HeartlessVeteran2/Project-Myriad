@@ -32,7 +32,7 @@ jobs:
           script: |
             const issue = context.payload.issue;
             const labels = [];
-            
+
             if (issue.title.toLowerCase().includes('bug')) {
               labels.push('bug');
             }
@@ -48,7 +48,7 @@ jobs:
             if (issue.body.toLowerCase().includes('mobile')) {
               labels.push('mobile');
             }
-            
+
             if (labels.length > 0) {
               github.rest.issues.addLabels({
                 owner: context.repo.owner,

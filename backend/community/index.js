@@ -26,21 +26,21 @@ export class Community {
         novelsRead: 0,
         clubsJoined: 0,
         friends: 0,
-        comments: 0
+        comments: 0,
       },
       preferences: {
         publicProfile: true,
         showActivity: true,
-        allowFriendRequests: true
+        allowFriendRequests: true,
       },
       badges: [],
-      reputation: 0
+      reputation: 0,
     };
-    
+
     this.users.set(userId, user);
     this.friendships.set(userId, []);
     this.notifications.set(userId, []);
-    
+
     return user;
   }
 
@@ -80,12 +80,12 @@ export class Community {
       stats: {
         posts: 0,
         discussions: 0,
-        events: 0
-      }
+        events: 0,
+      },
     };
 
     this.clubs.set(clubId, club);
-    
+
     // Update creator's stats
     const creator = this.users.get(creatorId);
     if (creator) {
@@ -99,18 +99,18 @@ export class Community {
   joinClub(clubId, userId) {
     const club = this.clubs.get(clubId);
     const user = this.users.get(userId);
-    
+
     if (club && user && !club.members.includes(userId)) {
       club.members.push(userId);
       club.memberCount++;
       user.stats.clubsJoined++;
-      
+
       this.addNotification(userId, {
         type: 'club_joined',
         message: `You joined ${club.name}`,
-        clubId
+        clubId,
       });
-      
+
       return true;
     }
     return false;
@@ -120,7 +120,7 @@ export class Community {
   leaveClub(clubId, userId) {
     const club = this.clubs.get(clubId);
     const user = this.users.get(userId);
-    
+
     if (club && user) {
       const memberIndex = club.members.indexOf(userId);
       if (memberIndex > -1) {
@@ -136,23 +136,24 @@ export class Community {
   // Get clubs
   getClubs(filter = {}) {
     let clubs = Array.from(this.clubs.values());
-    
+
     if (filter.category) {
       clubs = clubs.filter(club => club.category === filter.category);
     }
-    
+
     if (filter.search) {
       const searchLower = filter.search.toLowerCase();
-      clubs = clubs.filter(club => 
-        club.name.toLowerCase().includes(searchLower) ||
-        club.description.toLowerCase().includes(searchLower)
+      clubs = clubs.filter(
+        club =>
+          club.name.toLowerCase().includes(searchLower) ||
+          club.description.toLowerCase().includes(searchLower)
       );
     }
-    
+
     if (filter.isPublic !== undefined) {
       clubs = clubs.filter(club => club.isPublic === filter.isPublic);
     }
-    
+
     return clubs.sort((a, b) => b.memberCount - a.memberCount);
   }
 
@@ -161,7 +162,7 @@ export class Community {
     if (!this.comments.has(contentId)) {
       this.comments.set(contentId, []);
     }
-    
+
     const comment = {
       id: Date.now().toString(),
       userId,
@@ -173,11 +174,11 @@ export class Community {
       dislikes: 0,
       replies: [],
       edited: false,
-      editedAt: null
+      editedAt: null,
     };
-    
+
     const comments = this.comments.get(contentId);
-    
+
     if (comment.parentId) {
       // It's a reply
       const parentComment = comments.find(c => c.id === comment.parentId);
@@ -188,33 +189,33 @@ export class Community {
       // It's a top-level comment
       comments.push(comment);
     }
-    
+
     // Update user stats
     const user = this.users.get(userId);
     if (user) {
       user.stats.comments++;
     }
-    
+
     return comment;
   }
 
   // Get comments for content
   getComments(contentId, options = {}) {
     const comments = this.comments.get(contentId) || [];
-    
+
     // Sort by timestamp or likes
     const sortBy = options.sortBy || 'timestamp';
     const sortOrder = options.sortOrder || 'desc';
-    
+
     return comments.sort((a, b) => {
       let aVal = a[sortBy];
       let bVal = b[sortBy];
-      
+
       if (sortBy === 'timestamp') {
         aVal = new Date(aVal).getTime();
         bVal = new Date(bVal).getTime();
       }
-      
+
       return sortOrder === 'desc' ? bVal - aVal : aVal - bVal;
     });
   }
@@ -253,7 +254,7 @@ export class Community {
       participants: [creatorId],
       clubId: eventData.clubId || null,
       isPublic: eventData.isPublic !== false,
-      tags: eventData.tags || []
+      tags: eventData.tags || [],
     };
 
     this.events.set(eventId, event);
@@ -266,13 +267,13 @@ export class Community {
     if (event && !event.participants.includes(userId)) {
       if (!event.maxParticipants || event.participants.length < event.maxParticipants) {
         event.participants.push(userId);
-        
+
         this.addNotification(userId, {
           type: 'event_joined',
           message: `You joined the event: ${event.title}`,
-          eventId
+          eventId,
         });
-        
+
         return true;
       }
     }
@@ -282,20 +283,20 @@ export class Community {
   // Get events
   getEvents(filter = {}) {
     let events = Array.from(this.events.values());
-    
+
     if (filter.type) {
       events = events.filter(event => event.type === filter.type);
     }
-    
+
     if (filter.clubId) {
       events = events.filter(event => event.clubId === filter.clubId);
     }
-    
+
     if (filter.upcoming) {
       const now = new Date();
       events = events.filter(event => new Date(event.startTime) > now);
     }
-    
+
     return events.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
   }
 
@@ -303,15 +304,15 @@ export class Community {
   sendFriendRequest(fromUserId, toUserId) {
     const fromUser = this.users.get(fromUserId);
     const toUser = this.users.get(toUserId);
-    
+
     if (fromUser && toUser && fromUserId !== toUserId) {
       this.addNotification(toUserId, {
         type: 'friend_request',
         message: `${fromUser.displayName} sent you a friend request`,
         fromUserId,
-        status: 'pending'
+        status: 'pending',
       });
-      
+
       return true;
     }
     return false;
@@ -321,27 +322,27 @@ export class Community {
   acceptFriendRequest(userId, friendId) {
     const userFriends = this.friendships.get(userId) || [];
     const friendFriends = this.friendships.get(friendId) || [];
-    
+
     if (!userFriends.includes(friendId)) {
       userFriends.push(friendId);
       friendFriends.push(userId);
-      
+
       this.friendships.set(userId, userFriends);
       this.friendships.set(friendId, friendFriends);
-      
+
       // Update stats
       const user = this.users.get(userId);
       const friend = this.users.get(friendId);
       if (user) user.stats.friends++;
       if (friend) friend.stats.friends++;
-      
+
       // Add notifications
       this.addNotification(friendId, {
         type: 'friend_accepted',
         message: `${this.users.get(userId).displayName} accepted your friend request`,
-        userId
+        userId,
       });
-      
+
       return true;
     }
     return false;
@@ -358,16 +359,16 @@ export class Community {
     if (!this.notifications.has(userId)) {
       this.notifications.set(userId, []);
     }
-    
+
     const notif = {
       id: Date.now().toString(),
       ...notification,
       timestamp: new Date(),
-      read: false
+      read: false,
     };
-    
+
     this.notifications.get(userId).unshift(notif);
-    
+
     // Keep only last 100 notifications
     const notifications = this.notifications.get(userId);
     if (notifications.length > 100) {
@@ -401,10 +402,13 @@ export class Community {
       totalUsers: this.users.size,
       totalClubs: this.clubs.size,
       totalEvents: this.events.size,
-      totalComments: Array.from(this.comments.values()).reduce((sum, comments) => sum + comments.length, 0),
-      activeUsers: Array.from(this.users.values()).filter(u => 
-        Date.now() - new Date(u.joinDate).getTime() < 30 * 24 * 60 * 60 * 1000 // joined in last 30 days
-      ).length
+      totalComments: Array.from(this.comments.values()).reduce(
+        (sum, comments) => sum + comments.length,
+        0
+      ),
+      activeUsers: Array.from(this.users.values()).filter(
+        u => Date.now() - new Date(u.joinDate).getTime() < 30 * 24 * 60 * 60 * 1000 // joined in last 30 days
+      ).length,
     };
   }
 }

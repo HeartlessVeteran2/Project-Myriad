@@ -13,13 +13,13 @@ export class ParentalControls {
         enabled: false,
         allowedHours: { start: '06:00', end: '21:00' },
         weekdayLimits: 120, // minutes per day
-        weekendLimits: 180
+        weekendLimits: 180,
       },
       requirePinForSettings: true,
       requirePinForMature: true,
       blockUnratedContent: true,
       allowFriends: false,
-      allowCommunityFeatures: false
+      allowCommunityFeatures: false,
     };
   }
 
@@ -32,16 +32,16 @@ export class ParentalControls {
       settings: { ...this.defaultSettings, ...settings },
       createdAt: new Date(),
       lastUpdated: new Date(),
-      active: true
+      active: true,
     };
 
     this.userProfiles.set(userId, profile);
     this.accessLogs.set(userId, []);
-    
+
     return {
       success: true,
       message: 'Parental controls initialized',
-      pin: profile.pin
+      pin: profile.pin,
     };
   }
 
@@ -58,11 +58,11 @@ export class ParentalControls {
 
     profile.settings.enabled = true;
     profile.lastUpdated = new Date();
-    
+
     return {
       success: true,
       message: 'Content filtering enabled',
-      settings: profile.settings
+      settings: profile.settings,
     };
   }
 
@@ -79,10 +79,10 @@ export class ParentalControls {
 
     profile.settings.enabled = false;
     profile.lastUpdated = new Date();
-    
+
     return {
       success: true,
-      message: 'Content filtering disabled'
+      message: 'Content filtering disabled',
     };
   }
 
@@ -99,31 +99,31 @@ export class ParentalControls {
     if (contentInfo.rating && !this.isRatingAllowed(contentInfo.rating, settings.maxRating)) {
       return {
         allowed: false,
-        reason: `Content rating ${contentInfo.rating} exceeds allowed rating ${settings.maxRating}`
+        reason: `Content rating ${contentInfo.rating} exceeds allowed rating ${settings.maxRating}`,
       };
     }
 
     // Check genres
     if (contentInfo.genres) {
-      const blockedGenres = contentInfo.genres.filter(genre => 
+      const blockedGenres = contentInfo.genres.filter(genre =>
         settings.blockedGenres.includes(genre)
       );
-      
+
       if (blockedGenres.length > 0) {
         return {
           allowed: false,
-          reason: `Content contains blocked genres: ${blockedGenres.join(', ')}`
+          reason: `Content contains blocked genres: ${blockedGenres.join(', ')}`,
         };
       }
 
-      const allowedGenres = contentInfo.genres.filter(genre => 
+      const allowedGenres = contentInfo.genres.filter(genre =>
         settings.allowedGenres.includes(genre)
       );
-      
+
       if (allowedGenres.length === 0 && contentInfo.genres.length > 0) {
         return {
           allowed: false,
-          reason: 'Content does not contain any allowed genres'
+          reason: 'Content does not contain any allowed genres',
         };
       }
     }
@@ -132,7 +132,7 @@ export class ParentalControls {
     if (settings.blockUnratedContent && !contentInfo.rating) {
       return {
         allowed: false,
-        reason: 'Unrated content is blocked'
+        reason: 'Unrated content is blocked',
       };
     }
 
@@ -153,12 +153,12 @@ export class ParentalControls {
   // Check if rating is allowed
   isRatingAllowed(contentRating, maxAllowedRating) {
     const ratingHierarchy = {
-      'G': 1,
-      'PG': 2,
+      G: 1,
+      PG: 2,
       'PG-13': 3,
-      'R': 4,
+      R: 4,
       'NC-17': 5,
-      'M': 6
+      M: 6,
     };
 
     const contentLevel = ratingHierarchy[contentRating] || 6;
@@ -175,11 +175,13 @@ export class ParentalControls {
     const isWeekend = currentDay === 0 || currentDay === 6;
 
     // Check allowed hours
-    if (currentTime < timeRestrictions.allowedHours.start || 
-        currentTime > timeRestrictions.allowedHours.end) {
+    if (
+      currentTime < timeRestrictions.allowedHours.start ||
+      currentTime > timeRestrictions.allowedHours.end
+    ) {
       return {
         allowed: false,
-        reason: `Access not allowed outside of ${timeRestrictions.allowedHours.start}-${timeRestrictions.allowedHours.end}`
+        reason: `Access not allowed outside of ${timeRestrictions.allowedHours.start}-${timeRestrictions.allowedHours.end}`,
       };
     }
 
@@ -190,7 +192,7 @@ export class ParentalControls {
     if (todayUsage >= dailyLimit) {
       return {
         allowed: false,
-        reason: `Daily time limit of ${dailyLimit} minutes exceeded`
+        reason: `Daily time limit of ${dailyLimit} minutes exceeded`,
       };
     }
 
@@ -201,10 +203,8 @@ export class ParentalControls {
   getTodayUsage(userId) {
     const accessLog = this.accessLogs.get(userId) || [];
     const today = new Date().toDateString();
-    
-    const todayLogs = accessLog.filter(log => 
-      new Date(log.timestamp).toDateString() === today
-    );
+
+    const todayLogs = accessLog.filter(log => new Date(log.timestamp).toDateString() === today);
 
     // Calculate total minutes (simplified calculation)
     return todayLogs.length * 2; // Assume 2 minutes per access for simplification
@@ -227,7 +227,7 @@ export class ParentalControls {
     return {
       success: true,
       message: 'Parental settings updated',
-      settings: profile.settings
+      settings: profile.settings,
     };
   }
 
@@ -251,7 +251,7 @@ export class ParentalControls {
 
     return {
       success: true,
-      message: 'PIN changed successfully'
+      message: 'PIN changed successfully',
     };
   }
 
@@ -270,7 +270,7 @@ export class ParentalControls {
       timeRestrictions: profile.settings.timeRestrictions,
       blockUnratedContent: profile.settings.blockUnratedContent,
       allowFriends: profile.settings.allowFriends,
-      allowCommunityFeatures: profile.settings.allowCommunityFeatures
+      allowCommunityFeatures: profile.settings.allowCommunityFeatures,
     };
   }
 
@@ -287,15 +287,13 @@ export class ParentalControls {
 
     const accessLog = this.accessLogs.get(userId) || [];
     const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
-    
-    const recentLogs = accessLog.filter(log => 
-      new Date(log.timestamp) > cutoffDate
-    );
+
+    const recentLogs = accessLog.filter(log => new Date(log.timestamp) > cutoffDate);
 
     return {
       success: true,
       history: recentLogs,
-      summary: this.generateAccessSummary(recentLogs)
+      summary: this.generateAccessSummary(recentLogs),
     };
   }
 
@@ -306,7 +304,7 @@ export class ParentalControls {
       allowedAccess: logs.filter(log => log.allowed).length,
       blockedAccess: logs.filter(log => !log.allowed).length,
       topGenres: {},
-      dailyUsage: {}
+      dailyUsage: {},
     };
 
     logs.forEach(log => {
@@ -354,7 +352,7 @@ export class ParentalControls {
   // Log access attempt
   logAccess(userId, contentInfo, allowed) {
     const accessLog = this.accessLogs.get(userId) || [];
-    
+
     accessLog.push({
       timestamp: new Date(),
       content: {
@@ -362,9 +360,9 @@ export class ParentalControls {
         title: contentInfo.title,
         type: contentInfo.type,
         rating: contentInfo.rating,
-        genres: contentInfo.genres
+        genres: contentInfo.genres,
       },
-      allowed
+      allowed,
     });
 
     // Keep only last 1000 entries
@@ -391,20 +389,20 @@ export class ParentalControls {
 
     return {
       success: true,
-      message: 'Parental controls removed'
+      message: 'Parental controls removed',
     };
   }
 
   // Get system statistics
   getSystemStats() {
     const profiles = Array.from(this.userProfiles.values());
-    
+
     return {
       totalProfiles: profiles.length,
       activeProfiles: profiles.filter(p => p.active).length,
       enabledProfiles: profiles.filter(p => p.settings.enabled).length,
       averageUsage: this.calculateAverageUsage(),
-      topBlockedGenres: this.getTopBlockedGenres(profiles)
+      topBlockedGenres: this.getTopBlockedGenres(profiles),
     };
   }
 
@@ -412,16 +410,16 @@ export class ParentalControls {
   calculateAverageUsage() {
     const allLogs = Array.from(this.accessLogs.values()).flat();
     const totalUsers = this.accessLogs.size;
-    
+
     if (totalUsers === 0) return 0;
-    
+
     return Math.round(allLogs.length / totalUsers);
   }
 
   // Get most commonly blocked genres
   getTopBlockedGenres(profiles) {
     const genreCounts = {};
-    
+
     profiles.forEach(profile => {
       profile.settings.blockedGenres.forEach(genre => {
         genreCounts[genre] = (genreCounts[genre] || 0) + 1;

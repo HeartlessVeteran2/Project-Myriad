@@ -19,5 +19,6 @@ This is the mobile app for Project Myriad, built with React Native and Expo.
    ```
 
 ## Features
+
 - Cross-platform: Android, iOS, and Web
 - Ready for Web3 integration

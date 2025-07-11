@@ -33,12 +33,15 @@ docker-compose logs -f
 ### Option 2: Cloud Deployment Buttons
 
 #### Heroku
+
 [![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/HeartlessVeteran2/Project-Myriad)
 
 #### Vercel (Frontend Only)
+
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/HeartlessVeteran2/Project-Myriad)
 
 #### Railway
+
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template/project-myriad)
 
 ### Option 3: DigitalOcean App Platform
@@ -56,7 +59,7 @@ services:
     environment_slug: node-js
     instance_count: 1
     instance_size_slug: basic-xxs
-    
+
   - name: frontend
     source_dir: frontend/
     github:
@@ -66,12 +69,12 @@ services:
     environment_slug: node-js
     instance_count: 1
     instance_size_slug: basic-xxs
-    
+
 databases:
   - name: postgres-db
     engine: PG
-    version: "15"
-    
+    version: '15'
+
 static_sites:
   - name: docs
     source_dir: docs/
@@ -83,12 +86,14 @@ static_sites:
 ### Prerequisites
 
 **System Requirements**:
+
 - **CPU**: 2 cores minimum, 4+ cores recommended
 - **RAM**: 4GB minimum, 8GB+ recommended
 - **Storage**: 50GB minimum, SSD recommended
 - **Network**: 100Mbps+ bandwidth for optimal performance
 
 **Software Dependencies**:
+
 - **Docker**: 20.10+ and Docker Compose 2.0+
 - **Node.js**: 18+ (for manual installation)
 - **PostgreSQL**: 14+ (if not using Docker)
@@ -166,8 +171,8 @@ services:
   nginx:
     image: nginx:alpine
     ports:
-      - "80:80"
-      - "443:443"
+      - '80:80'
+      - '443:443'
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
@@ -198,7 +203,7 @@ services:
     networks:
       - myriad-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/health']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -228,7 +233,7 @@ services:
     networks:
       - myriad-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U myriad -d myriad_production"]
+      test: ['CMD-SHELL', 'pg_isready -U myriad -d myriad_production']
       interval: 30s
       timeout: 5s
       retries: 5
@@ -243,7 +248,7 @@ services:
     networks:
       - myriad-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 30s
       timeout: 3s
       retries: 5
@@ -285,6 +290,7 @@ networks:
 #### Production Dockerfiles
 
 **Backend Dockerfile.prod**:
+
 ```dockerfile
 # Multi-stage build for production
 FROM node:20-alpine AS builder
@@ -323,6 +329,7 @@ CMD ["node", "index.js"]
 ```
 
 **Frontend Dockerfile.prod**:
+
 ```dockerfile
 # Build stage
 FROM node:20-alpine AS builder
@@ -442,7 +449,7 @@ http {
             root /var/www/static;
             index index.html;
             try_files $uri $uri/ /index.html;
-            
+
             # Cache static assets
             location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
                 expires 1y;
@@ -453,7 +460,7 @@ http {
         # API routes
         location /api/ {
             limit_req zone=api burst=20 nodelay;
-            
+
             proxy_pass http://backend;
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
@@ -463,7 +470,7 @@ http {
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
             proxy_cache_bypass $http_upgrade;
-            
+
             # Timeouts
             proxy_connect_timeout 60s;
             proxy_send_timeout 60s;
@@ -473,7 +480,7 @@ http {
         # Authentication routes (stricter rate limiting)
         location /api/auth/ {
             limit_req zone=auth burst=5 nodelay;
-            
+
             proxy_pass http://backend;
             proxy_http_version 1.1;
             proxy_set_header Host $host;
@@ -516,51 +523,46 @@ http {
 ```yaml
 # ecs-task-definition.json
 {
-  "family": "project-myriad",
-  "networkMode": "awsvpc",
-  "requiresCompatibilities": ["FARGATE"],
-  "cpu": "1024",
-  "memory": "2048",
-  "executionRoleArn": "arn:aws:iam::account:role/ecsTaskExecutionRole",
-  "taskRoleArn": "arn:aws:iam::account:role/ecsTaskRole",
-  "containerDefinitions": [
-    {
-      "name": "backend",
-      "image": "your-repo/myriad-backend:latest",
-      "portMappings": [
-        {
-          "containerPort": 3000,
-          "protocol": "tcp"
-        }
-      ],
-      "environment": [
-        {
-          "name": "NODE_ENV",
-          "value": "production"
-        }
-      ],
-      "secrets": [
-        {
-          "name": "DATABASE_URL",
-          "valueFrom": "arn:aws:secretsmanager:region:account:secret:myriad/database"
-        }
-      ],
-      "logConfiguration": {
-        "logDriver": "awslogs",
-        "options": {
-          "awslogs-group": "/ecs/project-myriad",
-          "awslogs-region": "us-east-1",
-          "awslogs-stream-prefix": "ecs"
-        }
+  'family': 'project-myriad',
+  'networkMode': 'awsvpc',
+  'requiresCompatibilities': ['FARGATE'],
+  'cpu': '1024',
+  'memory': '2048',
+  'executionRoleArn': 'arn:aws:iam::account:role/ecsTaskExecutionRole',
+  'taskRoleArn': 'arn:aws:iam::account:role/ecsTaskRole',
+  'containerDefinitions':
+    [
+      {
+        'name': 'backend',
+        'image': 'your-repo/myriad-backend:latest',
+        'portMappings': [{ 'containerPort': 3000, 'protocol': 'tcp' }],
+        'environment': [{ 'name': 'NODE_ENV', 'value': 'production' }],
+        'secrets':
+          [
+            {
+              'name': 'DATABASE_URL',
+              'valueFrom': 'arn:aws:secretsmanager:region:account:secret:myriad/database',
+            },
+          ],
+        'logConfiguration':
+          {
+            'logDriver': 'awslogs',
+            'options':
+              {
+                'awslogs-group': '/ecs/project-myriad',
+                'awslogs-region': 'us-east-1',
+                'awslogs-stream-prefix': 'ecs',
+              },
+          },
+        'healthCheck':
+          {
+            'command': ['CMD-SHELL', 'curl -f http://localhost:3000/health || exit 1'],
+            'interval': 30,
+            'timeout': 5,
+            'retries': 3,
+          },
       },
-      "healthCheck": {
-        "command": ["CMD-SHELL", "curl -f http://localhost:3000/health || exit 1"],
-        "interval": 30,
-        "timeout": 5,
-        "retries": 3
-      }
-    }
-  ]
+    ],
 }
 ```
 
@@ -656,18 +658,18 @@ steps:
   # Build backend
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'gcr.io/$PROJECT_ID/myriad-backend', './backend']
-  
+
   # Build frontend
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'gcr.io/$PROJECT_ID/myriad-frontend', './frontend']
-  
+
   # Push images
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/$PROJECT_ID/myriad-backend']
-  
+
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/$PROJECT_ID/myriad-frontend']
-  
+
   # Deploy to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
@@ -770,7 +772,7 @@ services:
   prometheus:
     image: prom/prometheus:latest
     ports:
-      - "9090:9090"
+      - '9090:9090'
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
@@ -783,7 +785,7 @@ services:
   grafana:
     image: grafana/grafana:latest
     ports:
-      - "3001:3000"
+      - '3001:3000'
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
@@ -809,21 +811,21 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=false
     ports:
-      - "9200:9200"
+      - '9200:9200'
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
 
   logstash:
     image: docker.elastic.co/logstash/logstash:8.8.0
     ports:
-      - "5044:5044"
+      - '5044:5044'
     volumes:
       - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
 
   kibana:
     image: docker.elastic.co/kibana/kibana:8.8.0
     ports:
-      - "5601:5601"
+      - '5601:5601'
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
 
@@ -910,22 +912,22 @@ module.exports = {
       min: 2,
       max: 20,
       acquire: 30000,
-      idle: 10000
-    }
+      idle: 10000,
+    },
   },
 
   // Redis caching
   cache: {
     ttl: 3600, // 1 hour
     maxSize: 1000,
-    checkperiod: 600
+    checkperiod: 600,
   },
 
   // Rate limiting
   rateLimit: {
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100 // limit each IP to 100 requests per windowMs
-  }
+    max: 100, // limit each IP to 100 requests per windowMs
+  },
 };
 ```
 

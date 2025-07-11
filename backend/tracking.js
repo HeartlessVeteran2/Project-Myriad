@@ -11,7 +11,7 @@ export class Tracking {
     if (!this.history.has(userId)) {
       this.history.set(userId, []);
     }
-    
+
     const historyEntry = {
       id: entry.id,
       title: entry.title,
@@ -20,9 +20,9 @@ export class Tracking {
       episode: entry.episode || null,
       timestamp: new Date(),
       duration: entry.duration || 0,
-      completed: entry.completed || false
+      completed: entry.completed || false,
     };
-    
+
     this.history.get(userId).unshift(historyEntry);
     // Keep only last 500 entries
     if (this.history.get(userId).length > 500) {
@@ -50,7 +50,7 @@ export class Tracking {
       totalEpisodes: progress.totalEpisodes || 0,
       status: progress.status || 'reading', // 'reading', 'completed', 'dropped', 'plan_to_read'
       rating: progress.rating || null,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     });
   }
 
@@ -65,7 +65,7 @@ export class Tracking {
     if (!this.bookmarks.has(userId)) {
       this.bookmarks.set(userId, []);
     }
-    
+
     const bookmarkEntry = {
       id: Date.now().toString(),
       contentId: bookmark.contentId,
@@ -73,9 +73,9 @@ export class Tracking {
       chapter: bookmark.chapter,
       page: bookmark.page,
       note: bookmark.note || '',
-      timestamp: new Date()
+      timestamp: new Date(),
     };
-    
+
     this.bookmarks.get(userId).push(bookmarkEntry);
   }
 
@@ -87,8 +87,8 @@ export class Tracking {
   // Get reading statistics
   getStats(userId) {
     const history = this.getHistory(userId, 1000);
-    const progress = Array.from(this.readingProgress.values()).filter(p => 
-      p.contentId && this.readingProgress.has(`${userId}-${p.contentId}`)
+    const progress = Array.from(this.readingProgress.values()).filter(
+      p => p.contentId && this.readingProgress.has(`${userId}-${p.contentId}`)
     );
 
     return {
@@ -100,7 +100,7 @@ export class Tracking {
       reading: progress.filter(p => p.status === 'reading').length,
       planToRead: progress.filter(p => p.status === 'plan_to_read').length,
       dropped: progress.filter(p => p.status === 'dropped').length,
-      totalBookmarks: this.getBookmarks(userId).length
+      totalBookmarks: this.getBookmarks(userId).length,
     };
   }
 }

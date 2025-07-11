@@ -12,7 +12,7 @@ export class Accessibility {
       audioDescriptions: false,
       textToSpeech: false,
       fontSize: 'medium', // 'small', 'medium', 'large', 'extra-large'
-      dyslexiaFont: false
+      dyslexiaFont: false,
     };
   }
 
@@ -38,7 +38,7 @@ export class Accessibility {
       success: true,
       message: 'Screen reader support enabled',
       ariaLabels: this.generateAriaLabels(),
-      keyboardShortcuts: this.getKeyboardShortcuts()
+      keyboardShortcuts: this.getKeyboardShortcuts(),
     };
   }
 
@@ -50,7 +50,7 @@ export class Accessibility {
     return {
       success: true,
       message: 'High contrast mode enabled',
-      cssOverrides: this.getHighContrastCSS()
+      cssOverrides: this.getHighContrastCSS(),
     };
   }
 
@@ -63,7 +63,7 @@ export class Accessibility {
     return {
       success: true,
       message: `Font size set to ${size}`,
-      cssOverrides: this.getFontSizeCSS(size)
+      cssOverrides: this.getFontSizeCSS(size),
     };
   }
 
@@ -75,7 +75,7 @@ export class Accessibility {
     return {
       success: true,
       message: 'Reduced motion enabled',
-      cssOverrides: this.getReducedMotionCSS()
+      cssOverrides: this.getReducedMotionCSS(),
     };
   }
 
@@ -89,11 +89,11 @@ export class Accessibility {
     const settings = this.getUserSettings(userId);
     settings.colorBlindMode = mode;
     this.settings.set(userId, settings);
-    
+
     return {
       success: true,
       message: `Color blind mode set to ${mode}`,
-      cssOverrides: this.getColorBlindCSS(mode)
+      cssOverrides: this.getColorBlindCSS(mode),
     };
   }
 
@@ -105,7 +105,7 @@ export class Accessibility {
     return {
       success: true,
       message: 'Dyslexia-friendly font enabled',
-      cssOverrides: this.getDyslexiaFontCSS()
+      cssOverrides: this.getDyslexiaFontCSS(),
     };
   }
 
@@ -120,7 +120,7 @@ export class Accessibility {
       bookmarks: 'Your bookmarks',
       settings: 'Accessibility settings',
       profile: 'User profile menu',
-      notifications: 'Notifications panel'
+      notifications: 'Notifications panel',
     };
   }
 
@@ -132,11 +132,11 @@ export class Accessibility {
       'Alt + 3': 'Go to search',
       'Alt + 4': 'Go to settings',
       'Ctrl + K': 'Open search',
-      'Esc': 'Close modal or menu',
-      'Tab': 'Navigate to next element',
+      Esc: 'Close modal or menu',
+      Tab: 'Navigate to next element',
       'Shift + Tab': 'Navigate to previous element',
-      'Enter': 'Activate button or link',
-      'Space': 'Scroll down or activate button'
+      Enter: 'Activate button or link',
+      Space: 'Scroll down or activate button',
     };
   }
 
@@ -151,13 +151,13 @@ export class Accessibility {
         --accent-color: #ffff00 !important;
         --border-color: #ffffff !important;
       }
-      
+
       * {
         background-color: var(--bg-primary) !important;
         color: var(--text-primary) !important;
         border-color: var(--border-color) !important;
       }
-      
+
       a, button {
         color: var(--accent-color) !important;
         text-decoration: underline !important;
@@ -168,21 +168,21 @@ export class Accessibility {
   // Get font size CSS
   getFontSizeCSS(size) {
     const sizes = {
-      'small': '0.875rem',
-      'medium': '1rem',
-      'large': '1.25rem',
-      'extra-large': '1.5rem'
+      small: '0.875rem',
+      medium: '1rem',
+      large: '1.25rem',
+      'extra-large': '1.5rem',
     };
 
     return `
       :root {
         --font-size-base: ${sizes[size] || sizes.medium};
       }
-      
+
       body, p, span, div {
         font-size: var(--font-size-base) !important;
       }
-      
+
       h1 { font-size: calc(var(--font-size-base) * 2.5) !important; }
       h2 { font-size: calc(var(--font-size-base) * 2) !important; }
       h3 { font-size: calc(var(--font-size-base) * 1.75) !important; }
@@ -207,10 +207,10 @@ export class Accessibility {
   // Get color blind mode CSS
   getColorBlindCSS(mode) {
     const filters = {
-      'deuteranopia': 'filter: url(#deuteranopia-filter)',
-      'protanopia': 'filter: url(#protanopia-filter)',
-      'tritanopia': 'filter: url(#tritanopia-filter)',
-      'none': ''
+      deuteranopia: 'filter: url(#deuteranopia-filter)',
+      protanopia: 'filter: url(#protanopia-filter)',
+      tritanopia: 'filter: url(#tritanopia-filter)',
+      none: '',
     };
 
     return filters[mode] || '';
@@ -220,7 +220,7 @@ export class Accessibility {
   getDyslexiaFontCSS() {
     return `
       @import url('https://fonts.googleapis.com/css2?family=OpenDyslexic:wght@400;700&display=swap');
-      
+
       * {
         font-family: 'OpenDyslexic', Arial, sans-serif !important;
       }
@@ -239,7 +239,7 @@ export class Accessibility {
       success: true,
       message: 'Text-to-speech initiated',
       text,
-      audioUrl: `/api/tts?text=${encodeURIComponent(text)}`
+      audioUrl: `/api/tts?text=${encodeURIComponent(text)}`,
     };
   }
 
@@ -255,7 +255,7 @@ export class Accessibility {
       enabledFeatures,
       settings,
       recommendations: this.getAccessibilityRecommendations(settings),
-      complianceLevel: this.calculateComplianceLevel(settings)
+      complianceLevel: this.calculateComplianceLevel(settings),
     };
   }
 
@@ -306,7 +306,7 @@ export class Accessibility {
     return {
       success: true,
       message: 'Accessibility settings reset to default',
-      settings: this.defaultSettings
+      settings: this.defaultSettings,
     };
   }
 }

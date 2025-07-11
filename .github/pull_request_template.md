@@ -34,6 +34,7 @@ Briefly describe what this PR accomplishes:
 - [ ] Styling/theme changes
 
 **Details:**
+
 - [List specific frontend changes]
 
 ### Backend Changes
@@ -45,6 +46,7 @@ Briefly describe what this PR accomplishes:
 - [ ] External service integrations
 
 **Details:**
+
 - [List specific backend changes]
 
 ### Mobile Changes
@@ -55,6 +57,7 @@ Briefly describe what this PR accomplishes:
 - [ ] Performance optimizations
 
 **Details:**
+
 - [List specific mobile changes]
 
 ### Extension System Changes
@@ -65,6 +68,7 @@ Briefly describe what this PR accomplishes:
 - [ ] Extension marketplace updates
 
 **Details:**
+
 - [List specific extension changes]
 
 ## 🧪 Testing
@@ -79,6 +83,7 @@ Briefly describe what this PR accomplishes:
 ### Testing Checklist
 
 **Manual Testing:**
+
 - [ ] Tested on desktop browsers (Chrome, Firefox, Safari)
 - [ ] Tested on mobile devices (iOS, Android)
 - [ ] Tested with different user roles/permissions
@@ -86,6 +91,7 @@ Briefly describe what this PR accomplishes:
 - [ ] Tested performance impact
 
 **Automated Testing:**
+
 - [ ] All existing tests pass
 - [ ] New tests written for new functionality
 - [ ] Test coverage maintained above 80%
@@ -131,6 +137,7 @@ If this PR introduces breaking changes, describe:
 - [ ] Rollback plan documented
 
 **Migration Commands:**
+
 ```bash
 # Database migration commands
 ```
@@ -161,11 +168,13 @@ If this PR introduces breaking changes, describe:
 ### Metrics
 
 **Before:**
+
 - Load time: [X seconds]
 - Bundle size: [X MB]
 - Memory usage: [X MB]
 
 **After:**
+
 - Load time: [X seconds]
 - Bundle size: [X MB]
 - Memory usage: [X MB]
@@ -255,6 +264,7 @@ Please verify:
 ### Review Areas
 
 **Focus Areas for Review:**
+
 - [ ] Business logic correctness
 - [ ] Error handling robustness
 - [ ] Performance implications

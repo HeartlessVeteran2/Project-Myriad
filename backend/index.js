@@ -1,16 +1,16 @@
-import express from 'express';
 import cors from 'cors';
+import express from 'express';
 import morgan from 'morgan';
 
 // Import modules
-import { Tracking } from './tracking.js';
-import { DownloadManager } from './downloadManager.js';
+import { Accessibility } from './accessibility/index.js';
 import { AI } from './ai/index.js';
 import { Community } from './community/index.js';
+import { DownloadManager } from './downloadManager.js';
 import { extensionManager } from './extensions/index.js';
-import { Accessibility } from './accessibility/index.js';
 import { ParentalControls } from './parental/index.js';
 import { Sync } from './sync/index.js';
+import { Tracking } from './tracking.js';
 import { Web3Module } from './web3/index.js';
 
 const app = express();
@@ -38,16 +38,24 @@ app.use(express.json());
 
 // Basic routes
 app.get('/', (req, res) => {
-  res.json({ 
-    message: 'Project Myriad Backend API', 
+  res.json({
+    message: 'Project Myriad Backend API',
     version: '1.0.0',
     status: 'running',
     timestamp: new Date().toISOString(),
     features: [
-      'manga', 'anime', 'light-novels', 'user-tracking', 
-      'downloads', 'ai-recommendations', 'community', 
-      'extensions', 'accessibility', 'parental-controls',
-      'sync', 'web3-integration'
+      'manga',
+      'anime',
+      'light-novels',
+      'user-tracking',
+      'downloads',
+      'ai-recommendations',
+      'community',
+      'extensions',
+      'accessibility',
+      'parental-controls',
+      'sync',
+      'web3-integration',
     ],
     modules: {
       tracking: 'active',
@@ -58,8 +66,8 @@ app.get('/', (req, res) => {
       accessibility: 'active',
       parentalControls: 'active',
       sync: 'active',
-      web3: 'active'
-    }
+      web3: 'active',
+    },
   });
 });
 
@@ -69,13 +77,13 @@ app.get('/api/health', (req, res) => {
     downloads: downloadManager.getStats(),
     community: community.getStats(),
     extensions: extensionManager.getSystemStats(),
-    web3: web3.getWeb3Stats()
+    web3: web3.getWeb3Stats(),
   };
 
-  res.json({ 
-    status: 'healthy', 
+  res.json({
+    status: 'healthy',
     timestamp: new Date().toISOString(),
-    modules: moduleStats
+    modules: moduleStats,
   });
 });
 
@@ -83,43 +91,106 @@ app.get('/api/health', (req, res) => {
 app.get('/api/manga', (req, res) => {
   res.json({
     manga: [
-      { id: 1, title: 'One Piece', chapters: 1090, status: 'ongoing', rating: 9.5, genres: ['Adventure', 'Comedy', 'Shounen'] },
-      { id: 2, title: 'Attack on Titan', chapters: 139, status: 'completed', rating: 9.0, genres: ['Action', 'Drama', 'Fantasy'] },
-      { id: 3, title: 'Demon Slayer', chapters: 205, status: 'completed', rating: 8.8, genres: ['Action', 'Supernatural', 'Historical'] }
-    ]
+      {
+        id: 1,
+        title: 'One Piece',
+        chapters: 1090,
+        status: 'ongoing',
+        rating: 9.5,
+        genres: ['Adventure', 'Comedy', 'Shounen'],
+      },
+      {
+        id: 2,
+        title: 'Attack on Titan',
+        chapters: 139,
+        status: 'completed',
+        rating: 9.0,
+        genres: ['Action', 'Drama', 'Fantasy'],
+      },
+      {
+        id: 3,
+        title: 'Demon Slayer',
+        chapters: 205,
+        status: 'completed',
+        rating: 8.8,
+        genres: ['Action', 'Supernatural', 'Historical'],
+      },
+    ],
   });
 });
 
 app.get('/api/anime', (req, res) => {
   res.json({
     anime: [
-      { id: 1, title: 'Demon Slayer', episodes: 44, status: 'ongoing', rating: 8.7, genres: ['Action', 'Supernatural', 'Historical'] },
-      { id: 2, title: 'Attack on Titan', episodes: 87, status: 'completed', rating: 9.0, genres: ['Action', 'Drama', 'Fantasy'] },
-      { id: 3, title: 'Jujutsu Kaisen', episodes: 24, status: 'ongoing', rating: 8.9, genres: ['Action', 'Supernatural', 'School'] }
-    ]
+      {
+        id: 1,
+        title: 'Demon Slayer',
+        episodes: 44,
+        status: 'ongoing',
+        rating: 8.7,
+        genres: ['Action', 'Supernatural', 'Historical'],
+      },
+      {
+        id: 2,
+        title: 'Attack on Titan',
+        episodes: 87,
+        status: 'completed',
+        rating: 9.0,
+        genres: ['Action', 'Drama', 'Fantasy'],
+      },
+      {
+        id: 3,
+        title: 'Jujutsu Kaisen',
+        episodes: 24,
+        status: 'ongoing',
+        rating: 8.9,
+        genres: ['Action', 'Supernatural', 'School'],
+      },
+    ],
   });
 });
 
 app.get('/api/novels', (req, res) => {
   res.json({
     novels: [
-      { id: 1, title: 'Overlord', volumes: 16, status: 'ongoing', rating: 8.6, genres: ['Fantasy', 'Adventure', 'Comedy'] },
-      { id: 2, title: 'Re:Zero', volumes: 32, status: 'ongoing', rating: 8.8, genres: ['Fantasy', 'Psychological', 'Drama'] },
-      { id: 3, title: 'Konosuba', volumes: 17, status: 'completed', rating: 8.4, genres: ['Comedy', 'Fantasy', 'Adventure'] }
-    ]
+      {
+        id: 1,
+        title: 'Overlord',
+        volumes: 16,
+        status: 'ongoing',
+        rating: 8.6,
+        genres: ['Fantasy', 'Adventure', 'Comedy'],
+      },
+      {
+        id: 2,
+        title: 'Re:Zero',
+        volumes: 32,
+        status: 'ongoing',
+        rating: 8.8,
+        genres: ['Fantasy', 'Psychological', 'Drama'],
+      },
+      {
+        id: 3,
+        title: 'Konosuba',
+        volumes: 17,
+        status: 'completed',
+        rating: 8.4,
+        genres: ['Comedy', 'Fantasy', 'Adventure'],
+      },
+    ],
   });
 });
 
 app.get('/api/stats', (req, res) => {
   res.json({
     totalManga: 3,
-    totalAnime: 3, 
+    totalAnime: 3,
     totalNovels: 3,
     lastUpdated: new Date().toISOString(),
     userActivity: 'active',
     downloads: downloadManager.getStats(),
     community: community.getStats(),
-    extensions: extensionManager.getSystemStats()
+    extensions: extensionManager.getSystemStats(),
   });
 });
 
@@ -193,7 +264,11 @@ app.post('/api/accessibility/:userId/settings', (req, res) => {
 
 // Parental controls routes
 app.post('/api/parental/:userId/init', (req, res) => {
-  const result = parentalControls.initializeParentalControls(req.params.userId, req.body.parentEmail, req.body.settings);
+  const result = parentalControls.initializeParentalControls(
+    req.params.userId,
+    req.body.parentEmail,
+    req.body.settings
+  );
   res.json(result);
 });
 
@@ -204,7 +279,8 @@ app.post('/api/parental/:userId/check-content', (req, res) => {
 
 // Sync routes
 app.post('/api/sync/:userId/library', (req, res) => {
-  sync.syncLibrary(req.params.userId, req.body.deviceId, req.body.syncData)
+  sync
+    .syncLibrary(req.params.userId, req.body.deviceId, req.body.syncData)
     .then(result => res.json(result))
     .catch(error => res.status(500).json({ success: false, error: error.message }));
 });
@@ -216,7 +292,8 @@ app.get('/api/sync/:userId/devices', (req, res) => {
 
 // Web3 routes
 app.post('/api/web3/:userId/connect-wallet', (req, res) => {
-  web3.connectWallet(req.params.userId, req.body.walletInfo)
+  web3
+    .connectWallet(req.params.userId, req.body.walletInfo)
     .then(result => res.json(result))
     .catch(error => res.status(500).json({ success: false, error: error.message }));
 });
@@ -234,23 +311,23 @@ app.get('/api/web3/proposals', (req, res) => {
 // Error handling middleware
 app.use((err, req, res, _next) => {
   console.error(err.stack);
-  res.status(500).json({ 
-    success: false, 
+  res.status(500).json({
+    success: false,
     message: 'Internal server error',
-    error: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
+    error: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong',
   });
 });
 
 // 404 handler
 app.use((req, res) => {
-  res.status(404).json({ 
-    success: false, 
+  res.status(404).json({
+    success: false,
     message: 'API endpoint not found',
     availableEndpoints: [
       'GET /',
       'GET /api/health',
       'GET /api/manga',
-      'GET /api/anime', 
+      'GET /api/anime',
       'GET /api/novels',
       'GET /api/stats',
       'GET /api/tracking/:userId/history',
@@ -261,8 +338,8 @@ app.use((req, res) => {
       'GET /api/accessibility/:userId/settings',
       'GET /api/sync/:userId/devices',
       'GET /api/web3/:userId/nfts',
-      'GET /api/web3/proposals'
-    ]
+      'GET /api/web3/proposals',
+    ],
   });
 });
 
@@ -271,5 +348,7 @@ app.listen(PORT, () => {
   console.log(`📡 API available at http://localhost:${PORT}`);
   console.log(`❤️  Health check: http://localhost:${PORT}/api/health`);
   console.log(`📖 Documentation: http://localhost:${PORT}/`);
-  console.log(`🎯 Features: Tracking, Downloads, AI, Community, Extensions, Accessibility, Parental Controls, Sync, Web3`);
+  console.log(
+    `🎯 Features: Tracking, Downloads, AI, Community, Extensions, Accessibility, Parental Controls, Sync, Web3`
+  );
 });

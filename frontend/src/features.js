@@ -6,7 +6,7 @@ export const features = [
     description: 'Centralized library for manga, anime, and light novels',
     status: 'active',
     icon: '📚',
-    component: 'LibraryView'
+    component: 'LibraryView',
   },
   {
     id: 'extension-system',
@@ -14,7 +14,7 @@ export const features = [
     description: 'Dynamic content sources and custom features',
     status: 'active',
     icon: '🧩',
-    component: 'ExtensionManager'
+    component: 'ExtensionManager',
   },
   {
     id: 'manga-reader',
@@ -22,7 +22,7 @@ export const features = [
     description: 'Advanced manga reading interface with customization',
     status: 'active',
     icon: '📖',
-    component: 'MangaReader'
+    component: 'MangaReader',
   },
   {
     id: 'anime-player',
@@ -30,7 +30,7 @@ export const features = [
     description: 'Video player with subtitle support and streaming',
     status: 'active',
     icon: '🎬',
-    component: 'AnimePlayer'
+    component: 'AnimePlayer',
   },
   {
     id: 'download-manager',
@@ -38,7 +38,7 @@ export const features = [
     description: 'Queue-based downloading with progress tracking',
     status: 'active',
     icon: '⬇️',
-    component: 'DownloadManager'
+    component: 'DownloadManager',
   },
   {
     id: 'search-recommendations',
@@ -46,7 +46,7 @@ export const features = [
     description: 'AI-powered search and personalized recommendations',
     status: 'active',
     icon: '🔍',
-    component: 'SearchView'
+    component: 'SearchView',
   },
   {
     id: 'tracking-sync',
@@ -54,7 +54,7 @@ export const features = [
     description: 'Cross-device synchronization and reading progress',
     status: 'active',
     icon: '🔄',
-    component: 'TrackingView'
+    component: 'TrackingView',
   },
   {
     id: 'community',
@@ -62,7 +62,7 @@ export const features = [
     description: 'Social features, clubs, and discussions',
     status: 'active',
     icon: '👥',
-    component: 'CommunityView'
+    component: 'CommunityView',
   },
   {
     id: 'web3-integration',
@@ -70,12 +70,12 @@ export const features = [
     description: 'Blockchain features and NFT support',
     status: 'beta',
     icon: '⛓️',
-    component: 'Web3View'
-  }
+    component: 'Web3View',
+  },
 ];
 
 // Feature utilities
-export const getFeature = (id) => {
+export const getFeature = id => {
   return features.find(feature => feature.id === id);
 };
 
@@ -87,15 +87,15 @@ export const getBetaFeatures = () => {
   return features.filter(feature => feature.status === 'beta');
 };
 
-export const getFeaturesByCategory = (category) => {
+export const getFeaturesByCategory = category => {
   const categories = {
-    'content': ['unified-library', 'manga-reader', 'anime-player'],
-    'discovery': ['search-recommendations', 'extension-system'],
-    'management': ['download-manager', 'tracking-sync'],
-    'social': ['community'],
-    'advanced': ['web3-integration']
+    content: ['unified-library', 'manga-reader', 'anime-player'],
+    discovery: ['search-recommendations', 'extension-system'],
+    management: ['download-manager', 'tracking-sync'],
+    social: ['community'],
+    advanced: ['web3-integration'],
   };
-  
+
   const featureIds = categories[category] || [];
   return features.filter(feature => featureIds.includes(feature.id));
 };
@@ -103,10 +103,27 @@ export const getFeaturesByCategory = (category) => {
 // Feature permissions and access control
 export const checkFeatureAccess = (featureId, userRole = 'user') => {
   const rolePermissions = {
-    'admin': ['*'], // Admin has access to all features
-    'premium': ['unified-library', 'extension-system', 'manga-reader', 'anime-player', 'download-manager', 'search-recommendations', 'tracking-sync', 'community', 'web3-integration'],
-    'user': ['unified-library', 'manga-reader', 'anime-player', 'search-recommendations', 'tracking-sync', 'community'],
-    'guest': ['unified-library', 'manga-reader', 'search-recommendations']
+    admin: ['*'], // Admin has access to all features
+    premium: [
+      'unified-library',
+      'extension-system',
+      'manga-reader',
+      'anime-player',
+      'download-manager',
+      'search-recommendations',
+      'tracking-sync',
+      'community',
+      'web3-integration',
+    ],
+    user: [
+      'unified-library',
+      'manga-reader',
+      'anime-player',
+      'search-recommendations',
+      'tracking-sync',
+      'community',
+    ],
+    guest: ['unified-library', 'manga-reader', 'search-recommendations'],
   };
 
   const permissions = rolePermissions[userRole] || rolePermissions.guest;
@@ -114,38 +131,38 @@ export const checkFeatureAccess = (featureId, userRole = 'user') => {
 };
 
 // Feature configuration
-export const getFeatureConfig = (featureId) => {
+export const getFeatureConfig = featureId => {
   const configs = {
     'unified-library': {
       itemsPerPage: 20,
       sortOptions: ['title', 'rating', 'updated', 'added'],
       filterOptions: ['all', 'reading', 'completed', 'plan-to-read', 'dropped'],
-      viewModes: ['grid', 'list', 'compact']
+      viewModes: ['grid', 'list', 'compact'],
     },
     'manga-reader': {
       readingModes: ['single-page', 'double-page', 'webtoon', 'continuous'],
       navigationModes: ['click', 'keyboard', 'gesture'],
       themes: ['light', 'dark', 'sepia', 'black'],
-      zoomLevels: [50, 75, 100, 125, 150, 200, 300]
+      zoomLevels: [50, 75, 100, 125, 150, 200, 300],
     },
     'anime-player': {
       qualityOptions: ['360p', '480p', '720p', '1080p'],
       subtitleLanguages: ['en', 'jp', 'fr', 'es', 'de'],
       playbackSpeeds: [0.5, 0.75, 1, 1.25, 1.5, 2],
-      skipIntroLength: 90
+      skipIntroLength: 90,
     },
     'download-manager': {
       maxConcurrentDownloads: 3,
       downloadQualities: ['source', 'high', 'medium', 'low'],
       autoRetryAttempts: 3,
-      downloadFormats: ['cbz', 'pdf', 'images']
+      downloadFormats: ['cbz', 'pdf', 'images'],
     },
     'search-recommendations': {
       resultsPerPage: 25,
       searchFilters: ['type', 'genre', 'status', 'rating', 'year'],
       recommendationTypes: ['similar', 'trending', 'personalized', 'popular'],
-      maxRecommendations: 50
-    }
+      maxRecommendations: 50,
+    },
   };
 
   return configs[featureId] || {};
@@ -159,21 +176,21 @@ export const trackFeatureUsage = (featureId, action, metadata = {}) => {
     timestamp: new Date(),
     metadata,
     sessionId: getSessionId(),
-    userId: getCurrentUserId()
+    userId: getCurrentUserId(),
   };
 
   // In a real implementation, send to analytics service
   console.log('Feature usage tracked:', event);
-  
+
   // Store locally for now
   const usage = JSON.parse(localStorage.getItem('featureUsage') || '[]');
   usage.push(event);
-  
+
   // Keep only last 1000 events
   if (usage.length > 1000) {
     usage.splice(0, usage.length - 1000);
   }
-  
+
   localStorage.setItem('featureUsage', JSON.stringify(usage));
 };
 
@@ -190,22 +207,22 @@ const getCurrentUserId = () => {
 export const featureStates = {
   enabled: new Set(),
   disabled: new Set(),
-  settings: new Map()
+  settings: new Map(),
 };
 
-export const enableFeature = (featureId) => {
+export const enableFeature = featureId => {
   featureStates.enabled.add(featureId);
   featureStates.disabled.delete(featureId);
   localStorage.setItem('enabledFeatures', JSON.stringify([...featureStates.enabled]));
 };
 
-export const disableFeature = (featureId) => {
+export const disableFeature = featureId => {
   featureStates.disabled.add(featureId);
   featureStates.enabled.delete(featureId);
   localStorage.setItem('disabledFeatures', JSON.stringify([...featureStates.disabled]));
 };
 
-export const isFeatureEnabled = (featureId) => {
+export const isFeatureEnabled = featureId => {
   return featureStates.enabled.has(featureId) && !featureStates.disabled.has(featureId);
 };
 
@@ -214,7 +231,7 @@ export const setFeatureSetting = (featureId, key, value) => {
     featureStates.settings.set(featureId, new Map());
   }
   featureStates.settings.get(featureId).set(key, value);
-  
+
   // Persist to localStorage
   const allSettings = {};
   for (const [fId, settings] of featureStates.settings) {
@@ -234,10 +251,10 @@ export const initializeFeatureStates = () => {
     const enabled = JSON.parse(localStorage.getItem('enabledFeatures') || '[]');
     const disabled = JSON.parse(localStorage.getItem('disabledFeatures') || '[]');
     const settings = JSON.parse(localStorage.getItem('featureSettings') || '{}');
-    
+
     featureStates.enabled = new Set(enabled);
     featureStates.disabled = new Set(disabled);
-    
+
     for (const [featureId, featureSettings] of Object.entries(settings)) {
       featureStates.settings.set(featureId, new Map(Object.entries(featureSettings)));
     }

@@ -14,7 +14,7 @@ export class Web3Module extends EventEmitter {
       achievements: '0x742...', // Mock contract address
       voting: '0x963...',
       nftCollection: '0x158...',
-      library: '0x427...'
+      library: '0x427...',
     };
   }
 
@@ -28,13 +28,13 @@ export class Web3Module extends EventEmitter {
         chainId: walletInfo.chainId || 1, // Ethereum mainnet by default
         connectedAt: new Date(),
         lastUsed: new Date(),
-        verified: await this.verifyWalletOwnership(walletInfo.address, walletInfo.signature)
+        verified: await this.verifyWalletOwnership(walletInfo.address, walletInfo.signature),
       };
 
       if (!connection.verified) {
         return {
           success: false,
-          message: 'Wallet verification failed'
+          message: 'Wallet verification failed',
         };
       }
 
@@ -45,12 +45,12 @@ export class Web3Module extends EventEmitter {
         success: true,
         message: 'Wallet connected successfully',
         address: connection.address,
-        chainId: connection.chainId
+        chainId: connection.chainId,
       };
     } catch (error) {
       return {
         success: false,
-        message: `Wallet connection failed: ${error.message}`
+        message: `Wallet connection failed: ${error.message}`,
       };
     }
   }
@@ -69,7 +69,7 @@ export class Web3Module extends EventEmitter {
       if (!wallet) {
         return {
           success: false,
-          message: 'Wallet not connected'
+          message: 'Wallet not connected',
         };
       }
 
@@ -86,7 +86,7 @@ export class Web3Module extends EventEmitter {
         tokenStandard: 'ERC-721',
         contractAddress: this.smartContracts.achievements,
         rarity: this.calculateRarity(achievementType),
-        transferable: metadata.transferable !== false
+        transferable: metadata.transferable !== false,
       };
 
       // Store NFT badge
@@ -100,12 +100,12 @@ export class Web3Module extends EventEmitter {
       return {
         success: true,
         message: 'Achievement NFT minted successfully',
-        nft: achievementNFT
+        nft: achievementNFT,
       };
     } catch (error) {
       return {
         success: false,
-        message: `NFT minting failed: ${error.message}`
+        message: `NFT minting failed: ${error.message}`,
       };
     }
   }
@@ -113,14 +113,14 @@ export class Web3Module extends EventEmitter {
   // Get user's NFT collection
   getUserNFTs(userId) {
     const nfts = this.nftBadges.get(userId) || [];
-    
+
     return {
       total: nfts.length,
       nfts: nfts.map(nft => ({
         ...nft,
         marketValue: this.estimateNFTValue(nft),
-        verified: true
-      }))
+        verified: true,
+      })),
     };
   }
 
@@ -131,13 +131,13 @@ export class Web3Module extends EventEmitter {
       if (!wallet) {
         return {
           success: false,
-          message: 'Wallet not connected'
+          message: 'Wallet not connected',
         };
       }
 
       // Encrypt data (mock implementation)
       const encryptedData = this.encryptLibraryData(libraryData);
-      
+
       const backup = {
         id: this.generateBackupId(),
         userId,
@@ -147,7 +147,7 @@ export class Web3Module extends EventEmitter {
         blockchainTx: this.generateMockTxHash(),
         createdAt: new Date(),
         size: JSON.stringify(libraryData).length,
-        version: '1.0'
+        version: '1.0',
       };
 
       this.decentralizedBackups.set(backup.id, backup);
@@ -158,12 +158,12 @@ export class Web3Module extends EventEmitter {
         message: 'Decentralized backup created',
         backupId: backup.id,
         ipfsHash: backup.ipfsHash,
-        transactionHash: backup.blockchainTx
+        transactionHash: backup.blockchainTx,
       };
     } catch (error) {
       return {
         success: false,
-        message: `Backup creation failed: ${error.message}`
+        message: `Backup creation failed: ${error.message}`,
       };
     }
   }
@@ -175,14 +175,14 @@ export class Web3Module extends EventEmitter {
       if (!backup) {
         return {
           success: false,
-          message: 'Backup not found'
+          message: 'Backup not found',
         };
       }
 
       if (backup.userId !== userId) {
         return {
           success: false,
-          message: 'Unauthorized access to backup'
+          message: 'Unauthorized access to backup',
         };
       }
 
@@ -193,12 +193,12 @@ export class Web3Module extends EventEmitter {
         success: true,
         message: 'Library restored from backup',
         data: libraryData,
-        backupDate: backup.createdAt
+        backupDate: backup.createdAt,
       };
     } catch (error) {
       return {
         success: false,
-        message: `Restore failed: ${error.message}`
+        message: `Restore failed: ${error.message}`,
       };
     }
   }
@@ -210,7 +210,7 @@ export class Web3Module extends EventEmitter {
       if (!wallet) {
         return {
           success: false,
-          message: 'Wallet not connected'
+          message: 'Wallet not connected',
         };
       }
 
@@ -227,7 +227,7 @@ export class Web3Module extends EventEmitter {
         status: 'active', // 'active', 'ended', 'executed'
         quorum: proposalData.quorum || 100,
         threshold: proposalData.threshold || 0.5, // 50% threshold
-        transactionHash: this.generateMockTxHash()
+        transactionHash: this.generateMockTxHash(),
       };
 
       this.votingProposals.set(proposal.id, proposal);
@@ -237,12 +237,12 @@ export class Web3Module extends EventEmitter {
         success: true,
         message: 'Voting proposal created',
         proposalId: proposal.id,
-        endDate: proposal.endDate
+        endDate: proposal.endDate,
       };
     } catch (error) {
       return {
         success: false,
-        message: `Proposal creation failed: ${error.message}`
+        message: `Proposal creation failed: ${error.message}`,
       };
     }
   }
@@ -254,7 +254,7 @@ export class Web3Module extends EventEmitter {
       if (!wallet) {
         return {
           success: false,
-          message: 'Wallet not connected'
+          message: 'Wallet not connected',
         };
       }
 
@@ -262,21 +262,21 @@ export class Web3Module extends EventEmitter {
       if (!proposal) {
         return {
           success: false,
-          message: 'Proposal not found'
+          message: 'Proposal not found',
         };
       }
 
       if (proposal.status !== 'active' || new Date() > proposal.endDate) {
         return {
           success: false,
-          message: 'Voting period has ended'
+          message: 'Voting period has ended',
         };
       }
 
       if (proposal.votes.has(userId)) {
         return {
           success: false,
-          message: 'Already voted on this proposal'
+          message: 'Already voted on this proposal',
         };
       }
 
@@ -288,18 +288,18 @@ export class Web3Module extends EventEmitter {
         option,
         weight: votingWeight,
         timestamp: new Date(),
-        transactionHash: this.generateMockTxHash()
+        transactionHash: this.generateMockTxHash(),
       };
 
       proposal.votes.set(userId, vote);
-      
+
       // Store user vote history
       if (!this.userVotes.has(userId)) {
         this.userVotes.set(userId, []);
       }
       this.userVotes.get(userId).push({
         proposalId,
-        vote
+        vote,
       });
 
       this.emit('voteCast', { proposalId, vote });
@@ -308,12 +308,12 @@ export class Web3Module extends EventEmitter {
         success: true,
         message: 'Vote cast successfully',
         weight: votingWeight,
-        transactionHash: vote.transactionHash
+        transactionHash: vote.transactionHash,
       };
     } catch (error) {
       return {
         success: false,
-        message: `Voting failed: ${error.message}`
+        message: `Voting failed: ${error.message}`,
       };
     }
   }
@@ -340,10 +340,10 @@ export class Web3Module extends EventEmitter {
 
     // Determine if quorum is met and if proposal passes
     const quorumMet = proposal.votes.size >= proposal.quorum;
-    const winningOption = Object.entries(voteTotals).reduce((a, b) => 
+    const winningOption = Object.entries(voteTotals).reduce((a, b) =>
       voteTotals[a[0]] > voteTotals[b[0]] ? a : b
     );
-    const passes = quorumMet && (voteTotals[winningOption[0]] / totalWeight) >= proposal.threshold;
+    const passes = quorumMet && voteTotals[winningOption[0]] / totalWeight >= proposal.threshold;
 
     return {
       ...proposal,
@@ -353,7 +353,7 @@ export class Web3Module extends EventEmitter {
       totalWeight,
       quorumMet,
       passes,
-      winningOption: winningOption[0]
+      winningOption: winningOption[0],
     };
   }
 
@@ -374,44 +374,44 @@ export class Web3Module extends EventEmitter {
   calculateVotingWeight(userId, baseWeight) {
     const nfts = this.getUserNFTs(userId);
     const achievements = this.achievements.get(userId) || [];
-    
+
     let multiplier = 1;
-    
+
     // NFT holders get bonus weight
     multiplier += nfts.total * 0.1;
-    
+
     // Long-term users get bonus
     multiplier += achievements.length * 0.05;
-    
+
     // Cap the multiplier
     multiplier = Math.min(multiplier, 3);
-    
+
     return Math.round(baseWeight * multiplier);
   }
 
   // Calculate NFT rarity
   calculateRarity(achievementType) {
     const rarityMap = {
-      'first_read': 'common',
-      'speed_reader': 'uncommon',
-      'collector': 'rare',
-      'community_leader': 'epic',
-      'platform_pioneer': 'legendary'
+      first_read: 'common',
+      speed_reader: 'uncommon',
+      collector: 'rare',
+      community_leader: 'epic',
+      platform_pioneer: 'legendary',
     };
-    
+
     return rarityMap[achievementType] || 'common';
   }
 
   // Estimate NFT market value (mock)
   estimateNFTValue(nft) {
     const baseValues = {
-      'common': 0.01,
-      'uncommon': 0.05,
-      'rare': 0.1,
-      'epic': 0.5,
-      'legendary': 2.0
+      common: 0.01,
+      uncommon: 0.05,
+      rare: 0.1,
+      epic: 0.5,
+      legendary: 2.0,
     };
-    
+
     return baseValues[nft.rarity] || 0.01;
   }
 
@@ -453,10 +453,16 @@ export class Web3Module extends EventEmitter {
 
   // Get Web3 statistics
   getWeb3Stats() {
-    const totalNFTs = Array.from(this.nftBadges.values()).reduce((sum, nfts) => sum + nfts.length, 0);
+    const totalNFTs = Array.from(this.nftBadges.values()).reduce(
+      (sum, nfts) => sum + nfts.length,
+      0
+    );
     const totalBackups = this.decentralizedBackups.size;
     const activeProposals = this.getActiveProposals().length;
-    const totalVotes = Array.from(this.votingProposals.values()).reduce((sum, proposal) => sum + proposal.votes.size, 0);
+    const totalVotes = Array.from(this.votingProposals.values()).reduce(
+      (sum, proposal) => sum + proposal.votes.size,
+      0
+    );
 
     return {
       connectedWallets: this.walletConnections.size,
@@ -464,7 +470,7 @@ export class Web3Module extends EventEmitter {
       totalBackups,
       activeProposals,
       totalVotes,
-      smartContracts: this.smartContracts
+      smartContracts: this.smartContracts,
     };
   }
 
@@ -476,22 +482,22 @@ export class Web3Module extends EventEmitter {
         name: 'Ethereum Mainnet',
         currency: 'ETH',
         rpcUrl: 'https://mainnet.infura.io/v3/...',
-        blockExplorer: 'https://etherscan.io'
+        blockExplorer: 'https://etherscan.io',
       },
       {
         chainId: 137,
         name: 'Polygon',
         currency: 'MATIC',
         rpcUrl: 'https://polygon-rpc.com',
-        blockExplorer: 'https://polygonscan.com'
+        blockExplorer: 'https://polygonscan.com',
       },
       {
         chainId: 56,
         name: 'BSC',
         currency: 'BNB',
         rpcUrl: 'https://bsc-dataseed.binance.org',
-        blockExplorer: 'https://bscscan.com'
-      }
+        blockExplorer: 'https://bscscan.com',
+      },
     ];
   }
 }

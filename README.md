@@ -1,4 +1,3 @@
-
 # 🌟 Project Myriad
 
 <div align="center">
@@ -37,23 +36,23 @@ Project Myriad revolutionizes how you experience manga and anime by combining th
 
 ### 📚 Core Features
 
-| Feature | Status | Description |
-|---------|--------|-------------|
-| **Unified Library** | ✅ | Manage local files and online sources in one place |
-| **Extension System** | 🚧 | Add new manga/anime sources with ease |
-| **Offline Reader** | 🚧 | Support for CBZ, CBR, PDF, and web formats |
-| **Download Manager** | 🚧 | Queue and manage downloads for offline reading |
-| **Progress Tracking** | 📋 | Sync reading progress across all devices |
-| **Search & Discovery** | 📋 | Advanced search with filters and recommendations |
+| Feature                | Status | Description                                        |
+| ---------------------- | ------ | -------------------------------------------------- |
+| **Unified Library**    | ✅     | Manage local files and online sources in one place |
+| **Extension System**   | 🚧     | Add new manga/anime sources with ease              |
+| **Offline Reader**     | 🚧     | Support for CBZ, CBR, PDF, and web formats         |
+| **Download Manager**   | 🚧     | Queue and manage downloads for offline reading     |
+| **Progress Tracking**  | 📋     | Sync reading progress across all devices           |
+| **Search & Discovery** | 📋     | Advanced search with filters and recommendations   |
 
 ### 🎥 Media Support
 
-| Type | Formats | Status |
-|------|---------|--------|
-| **Manga** | CBZ, CBR, PDF, ZIP, RAR | 🚧 |
-| **Light Novels** | EPUB, TXT, PDF | 📋 |
-| **Anime** | MP4, MKV, WebM | 📋 |
-| **Web Content** | Online readers, streaming | 🚧 |
+| Type             | Formats                   | Status |
+| ---------------- | ------------------------- | ------ |
+| **Manga**        | CBZ, CBR, PDF, ZIP, RAR   | 🚧     |
+| **Light Novels** | EPUB, TXT, PDF            | 📋     |
+| **Anime**        | MP4, MKV, WebM            | 📋     |
+| **Web Content**  | Online readers, streaming | 🚧     |
 
 ### 🔧 Advanced Features
 
@@ -69,6 +68,7 @@ Project Myriad revolutionizes how you experience manga and anime by combining th
 ## 🛠 Tech Stack
 
 ### Backend
+
 - **Runtime**: Node.js 20+ with Express.js
 - **Database**: PostgreSQL (production) / SQLite (development)
 - **Authentication**: JWT with refresh tokens
@@ -76,6 +76,7 @@ Project Myriad revolutionizes how you experience manga and anime by combining th
 - **API**: RESTful with GraphQL subscription support
 
 ### Frontend
+
 - **Framework**: React 18+ with Vite
 - **State Management**: Zustand with persistence
 - **UI Library**: Tailwind CSS with Headless UI
@@ -83,12 +84,14 @@ Project Myriad revolutionizes how you experience manga and anime by combining th
 - **Forms**: React Hook Form with Zod validation
 
 ### Mobile
+
 - **Framework**: React Native with Expo SDK 50+
 - **Navigation**: Expo Router (file-based)
 - **State**: Shared store with web frontend
 - **Platforms**: iOS, Android, and Web
 
 ### DevOps & Infrastructure
+
 - **Containerization**: Docker with multi-stage builds
 - **CI/CD**: GitHub Actions with automated testing and deployment
 - **Monitoring**: Built-in health checks and performance monitoring
@@ -143,22 +146,23 @@ npm start
 
 ## 📖 Documentation
 
-| Documentation | Description |
-|---------------|-------------|
-| [📋 API Reference](docs/API.md) | Complete API documentation |
-| [🏗 Architecture Guide](docs/ARCHITECTURE.md) | System design and architecture |
-| [🔌 Extension Development](docs/EXTENSIONS.md) | Creating custom extensions |
-| [🚀 Deployment Guide](docs/DEPLOYMENT.md) | Production deployment instructions |
-| [🔧 Configuration](docs/CONFIGURATION.md) | Environment and feature configuration |
-| [🛠 Development Setup](docs/DEVELOPMENT.md) | Development environment setup |
-| [🎨 UI Components](docs/COMPONENTS.md) | Frontend component library |
-| [📱 Mobile Development](docs/MOBILE.md) | Mobile app development guide |
-| [🔐 Security Guide](docs/SECURITY.md) | Security best practices |
-| [📊 Performance](docs/PERFORMANCE.md) | Performance optimization guide |
+| Documentation                                  | Description                           |
+| ---------------------------------------------- | ------------------------------------- |
+| [📋 API Reference](docs/API.md)                | Complete API documentation            |
+| [🏗 Architecture Guide](docs/ARCHITECTURE.md)  | System design and architecture        |
+| [🔌 Extension Development](docs/EXTENSIONS.md) | Creating custom extensions            |
+| [🚀 Deployment Guide](docs/DEPLOYMENT.md)      | Production deployment instructions    |
+| [🔧 Configuration](docs/CONFIGURATION.md)      | Environment and feature configuration |
+| [🛠 Development Setup](docs/DEVELOPMENT.md)    | Development environment setup         |
+| [🎨 UI Components](docs/COMPONENTS.md)         | Frontend component library            |
+| [📱 Mobile Development](docs/MOBILE.md)        | Mobile app development guide          |
+| [🔐 Security Guide](docs/SECURITY.md)          | Security best practices               |
+| [📊 Performance](docs/PERFORMANCE.md)          | Performance optimization guide        |
 
 ## 🗺 Roadmap
 
 ### Phase 1: Foundation (Q3 2025) ✅
+
 - [x] Project setup and core architecture
 - [x] Backend API with basic endpoints
 - [x] Frontend web application
@@ -167,6 +171,7 @@ npm start
 - [x] CI/CD pipeline
 
 ### Phase 2: Core Features (Q4 2025) 🚧
+
 - [ ] Extension system implementation
 - [ ] Manga reader with offline support
 - [ ] Download manager
@@ -175,6 +180,7 @@ npm start
 - [ ] Search and filtering
 
 ### Phase 3: Advanced Features (Q1 2026) 📋
+
 - [ ] AI-powered recommendations
 - [ ] Community features and social sharing
 - [ ] Advanced reading statistics
@@ -183,6 +189,7 @@ npm start
 - [ ] Performance optimizations
 
 ### Phase 4: Ecosystem (Q2 2026) 🔮
+
 - [ ] Anime streaming integration
 - [ ] Desktop application (Electron)
 - [ ] Web3 features (optional)

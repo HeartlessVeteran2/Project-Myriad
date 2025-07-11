@@ -17,17 +17,8 @@
   "files.trimFinalNewlines": true,
   "typescript.preferences.importModuleSpecifier": "relative",
   "javascript.preferences.importModuleSpecifier": "relative",
-  "eslint.workingDirectories": [
-    "backend",
-    "frontend",
-    "mobile"
-  ],
-  "eslint.validate": [
-    "javascript",
-    "javascriptreact",
-    "typescript",
-    "typescriptreact"
-  ],
+  "eslint.workingDirectories": ["backend", "frontend", "mobile"],
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
   "emmet.includeLanguages": {
     "javascript": "javascriptreact",
     "typescript": "typescriptreact"
@@ -58,15 +49,7 @@
   "debug.allowBreakpointsEverywhere": true,
   "jest.autoRun": "watch",
   "jest.showCoverageOnLoad": true,
-  "todo-tree.general.tags": [
-    "BUG",
-    "HACK",
-    "FIXME",
-    "TODO",
-    "XXX",
-    "[ ]",
-    "[x]"
-  ],
+  "todo-tree.general.tags": ["BUG", "HACK", "FIXME", "TODO", "XXX", "[ ]", "[x]"],
   "todo-tree.highlights.defaultHighlight": {
     "icon": "alert",
     "type": "tag",

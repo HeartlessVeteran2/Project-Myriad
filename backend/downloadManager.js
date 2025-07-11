@@ -23,7 +23,7 @@ export class DownloadManager extends EventEmitter {
   // Add item to download queue
   addDownload(item) {
     const downloadId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
-    
+
     const downloadInfo = {
       id: downloadId,
       title: item.title,
@@ -38,13 +38,13 @@ export class DownloadManager extends EventEmitter {
       createdAt: new Date(),
       startedAt: null,
       completedAt: null,
-      error: null
+      error: null,
     };
 
     this.queue.set(downloadId, downloadInfo);
     this.emit('downloadAdded', downloadInfo);
     this.processQueue();
-    
+
     return downloadId;
   }
 
@@ -62,7 +62,7 @@ export class DownloadManager extends EventEmitter {
       if (this.activeDownloads.size >= this.maxConcurrent) {
         break;
       }
-      
+
       await this.startDownload(download.id);
     }
   }
@@ -77,17 +77,17 @@ export class DownloadManager extends EventEmitter {
     download.status = 'downloading';
     download.startedAt = new Date();
     this.activeDownloads.set(downloadId, download);
-    
+
     this.emit('downloadStarted', download);
 
     try {
       // Simulate download process
       await this.simulateDownload(download);
-      
+
       download.status = 'completed';
       download.completedAt = new Date();
       download.progress = 100;
-      
+
       this.emit('downloadCompleted', download);
     } catch (error) {
       download.status = 'failed';
@@ -103,13 +103,13 @@ export class DownloadManager extends EventEmitter {
   async simulateDownload(download) {
     const steps = 20;
     const stepDelay = 100; // 100ms per step = 2s total
-    
+
     for (let i = 0; i <= steps; i++) {
       download.progress = Math.round((i / steps) * 100);
       download.downloadedSize = Math.round((download.totalSize || 100000) * (i / steps));
-      
+
       this.emit('downloadProgress', download);
-      
+
       if (i < steps) {
         await new Promise(resolve => setTimeout(resolve, stepDelay));
       }
@@ -185,7 +185,7 @@ export class DownloadManager extends EventEmitter {
       paused: downloads.filter(d => d.status === 'paused').length,
       cancelled: downloads.filter(d => d.status === 'cancelled').length,
       totalSize: downloads.reduce((sum, d) => sum + (d.totalSize || 0), 0),
-      downloadedSize: downloads.reduce((sum, d) => sum + (d.downloadedSize || 0), 0)
+      downloadedSize: downloads.reduce((sum, d) => sum + (d.downloadedSize || 0), 0),
     };
   }
 }

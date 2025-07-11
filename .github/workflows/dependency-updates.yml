@@ -2,7 +2,7 @@ name: Dependency Updates
 
 on:
   schedule:
-    - cron: '0 8 * * 1'  # Weekly on Monday at 8 AM
+    - cron: '0 8 * * 1' # Weekly on Monday at 8 AM
   workflow_dispatch:
     inputs:
       update_type:
@@ -11,9 +11,9 @@ on:
         default: 'patch'
         type: choice
         options:
-        - patch
-        - minor
-        - major
+          - patch
+          - minor
+          - major
 
 jobs:
   update-dependencies:
@@ -23,22 +23,22 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-      
+
       - name: Install npm-check-updates
         run: npm install -g npm-check-updates
-      
+
       - name: Update backend dependencies
         if: hashFiles('backend/package.json') != ''
         run: |
           cd backend
           echo "Current backend dependencies:"
           npm list --depth=0 || true
-          
+
           # Update based on input or default to patch
           UPDATE_TYPE="${{ github.event.inputs.update_type || 'patch' }}"
           case $UPDATE_TYPE in
@@ -46,69 +46,69 @@ jobs:
             minor) ncu -u --target minor ;;
             major) ncu -u ;;
           esac
-          
+
           npm install || npm update
-          
+
           echo "Updated backend dependencies:"
           npm list --depth=0 || true
-      
+
       - name: Update frontend dependencies
         if: hashFiles('frontend/package.json') != ''
         run: |
           cd frontend
           echo "Current frontend dependencies:"
           npm list --depth=0 || true
-          
+
           UPDATE_TYPE="${{ github.event.inputs.update_type || 'patch' }}"
           case $UPDATE_TYPE in
             patch) ncu -u --target patch ;;
             minor) ncu -u --target minor ;;
             major) ncu -u ;;
           esac
-          
+
           npm install || npm update
-          
+
           echo "Updated frontend dependencies:"
           npm list --depth=0 || true
-      
+
       - name: Update mobile dependencies
         if: hashFiles('mobile/package.json') != ''
         run: |
           cd mobile
           echo "Current mobile dependencies:"
           npm list --depth=0 || true
-          
+
           UPDATE_TYPE="${{ github.event.inputs.update_type || 'patch' }}"
           case $UPDATE_TYPE in
             patch) ncu -u --target patch ;;
             minor) ncu -u --target minor ;;
             major) ncu -u ;;
           esac
-          
+
           npm install || npm update
-          
+
           echo "Updated mobile dependencies:"
           npm list --depth=0 || true
-      
+
       - name: Run tests after updates
         run: |
           echo "Running tests to verify updates..."
-          
+
           if [ -f backend/package.json ]; then
             cd backend && npm test || echo "Backend tests failed or not configured"
             cd ..
           fi
-          
+
           if [ -f frontend/package.json ]; then
             cd frontend && npm test || echo "Frontend tests failed or not configured"
             cd ..
           fi
-          
+
           if [ -f mobile/package.json ]; then
             cd mobile && npm test || echo "Mobile tests failed or not configured"
             cd ..
           fi
-      
+
       - name: Generate update summary
         id: summary
         run: |
@@ -117,41 +117,41 @@ jobs:
           echo "Update type: ${{ github.event.inputs.update_type || 'patch' }}" >> update_summary.md
           echo "Date: $(date)" >> update_summary.md
           echo "" >> update_summary.md
-          
+
           if git diff --name-only | grep -q package.json; then
             echo "### Changed Files:" >> update_summary.md
             git diff --name-only | grep package.json | sed 's/^/- /' >> update_summary.md
             echo "" >> update_summary.md
-            
+
             echo "### Security Audit:" >> update_summary.md
             echo "\`\`\`" >> update_summary.md
-            
+
             if [ -f backend/package.json ]; then
               echo "Backend:" >> update_summary.md
               cd backend && npm audit || echo "No vulnerabilities found"
               cd ..
             fi
-            
+
             if [ -f frontend/package.json ]; then
               echo "Frontend:" >> update_summary.md
               cd frontend && npm audit || echo "No vulnerabilities found"
               cd ..
             fi
-            
+
             if [ -f mobile/package.json ]; then
               echo "Mobile:" >> update_summary.md
               cd mobile && npm audit || echo "No vulnerabilities found"
               cd ..
             fi
-            
+
             echo "\`\`\`" >> update_summary.md
-            
+
             echo "has-changes=true" >> $GITHUB_OUTPUT
           else
             echo "No dependency updates available." >> update_summary.md
             echo "has-changes=false" >> $GITHUB_OUTPUT
           fi
-      
+
       - name: Create Pull Request
         if: steps.summary.outputs.has-changes == 'true'
         uses: peter-evans/create-pull-request@v5

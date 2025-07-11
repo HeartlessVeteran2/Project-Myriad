@@ -26,9 +26,11 @@ Authorization: Bearer <your_jwt_token>
 ### Authentication Endpoints
 
 #### POST /auth/login
+
 Authenticate user and receive access tokens.
 
 **Request Body**:
+
 ```json
 {
   "email": "user@example.com",
@@ -37,6 +39,7 @@ Authenticate user and receive access tokens.
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -59,9 +62,11 @@ Authenticate user and receive access tokens.
 ```
 
 #### POST /auth/refresh
+
 Refresh access token using refresh token.
 
 **Request Body**:
+
 ```json
 {
   "refresh_token": "eyJhbGciOiJIUzI1NiIs..."
@@ -69,9 +74,11 @@ Refresh access token using refresh token.
 ```
 
 #### POST /auth/register
+
 Create new user account.
 
 **Request Body**:
+
 ```json
 {
   "email": "newuser@example.com",
@@ -82,12 +89,15 @@ Create new user account.
 ```
 
 #### POST /auth/logout
+
 Invalidate current session and refresh token.
 
 #### POST /auth/forgot-password
+
 Request password reset email.
 
 **Request Body**:
+
 ```json
 {
   "email": "user@example.com"
@@ -95,9 +105,11 @@ Request password reset email.
 ```
 
 #### POST /auth/reset-password
+
 Reset password using reset token.
 
 **Request Body**:
+
 ```json
 {
   "token": "reset_token_here",
@@ -109,9 +121,11 @@ Reset password using reset token.
 ## Library Management
 
 ### GET /library
+
 Get user's library with pagination and filtering.
 
 **Query Parameters**:
+
 - `page` (integer): Page number (default: 1)
 - `limit` (integer): Items per page (default: 20, max: 100)
 - `sort` (string): Sort field (title, created_at, updated_at, progress)
@@ -121,6 +135,7 @@ Get user's library with pagination and filtering.
 - `search` (string): Search query
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -161,9 +176,11 @@ Get user's library with pagination and filtering.
 ```
 
 ### POST /library
+
 Add new media to library.
 
 **Request Body**:
+
 ```json
 {
   "source": "local", // or extension source id
@@ -178,9 +195,11 @@ Add new media to library.
 ```
 
 ### GET /library/{id}
+
 Get detailed information about a specific media item.
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -231,9 +250,11 @@ Get detailed information about a specific media item.
 ```
 
 ### PUT /library/{id}
+
 Update media information.
 
 **Request Body**:
+
 ```json
 {
   "status": "completed",
@@ -249,12 +270,15 @@ Update media information.
 ```
 
 ### DELETE /library/{id}
+
 Remove media from library.
 
 ### POST /library/{id}/progress
+
 Update reading progress.
 
 **Request Body**:
+
 ```json
 {
   "chapter": 1051,
@@ -266,9 +290,11 @@ Update reading progress.
 ## Reader API
 
 ### GET /reader/{media_id}/chapter/{chapter_id}
+
 Get chapter pages for reading.
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -299,9 +325,11 @@ Get chapter pages for reading.
 ```
 
 ### POST /reader/{media_id}/chapter/{chapter_id}/bookmark
+
 Add bookmark to current page.
 
 **Request Body**:
+
 ```json
 {
   "page": 5,
@@ -312,14 +340,17 @@ Add bookmark to current page.
 ## Download Management
 
 ### GET /downloads
+
 Get download queue and history.
 
 **Query Parameters**:
+
 - `status` (string): Filter by status (pending, downloading, completed, failed, paused)
 - `page` (integer): Page number
 - `limit` (integer): Items per page
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -355,9 +386,11 @@ Get download queue and history.
 ```
 
 ### POST /downloads
+
 Add new download to queue.
 
 **Request Body**:
+
 ```json
 {
   "source": "extension_mangadex",
@@ -369,9 +402,11 @@ Add new download to queue.
 ```
 
 ### PUT /downloads/{id}
+
 Update download (pause, resume, cancel).
 
 **Request Body**:
+
 ```json
 {
   "action": "pause" // pause, resume, cancel, retry
@@ -379,14 +414,17 @@ Update download (pause, resume, cancel).
 ```
 
 ### DELETE /downloads/{id}
+
 Remove download from queue and delete files.
 
 ## Extension System
 
 ### GET /extensions
+
 Get available extensions.
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -423,12 +461,15 @@ Get available extensions.
 ```
 
 ### POST /extensions/{id}/install
+
 Install extension.
 
 ### PUT /extensions/{id}/toggle
+
 Enable/disable extension.
 
 **Request Body**:
+
 ```json
 {
   "enabled": true
@@ -436,14 +477,17 @@ Enable/disable extension.
 ```
 
 ### GET /extensions/{id}/search
+
 Search using specific extension.
 
 **Query Parameters**:
+
 - `q` (string): Search query
 - `page` (integer): Page number
 - `filters` (object): Extension-specific filters
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -471,9 +515,11 @@ Search using specific extension.
 ## User Management
 
 ### GET /user/profile
+
 Get current user profile.
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -508,9 +554,11 @@ Get current user profile.
 ```
 
 ### PUT /user/profile
+
 Update user profile.
 
 **Request Body**:
+
 ```json
 {
   "username": "newusername",
@@ -523,23 +571,28 @@ Update user profile.
 ```
 
 ### GET /user/statistics
+
 Get detailed user statistics.
 
 ### GET /user/reading-history
+
 Get reading history with pagination.
 
 ## Search API
 
 ### GET /search
+
 Global search across library and extensions.
 
 **Query Parameters**:
+
 - `q` (string): Search query
 - `type` (string): Content type (manga, anime, light_novel, all)
 - `sources` (array): Sources to search (library, extension_ids)
 - `filters` (object): Advanced filters
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -565,11 +618,7 @@ Global search across library and extensions.
         ]
       }
     ],
-    "suggestions": [
-      "One Piece",
-      "One Punch Man",
-      "One Piece Film"
-    ]
+    "suggestions": ["One Piece", "One Punch Man", "One Piece Film"]
   }
 }
 ```
@@ -577,9 +626,11 @@ Global search across library and extensions.
 ## Tracking Integration
 
 ### GET /tracking/services
+
 Get available tracking services.
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -604,23 +655,29 @@ Get available tracking services.
 ```
 
 ### POST /tracking/{service}/connect
+
 Connect tracking service.
 
 ### POST /tracking/{service}/sync
+
 Manual sync with tracking service.
 
 ### PUT /tracking/{service}/settings
+
 Update tracking service settings.
 
 ## Community Features
 
 ### GET /community/reviews/{media_id}
+
 Get reviews for media.
 
 ### POST /community/reviews
+
 Create new review.
 
 **Request Body**:
+
 ```json
 {
   "media_id": "media_123",
@@ -632,20 +689,25 @@ Create new review.
 ```
 
 ### GET /community/collections
+
 Get public collections.
 
 ### POST /community/collections
+
 Create new collection.
 
 ## Admin API
 
 ### GET /admin/stats
+
 Get system statistics (admin only).
 
 ### GET /admin/users
+
 Get user management interface (admin only).
 
 ### POST /admin/extensions/approve
+
 Approve extension for marketplace (admin only).
 
 ## Error Responses
@@ -671,25 +733,27 @@ All error responses follow this format:
 
 ### Common Error Codes
 
-| Code | Status | Description |
-|------|--------|-------------|
-| `VALIDATION_ERROR` | 400 | Request validation failed |
-| `UNAUTHORIZED` | 401 | Authentication required |
-| `FORBIDDEN` | 403 | Insufficient permissions |
-| `NOT_FOUND` | 404 | Resource not found |
-| `RATE_LIMITED` | 429 | Rate limit exceeded |
-| `SERVER_ERROR` | 500 | Internal server error |
-| `SERVICE_UNAVAILABLE` | 503 | Service temporarily unavailable |
+| Code                  | Status | Description                     |
+| --------------------- | ------ | ------------------------------- |
+| `VALIDATION_ERROR`    | 400    | Request validation failed       |
+| `UNAUTHORIZED`        | 401    | Authentication required         |
+| `FORBIDDEN`           | 403    | Insufficient permissions        |
+| `NOT_FOUND`           | 404    | Resource not found              |
+| `RATE_LIMITED`        | 429    | Rate limit exceeded             |
+| `SERVER_ERROR`        | 500    | Internal server error           |
+| `SERVICE_UNAVAILABLE` | 503    | Service temporarily unavailable |
 
 ## Rate Limiting
 
 Default rate limits per user:
+
 - **Authentication**: 10 requests per minute
 - **API Calls**: 1000 requests per hour
 - **Download Requests**: 50 requests per minute
 - **Search Requests**: 100 requests per minute
 
 Rate limit headers are included in all responses:
+
 ```http
 X-RateLimit-Limit: 1000
 X-RateLimit-Remaining: 999
@@ -730,6 +794,7 @@ For advanced queries, use our GraphQL endpoint:
 **Endpoint**: `/graphql`
 
 **Example Query**:
+
 ```graphql
 query GetLibraryWithProgress($limit: Int!) {
   library(limit: $limit) {

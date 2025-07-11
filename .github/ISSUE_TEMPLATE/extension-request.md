@@ -12,7 +12,7 @@ assignees: ''
 
 - **Source Name**: [Name of the website/platform]
 - **Source URL**: [URL of the website]
-- **Content Type**: 
+- **Content Type**:
   - [ ] Manga
   - [ ] Anime
   - [ ] Light Novel
@@ -29,14 +29,14 @@ assignees: ''
 
 ### API Information
 
-- **Public API Available**: 
+- **Public API Available**:
   - [ ] Yes - [API documentation URL]
   - [ ] No - Web scraping required
   - [ ] Unknown
 
 ### Website Structure
 
-- **Search Functionality**: 
+- **Search Functionality**:
   - [ ] Global search available
   - [ ] Category browsing
   - [ ] Advanced filters
@@ -112,6 +112,7 @@ If you're willing to help, what skills do you have?
 ### Screenshots
 
 If possible, provide screenshots of:
+
 - Search results page
 - Content listing page
 - Reader interface
@@ -119,6 +120,7 @@ If possible, provide screenshots of:
 ### Example Content
 
 Provide examples of content available on this source:
+
 - Popular titles
 - Recent additions
 - Unique content

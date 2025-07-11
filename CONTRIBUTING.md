@@ -34,12 +34,14 @@ Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md) to ensure a wel
 ### Setting up the Development Environment
 
 1. **Fork and Clone the Repository**
+
    ```bash
    git clone https://github.com/your-username/Project-Myriad.git
    cd Project-Myriad
    ```
 
 2. **Install Dependencies**
+
    ```bash
    # Install all dependencies using the root package.json
    npm install
@@ -56,6 +58,7 @@ Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md) to ensure a wel
    ```
 
 3. **Environment Configuration**
+
    ```bash
    # Copy environment templates
    cp backend/.env.example backend/.env
@@ -66,6 +69,7 @@ Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md) to ensure a wel
    ```
 
 4. **Database Setup**
+
    ```bash
    # Using Docker (recommended)
    docker-compose up -d mysql
@@ -74,6 +78,7 @@ Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md) to ensure a wel
    ```
 
 5. **Start Development Servers**
+
    ```bash
    # Start all services
    npm run dev
@@ -82,7 +87,7 @@ Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md) to ensure a wel
    # Backend
    cd backend && npm run dev
 
-   # Frontend  
+   # Frontend
    cd frontend && npm start
 
    # Mobile (React Native)
@@ -130,6 +135,7 @@ We follow [Conventional Commits](https://conventionalcommits.org/) specification
 ```
 
 **Types:**
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
@@ -142,6 +148,7 @@ We follow [Conventional Commits](https://conventionalcommits.org/) specification
 - `build`: Build system changes
 
 **Examples:**
+
 ```bash
 feat(auth): implement JWT token refresh mechanism
 fix(library): resolve pagination issue in manga grid
@@ -155,6 +162,7 @@ chore(deps): update dependencies to latest versions
 ### Pull Request Process
 
 1. **Create Feature Branch**
+
    ```bash
    git checkout develop
    git pull origin develop
@@ -190,12 +198,14 @@ chore(deps): update dependencies to latest versions
 ### Code Review Guidelines
 
 **For Authors:**
+
 - Keep PRs focused and reasonably sized (<500 lines)
 - Provide clear description and context
 - Respond to feedback promptly and professionally
 - Update documentation alongside code changes
 
 **For Reviewers:**
+
 - Review within 48 hours
 - Provide constructive feedback
 - Focus on logic, security, performance, and maintainability
@@ -217,17 +227,17 @@ chore(deps): update dependencies to latest versions
 // ✅ Good
 const getUserLibrary = async (userId, options = {}) => {
   const { page = 1, limit = 20, type } = options;
-  
+
   try {
     const items = await libraryService.getItems(userId, {
       page,
       limit,
-      type
+      type,
     });
-    
+
     return {
       success: true,
-      data: items
+      data: items,
     };
   } catch (error) {
     logger.error('Failed to fetch user library', { userId, error });
@@ -278,6 +288,7 @@ src/
 ### API Development Standards
 
 **RESTful Design:**
+
 ```javascript
 // ✅ Good REST endpoints
 GET    /api/library/items          // Get library items
@@ -292,6 +303,7 @@ GET    /api/library/delete/:id
 ```
 
 **Error Handling:**
+
 ```javascript
 // Consistent error response format
 {
@@ -312,12 +324,14 @@ GET    /api/library/delete/:id
 ### Database Standards
 
 **Schema Design:**
+
 - Use consistent naming conventions (snake_case)
 - Include proper indexes for performance
 - Implement foreign key constraints
 - Add created_at/updated_at timestamps
 
 **Query Optimization:**
+
 - Use parameterized queries to prevent SQL injection
 - Implement proper indexing
 - Avoid N+1 query problems
@@ -328,6 +342,7 @@ GET    /api/library/delete/:id
 ### Testing Philosophy
 
 We follow the **Testing Pyramid** principle:
+
 - **70%** Unit Tests - Fast, isolated tests
 - **20%** Integration Tests - Component interaction tests
 - **10%** E2E Tests - Full user workflow tests
@@ -335,6 +350,7 @@ We follow the **Testing Pyramid** principle:
 ### Writing Tests
 
 **Unit Test Example:**
+
 ```javascript
 // services/__tests__/libraryService.test.js
 describe('LibraryService', () => {
@@ -343,32 +359,33 @@ describe('LibraryService', () => {
       // Arrange
       const mockItem = { title: 'Test Manga', type: 'manga' };
       const expectedResult = { id: '123', ...mockItem };
-      
+
       // Act
       const result = await libraryService.addItem('user123', mockItem);
-      
+
       // Assert
       expect(result).toEqual(expectedResult);
     });
 
     it('should throw error for invalid type', async () => {
       const invalidItem = { title: 'Test', type: 'invalid' };
-      
-      await expect(libraryService.addItem('user123', invalidItem))
-        .rejects
-        .toThrow('Invalid item type');
+
+      await expect(libraryService.addItem('user123', invalidItem)).rejects.toThrow(
+        'Invalid item type'
+      );
     });
   });
 });
 ```
 
 **Integration Test Example:**
+
 ```javascript
 // api/__tests__/library.integration.test.js
 describe('Library API', () => {
   it('should create and retrieve library item', async () => {
     const itemData = { title: 'Test Manga', type: 'manga' };
-    
+
     // Create item
     const createResponse = await request(app)
       .post('/api/library/items')
@@ -419,6 +436,7 @@ npm run test:watch
 ### Code Documentation
 
 **JSDoc Comments:**
+
 ```javascript
 /**
  * Adds a new item to the user's library
@@ -462,6 +480,7 @@ paths:
 ### README Updates
 
 Keep component READMEs current:
+
 - Installation instructions
 - Configuration options
 - Usage examples
@@ -520,7 +539,7 @@ describe('ExampleSource', () => {
 
   it('should search for manga', async () => {
     const results = await source.search('one piece');
-    
+
     expect(results).toHaveLength(greaterThan(0));
     expect(results[0]).toHaveProperty('title');
     expect(results[0]).toHaveProperty('id');
@@ -533,6 +552,7 @@ describe('ExampleSource', () => {
 ### Frontend Performance
 
 **Bundle Optimization:**
+
 ```javascript
 // Use dynamic imports for code splitting
 const LazyComponent = React.lazy(() => import('./HeavyComponent'));
@@ -550,6 +570,7 @@ const handleClick = useCallback(() => {
 ```
 
 **Image Optimization:**
+
 - Use WebP format when possible
 - Implement lazy loading
 - Provide responsive images
@@ -558,38 +579,43 @@ const handleClick = useCallback(() => {
 ### Backend Performance
 
 **Database Optimization:**
+
 ```javascript
 // ✅ Good - Use indexes and limit results
 const getLibraryItems = async (userId, { page = 1, limit = 20 }) => {
   const offset = (page - 1) * limit;
-  
-  return await db.query(`
+
+  return await db.query(
+    `
     SELECT id, title, type, created_at
-    FROM library_items 
-    WHERE user_id = ? 
-    ORDER BY created_at DESC 
+    FROM library_items
+    WHERE user_id = ?
+    ORDER BY created_at DESC
     LIMIT ? OFFSET ?
-  `, [userId, limit, offset]);
+  `,
+    [userId, limit, offset]
+  );
 };
 
 // ❌ Avoid - Fetching all data
-const getLibraryItems = async (userId) => {
+const getLibraryItems = async userId => {
   return await db.query('SELECT * FROM library_items WHERE user_id = ?', [userId]);
 };
 ```
 
 **Caching Strategy:**
+
 ```javascript
 // Implement Redis caching for frequently accessed data
-const getCachedUserLibrary = async (userId) => {
+const getCachedUserLibrary = async userId => {
   const cacheKey = `user:${userId}:library`;
-  
+
   let library = await redis.get(cacheKey);
   if (!library) {
     library = await libraryService.getItems(userId);
     await redis.setex(cacheKey, 300, JSON.stringify(library)); // 5 min cache
   }
-  
+
   return JSON.parse(library);
 };
 ```
@@ -609,11 +635,11 @@ const getCachedUserLibrary = async (userId) => {
 // ✅ Validate and sanitize all inputs
 const addLibraryItem = async (req, res) => {
   const { error, value } = itemSchema.validate(req.body);
-  
+
   if (error) {
     return res.status(400).json({
       success: false,
-      error: { code: 'VALIDATION_ERROR', message: error.details[0].message }
+      error: { code: 'VALIDATION_ERROR', message: error.details[0].message },
     });
   }
 
@@ -632,20 +658,20 @@ const authenticateToken = (req, res, next) => {
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
-    return res.status(401).json({ 
-      success: false, 
-      error: { code: 'UNAUTHORIZED', message: 'Access token required' }
+    return res.status(401).json({
+      success: false,
+      error: { code: 'UNAUTHORIZED', message: 'Access token required' },
     });
   }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) {
-      return res.status(403).json({ 
-        success: false, 
-        error: { code: 'FORBIDDEN', message: 'Invalid token' }
+      return res.status(403).json({
+        success: false,
+        error: { code: 'FORBIDDEN', message: 'Invalid token' },
       });
     }
-    
+
     req.user = user;
     next();
   });
@@ -675,6 +701,7 @@ Use our bug report template when creating issues:
 A clear and concise description of the bug.
 
 **Steps to Reproduce**
+
 1. Go to '...'
 2. Click on '....'
 3. Scroll down to '....'
@@ -690,6 +717,7 @@ What actually happened.
 If applicable, add screenshots to help explain your problem.
 
 **Environment**
+
 - OS: [e.g. iOS]
 - Browser [e.g. chrome, safari]
 - Version [e.g. 22]
@@ -774,19 +802,23 @@ We follow **Semantic Versioning (SemVer)**:
 ## [2.1.0] - 2024-01-15
 
 ### Added
+
 - New manga reading mode with vertical scrolling
 - Extension marketplace for third-party sources
 - Dark mode theme option
 
 ### Changed
+
 - Improved library organization with custom tags
 - Enhanced search functionality with filters
 
 ### Fixed
+
 - Fixed pagination issue in library grid view
 - Resolved memory leak in reader component
 
 ### Security
+
 - Updated authentication system with refresh tokens
 - Fixed XSS vulnerability in user profiles
 ```

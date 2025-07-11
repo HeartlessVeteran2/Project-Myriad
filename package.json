@@ -5,7 +5,7 @@
   "private": true,
   "workspaces": [
     "backend",
-    "frontend", 
+    "frontend",
     "mobile"
   ],
   "scripts": {
@@ -32,7 +32,7 @@
     "lint:mobile": "cd mobile && npm run lint",
     "lint:fix": "npm run lint:fix:backend && npm run lint:fix:frontend && npm run lint:fix:mobile",
     "lint:fix:backend": "cd backend && npm run lint:fix",
-    "lint:fix:frontend": "cd frontend && npm run lint:fix", 
+    "lint:fix:frontend": "cd frontend && npm run lint:fix",
     "lint:fix:mobile": "cd mobile && npm run lint:fix",
     "format": "npm run format:backend && npm run format:frontend && npm run format:mobile",
     "format:backend": "cd backend && npm run format",
@@ -60,7 +60,7 @@
     "test:watch:frontend": "cd frontend && npm run test:watch",
     "audit": "npm audit && npm run audit:backend && npm run audit:frontend && npm run audit:mobile",
     "audit:backend": "cd backend && npm run audit",
-    "audit:frontend": "cd frontend && npm run audit", 
+    "audit:frontend": "cd frontend && npm run audit",
     "audit:mobile": "cd mobile && npm run audit",
     "security": "npm run audit && npm run lint:security",
     "lint:security": "npm run lint:security:backend",
@@ -82,7 +82,7 @@
   },
   "keywords": [
     "manga",
-    "anime", 
+    "anime",
     "light-novel",
     "reading-tracker",
     "library-management",

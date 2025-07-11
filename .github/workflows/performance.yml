@@ -2,15 +2,15 @@ name: Performance Testing
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'backend/**'
       - 'frontend/**'
       - 'mobile/**'
   push:
-    branches: [ main ]
+    branches: [main]
   schedule:
-    - cron: '0 2 * * 0'  # Weekly on Sunday at 2 AM
+    - cron: '0 2 * * 0' # Weekly on Sunday at 2 AM
   workflow_dispatch:
     inputs:
       test_duration:
@@ -33,26 +33,26 @@ jobs:
         node-version: [18.x, 20.x]
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
-      
+
       - name: Install backend dependencies
         run: |
           cd backend
           npm ci --prefer-offline --no-audit || npm install
-      
+
       - name: Start backend server
         run: |
           cd backend
           npm start &
           echo $! > server.pid
           sleep 10  # Wait for server to start
-          
+
           # Health check
           for i in {1..30}; do
             if curl -f http://localhost:3000/health >/dev/null 2>&1; then
@@ -68,10 +68,10 @@ jobs:
             fi
             sleep 2
           done
-      
+
       - name: Install Artillery for load testing
         run: npm install -g artillery@latest
-      
+
       - name: Create Artillery config
         run: |
           cat > artillery-config.yml << 'EOF'
@@ -107,12 +107,12 @@ jobs:
                       query: "test manga"
                       limit: 50
           EOF
-      
+
       - name: Run performance tests
         run: |
           artillery run artillery-config.yml --output performance-report.json || echo "Performance tests completed with warnings"
           artillery report performance-report.json --output performance-report.html || echo "Report generation completed"
-      
+
       - name: Analyze performance results
         run: |
           # Extract key metrics
@@ -122,7 +122,7 @@ jobs:
               try {
                 const report = JSON.parse(fs.readFileSync('performance-report.json', 'utf8'));
                 const aggregate = report.aggregate;
-                
+
                 console.log('## Performance Test Results');
                 console.log('');
                 console.log('| Metric | Value |');
@@ -134,7 +134,7 @@ jobs:
                 console.log(\`| 95th Percentile | \${Math.round(aggregate.latency?.p95 || 0)}ms |\`);
                 console.log(\`| 99th Percentile | \${Math.round(aggregate.latency?.p99 || 0)}ms |\`);
                 console.log(\`| Requests per Second | \${Math.round(aggregate.rates?.['http.request_rate'] || 0)} |\`);
-                
+
                 console.log('');
                 console.log('✅ Performance tests completed');
               } catch (e) {
@@ -145,7 +145,7 @@ jobs:
             echo "## Performance Test Results" > performance-summary.md
             echo "Performance tests completed but no detailed report available" >> performance-summary.md
           fi
-      
+
       - name: Stop backend server
         if: always()
         run: |
@@ -153,7 +153,7 @@ jobs:
             kill $(cat backend/server.pid) || true
             rm backend/server.pid
           fi
-      
+
       - name: Upload performance artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -170,27 +170,27 @@ jobs:
     if: hashFiles('frontend/package.json') != ''
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
-      
+
       - name: Install frontend dependencies
         run: |
           cd frontend
           npm ci --prefer-offline --no-audit || npm install
-      
+
       - name: Build frontend for production
         run: |
           cd frontend
           npm run build || echo "Build completed with warnings"
-      
+
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli@latest
-      
+
       - name: Start frontend server
         run: |
           cd frontend
@@ -201,7 +201,7 @@ jobs:
           fi
           echo $! > frontend-server.pid
           sleep 5
-          
+
           # Health check
           for i in {1..15}; do
             if curl -f http://localhost:3001 >/dev/null 2>&1; then
@@ -214,7 +214,7 @@ jobs:
             fi
             sleep 2
           done
-      
+
       - name: Run Lighthouse CI
         run: |
           lhci autorun \
@@ -222,7 +222,7 @@ jobs:
             --collect.numberOfRuns=1 \
             --upload.target=temporary-public-storage \
             --output-dir=./lighthouse-results || echo "Lighthouse completed with warnings"
-      
+
       - name: Stop frontend server
         if: always()
         run: |
@@ -230,7 +230,7 @@ jobs:
             kill $(cat frontend-server.pid) || true
             rm frontend-server.pid
           fi
-      
+
       - name: Upload frontend performance artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -245,41 +245,41 @@ jobs:
     if: hashFiles('frontend/package.json') != ''
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
-      
+
       - name: Install frontend dependencies
         run: |
           cd frontend
           npm ci --prefer-offline --no-audit || npm install
-      
+
       - name: Build and analyze bundle
         run: |
           cd frontend
           npm run build || echo "Build completed with warnings"
-          
+
           echo "## Bundle Size Analysis" > ../bundle-analysis.md
           echo "" >> ../bundle-analysis.md
-          
+
           if [ -d dist ]; then
             echo "### Build Output:" >> ../bundle-analysis.md
             echo "\`\`\`" >> ../bundle-analysis.md
             du -sh dist/* 2>/dev/null | sort -hr >> ../bundle-analysis.md || echo "No build files found" >> ../bundle-analysis.md
             echo "\`\`\`" >> ../bundle-analysis.md
             echo "" >> ../bundle-analysis.md
-            
+
             # Check for large files
             echo "### Large Files (>500KB):" >> ../bundle-analysis.md
             find dist -type f -size +500k -exec ls -lh {} \; 2>/dev/null | awk '{print "- " $9 ": " $5}' >> ../bundle-analysis.md || echo "None found" >> ../bundle-analysis.md
           else
             echo "No dist directory found" >> ../bundle-analysis.md
           fi
-      
+
       - name: Upload bundle analysis
         if: always()
         uses: actions/upload-artifact@v4

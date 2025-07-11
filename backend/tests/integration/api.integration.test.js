@@ -13,6 +13,8 @@ describe('Backend API Integration Tests', () => {
   test('should have required environment variables structure', () => {
     // Basic environment check
     expect(process.env).toBeDefined();
-    expect(typeof process.env.NODE_ENV === 'undefined' || typeof process.env.NODE_ENV === 'string').toBe(true);
+    expect(
+      typeof process.env.NODE_ENV === 'undefined' || typeof process.env.NODE_ENV === 'string'
+    ).toBe(true);
   });
 });

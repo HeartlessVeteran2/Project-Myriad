@@ -1,6 +1,5 @@
-import React from 'react';
-import { Text, View, StyleSheet, FlatList } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { features } from './features';
 
 export default function App() {
@@ -13,7 +12,7 @@ export default function App() {
         keyExtractor={item => item}
         renderItem={({ item }) => <Text style={styles.item}>{item}</Text>}
       />
-      <StatusBar style="auto" />
+      <StatusBar style='auto' />
     </View>
   );
 }

@@ -30,7 +30,7 @@ class MigrationManager {
 export const up = async (db) => {
   // Add your migration logic here
   console.log('Running migration: ${name}');
-  
+
   // Example: Create tables, add columns, etc.
   // await db.createTable('users', {
   //   id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
@@ -43,7 +43,7 @@ export const up = async (db) => {
 export const down = async (db) => {
   // Add your rollback logic here
   console.log('Rolling back migration: ${name}');
-  
+
   // Example: Drop tables, remove columns, etc.
   // await db.dropTable('users');
 };
@@ -56,12 +56,10 @@ export const down = async (db) => {
 
   async runMigrations() {
     console.log('Running database migrations...');
-    
+
     try {
       const files = await fs.readdir(this.migrationsDir);
-      const migrationFiles = files
-        .filter(file => file.endsWith('.js'))
-        .sort();
+      const migrationFiles = files.filter(file => file.endsWith('.js')).sort();
 
       if (migrationFiles.length === 0) {
         console.log('No migrations found');
@@ -70,13 +68,13 @@ export const down = async (db) => {
 
       for (const file of migrationFiles) {
         console.log(`Running migration: ${file}`);
-        
+
         // In a real implementation, you would:
         // 1. Import the migration file
         // 2. Check if it's already been run
         // 3. Execute the 'up' function
         // 4. Record that it's been run
-        
+
         console.log(`✓ Migration ${file} completed`);
       }
 
@@ -90,13 +88,11 @@ export const down = async (db) => {
   async getStatus() {
     try {
       const files = await fs.readdir(this.migrationsDir);
-      const migrationFiles = files
-        .filter(file => file.endsWith('.js'))
-        .sort();
+      const migrationFiles = files.filter(file => file.endsWith('.js')).sort();
 
       console.log('Migration Status:');
       console.log('================');
-      
+
       if (migrationFiles.length === 0) {
         console.log('No migrations found');
         return;
@@ -105,7 +101,6 @@ export const down = async (db) => {
       migrationFiles.forEach(file => {
         console.log(`✓ ${file} - Applied`);
       });
-
     } catch (error) {
       console.error('Failed to get migration status:', error);
     }
@@ -130,15 +125,15 @@ async function main() {
       await migrationManager.createMigration(name);
       break;
     }
-      
+
     case 'run':
       await migrationManager.runMigrations();
       break;
-      
+
     case 'status':
       await migrationManager.getStatus();
       break;
-      
+
     default:
       console.log('Available commands:');
       console.log('  create <name>  - Create a new migration');

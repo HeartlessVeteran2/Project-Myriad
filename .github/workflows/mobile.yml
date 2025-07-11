@@ -2,9 +2,9 @@ name: Mobile Build
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
     inputs:
       platform:
@@ -13,10 +13,10 @@ on:
         default: 'web'
         type: choice
         options:
-        - web
-        - android
-        - ios
-        - all
+          - web
+          - android
+          - ios
+          - all
 
 jobs:
   check-mobile:
@@ -39,27 +39,27 @@ jobs:
         working-directory: mobile
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           cache: 'npm'
           cache-dependency-path: mobile/package-lock.json
-      
+
       - name: Setup Expo CLI
         run: npm install -g @expo/cli@latest
-      
+
       - name: Install dependencies
         run: npm ci || npm install
-      
+
       - name: Expo Doctor
         run: npx expo doctor || echo 'Expo doctor check completed with warnings'
-      
+
       - name: Build for web
         run: |
           npx expo export --platform web || npx expo build:web || echo 'Web build completed with warnings'
-      
+
       - name: Upload web build
         uses: actions/upload-artifact@v4
         with:
@@ -72,8 +72,8 @@ jobs:
   expo-android-build:
     needs: check-mobile
     if: |
-      needs.check-mobile.outputs.mobile-exists == 'true' && 
-      (contains(github.event.head_commit.message, '[android]') || 
+      needs.check-mobile.outputs.mobile-exists == 'true' &&
+      (contains(github.event.head_commit.message, '[android]') ||
        github.event_name == 'workflow_dispatch' &&
        (github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all'))
     runs-on: ubuntu-latest
@@ -82,27 +82,27 @@ jobs:
         working-directory: mobile
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           cache: 'npm'
           cache-dependency-path: mobile/package-lock.json
-      
+
       - name: Setup EAS CLI
         run: npm install -g eas-cli@latest
-      
+
       - name: Install dependencies
         run: npm ci || npm install
-      
+
       - name: Check EAS configuration
         run: |
           if [ ! -f eas.json ]; then
             echo "Creating default eas.json"
             npx eas build:configure --platform android --non-interactive || true
           fi
-      
+
       - name: Build Android (Development)
         run: |
           npx eas build --platform android --profile development --non-interactive --no-wait || echo 'EAS build queued or failed'
@@ -112,8 +112,8 @@ jobs:
   expo-ios-build:
     needs: check-mobile
     if: |
-      needs.check-mobile.outputs.mobile-exists == 'true' && 
-      (contains(github.event.head_commit.message, '[ios]') || 
+      needs.check-mobile.outputs.mobile-exists == 'true' &&
+      (contains(github.event.head_commit.message, '[ios]') ||
        github.event_name == 'workflow_dispatch' &&
        (github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'all'))
     runs-on: macos-latest
@@ -122,27 +122,27 @@ jobs:
         working-directory: mobile
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           cache: 'npm'
           cache-dependency-path: mobile/package-lock.json
-      
+
       - name: Setup EAS CLI
         run: npm install -g eas-cli@latest
-      
+
       - name: Install dependencies
         run: npm ci || npm install
-      
+
       - name: Check EAS configuration
         run: |
           if [ ! -f eas.json ]; then
             echo "Creating default eas.json"
             npx eas build:configure --platform ios --non-interactive || true
           fi
-      
+
       - name: Build iOS (Development)
         run: |
           npx eas build --platform ios --profile development --non-interactive --no-wait || echo 'EAS build queued or failed'

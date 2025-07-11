@@ -67,6 +67,7 @@ assignees: ''
 ### System Information
 
 **Desktop:**
+
 - OS: [e.g. macOS Big Sur]
 - Browser: [e.g. Chrome 91]
 - RAM: [e.g. 16GB]
@@ -74,12 +75,14 @@ assignees: ''
 - Network: [e.g. WiFi, 100Mbps]
 
 **Mobile:**
+
 - Device: [e.g. iPhone 12]
 - OS: [e.g. iOS 14.6]
 - Available RAM: [e.g. 4GB]
 - Network: [e.g. 4G, WiFi]
 
 **Backend:**
+
 - Server Specs: [CPU, RAM, Storage]
 - Database: [Type, version, size]
 - Load: [Current user count, requests/sec]
@@ -127,7 +130,7 @@ If you have ideas for fixing this performance issue:
 
 ### User Impact
 
-- **Severity**: 
+- **Severity**:
   - [ ] Low - Slight inconvenience
   - [ ] Medium - Noticeable delay
   - [ ] High - Significant usability impact
@@ -144,6 +147,7 @@ If you have ideas for fixing this performance issue:
 ### Screenshots/Videos
 
 Attach screenshots of:
+
 - Performance profiler results
 - Network tab showing slow requests
 - Memory usage graphs

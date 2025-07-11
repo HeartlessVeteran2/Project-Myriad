@@ -387,11 +387,7 @@ Create `.vscode/settings.json`:
     "javascript": "javascript",
     "html": "HTML"
   },
-  "eslint.workingDirectories": [
-    "backend",
-    "frontend", 
-    "mobile"
-  ]
+  "eslint.workingDirectories": ["backend", "frontend", "mobile"]
 }
 ```
 
@@ -533,19 +529,15 @@ module.exports = {
   root: true,
   env: {
     node: true,
-    es2022: true
+    es2022: true,
   },
-  extends: [
-    'eslint:recommended',
-    '@typescript-eslint/recommended',
-    'prettier'
-  ],
+  extends: ['eslint:recommended', '@typescript-eslint/recommended', 'prettier'],
   rules: {
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     '@typescript-eslint/no-unused-vars': 'error',
-    '@typescript-eslint/explicit-function-return-type': 'off'
-  }
+    '@typescript-eslint/explicit-function-return-type': 'off',
+  },
 };
 ```
 
@@ -577,15 +569,8 @@ Using Husky and lint-staged for pre-commit checks:
     }
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "prettier --write",
-      "git add"
-    ],
-    "*.{json,css,md}": [
-      "prettier --write",
-      "git add"
-    ]
+    "*.{js,jsx,ts,tsx}": ["eslint --fix", "prettier --write", "git add"],
+    "*.{json,css,md}": ["prettier --write", "git add"]
   }
 }
 ```
@@ -618,30 +603,33 @@ npm run test:performance
 ### Adding a New Feature
 
 1. **Create Feature Branch**:
+
    ```bash
    git checkout -b feature/new-feature
    ```
 
 2. **Backend Development**:
+
    ```bash
    # Add route
    echo "router.get('/new-endpoint', handler);" >> backend/routes/api.js
-   
+
    # Add handler
    touch backend/controllers/newFeatureController.js
-   
+
    # Add tests
    touch backend/tests/newFeature.test.js
    ```
 
 3. **Frontend Development**:
+
    ```bash
    # Add component
    touch frontend/src/components/NewFeature.jsx
-   
+
    # Add route
    # Update frontend/src/App.jsx
-   
+
    # Add tests
    touch frontend/src/components/__tests__/NewFeature.test.jsx
    ```
@@ -699,24 +687,27 @@ npx expo doctor
 ### Common Issues
 
 1. **Port already in use**:
+
    ```bash
    # Find process using port
    lsof -ti:3000
-   
+
    # Kill process
    kill -9 $(lsof -ti:3000)
    ```
 
 2. **Database connection issues**:
+
    ```bash
    # Check if PostgreSQL is running
    docker ps | grep postgres
-   
+
    # Restart database
    docker-compose restart postgres
    ```
 
 3. **Module not found errors**:
+
    ```bash
    # Clear node_modules and reinstall
    rm -rf node_modules package-lock.json
@@ -724,10 +715,11 @@ npx expo doctor
    ```
 
 4. **Docker issues**:
+
    ```bash
    # Rebuild containers
    docker-compose build --no-cache
-   
+
    # Remove all containers and volumes
    docker-compose down -v
    ```

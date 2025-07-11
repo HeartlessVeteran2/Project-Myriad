@@ -25,12 +25,12 @@ export class Sync extends EventEmitter {
       version: deviceInfo.version,
       lastSeen: new Date(),
       syncEnabled: true,
-      registered: new Date()
+      registered: new Date(),
     };
 
     const devices = this.deviceRegistry.get(userId);
     const existingIndex = devices.findIndex(d => d.id === device.id);
-    
+
     if (existingIndex > -1) {
       devices[existingIndex] = { ...devices[existingIndex], ...device };
     } else {
@@ -46,30 +46,30 @@ export class Sync extends EventEmitter {
     try {
       const currentData = this.userSyncData.get(userId) || this.getEmptySyncData();
       const lastSync = this.lastSyncTimes.get(userId) || new Date(0);
-      
+
       // Detect conflicts
       const conflicts = this.detectConflicts(currentData, syncData, lastSync);
-      
+
       if (conflicts.length > 0) {
         return await this.handleConflicts(userId, deviceId, conflicts, syncData);
       }
 
       // Merge data
       const mergedData = this.mergeData(currentData, syncData);
-      
+
       // Store merged data
       this.userSyncData.set(userId, mergedData);
       this.lastSyncTimes.set(userId, new Date());
-      
+
       // Update device last seen
       this.updateDeviceLastSeen(userId, deviceId);
-      
+
       // Emit sync completion event
       this.emit('syncCompleted', {
         userId,
         deviceId,
         timestamp: new Date(),
-        dataSize: this.calculateDataSize(mergedData)
+        dataSize: this.calculateDataSize(mergedData),
       });
 
       return {
@@ -77,14 +77,14 @@ export class Sync extends EventEmitter {
         message: 'Library synced successfully',
         data: mergedData,
         conflicts: [],
-        lastSync: new Date()
+        lastSync: new Date(),
       };
     } catch (error) {
       this.emit('syncError', { userId, deviceId, error: error.message });
       return {
         success: false,
         message: `Sync failed: ${error.message}`,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -95,7 +95,7 @@ export class Sync extends EventEmitter {
       library: {
         manga: [],
         anime: [],
-        novels: []
+        novels: [],
       },
       readingProgress: {},
       bookmarks: [],
@@ -105,7 +105,7 @@ export class Sync extends EventEmitter {
       customLists: [],
       ratings: {},
       reviews: [],
-      lastModified: new Date()
+      lastModified: new Date(),
     };
   }
 
@@ -116,18 +116,19 @@ export class Sync extends EventEmitter {
     // Check for reading progress conflicts
     for (const [contentId, localProgress] of Object.entries(localData.readingProgress || {})) {
       const serverProgress = serverData.readingProgress[contentId];
-      
-      if (serverProgress && 
-          new Date(localProgress.lastUpdated) > lastSync &&
-          new Date(serverProgress.lastUpdated) > lastSync &&
-          !this.isProgressEqual(localProgress, serverProgress)) {
-        
+
+      if (
+        serverProgress &&
+        new Date(localProgress.lastUpdated) > lastSync &&
+        new Date(serverProgress.lastUpdated) > lastSync &&
+        !this.isProgressEqual(localProgress, serverProgress)
+      ) {
         conflicts.push({
           type: 'reading_progress',
           contentId,
           local: localProgress,
           server: serverProgress,
-          field: 'progress'
+          field: 'progress',
         });
       }
     }
@@ -136,26 +137,28 @@ export class Sync extends EventEmitter {
     ['manga', 'anime', 'novels'].forEach(type => {
       const localItems = new Set((localData.library[type] || []).map(item => item.id));
       const serverItems = new Set((serverData.library[type] || []).map(item => item.id));
-      
+
       // Find items that exist in both but were modified after last sync
       const commonItems = [...localItems].filter(id => serverItems.has(id));
-      
+
       commonItems.forEach(itemId => {
         const localItem = localData.library[type].find(item => item.id === itemId);
         const serverItem = serverData.library[type].find(item => item.id === itemId);
-        
-        if (localItem && serverItem &&
-            new Date(localItem.lastModified) > lastSync &&
-            new Date(serverItem.lastModified) > lastSync &&
-            !this.isItemEqual(localItem, serverItem)) {
-          
+
+        if (
+          localItem &&
+          serverItem &&
+          new Date(localItem.lastModified) > lastSync &&
+          new Date(serverItem.lastModified) > lastSync &&
+          !this.isItemEqual(localItem, serverItem)
+        ) {
           conflicts.push({
             type: 'library_item',
             contentType: type,
             itemId,
             local: localItem,
             server: serverItem,
-            field: 'metadata'
+            field: 'metadata',
           });
         }
       });
@@ -164,24 +167,26 @@ export class Sync extends EventEmitter {
     // Check for bookmark conflicts
     const localBookmarkIds = new Set(localData.bookmarks.map(b => b.id));
     const serverBookmarkIds = new Set(serverData.bookmarks.map(b => b.id));
-    
+
     const commonBookmarks = [...localBookmarkIds].filter(id => serverBookmarkIds.has(id));
-    
+
     commonBookmarks.forEach(bookmarkId => {
       const localBookmark = localData.bookmarks.find(b => b.id === bookmarkId);
       const serverBookmark = serverData.bookmarks.find(b => b.id === bookmarkId);
-      
-      if (localBookmark && serverBookmark &&
-          new Date(localBookmark.lastModified) > lastSync &&
-          new Date(serverBookmark.lastModified) > lastSync &&
-          !this.isBookmarkEqual(localBookmark, serverBookmark)) {
-        
+
+      if (
+        localBookmark &&
+        serverBookmark &&
+        new Date(localBookmark.lastModified) > lastSync &&
+        new Date(serverBookmark.lastModified) > lastSync &&
+        !this.isBookmarkEqual(localBookmark, serverBookmark)
+      ) {
         conflicts.push({
           type: 'bookmark',
           bookmarkId,
           local: localBookmark,
           server: serverBookmark,
-          field: 'content'
+          field: 'content',
         });
       }
     });
@@ -193,7 +198,7 @@ export class Sync extends EventEmitter {
   async handleConflicts(userId, deviceId, conflicts, localData) {
     const resolutionSettings = this.conflictResolution.get(userId) || {
       strategy: 'prompt', // 'prompt', 'local_wins', 'server_wins', 'merge'
-      autoResolve: false
+      autoResolve: false,
     };
 
     if (resolutionSettings.autoResolve) {
@@ -206,7 +211,7 @@ export class Sync extends EventEmitter {
       message: 'Sync conflicts detected',
       conflicts,
       requiresResolution: true,
-      resolutionToken: this.generateResolutionToken(userId, conflicts)
+      resolutionToken: this.generateResolutionToken(userId, conflicts),
     };
   }
 
@@ -237,7 +242,7 @@ export class Sync extends EventEmitter {
       success: true,
       message: `Conflicts auto-resolved using ${strategy} strategy`,
       data: resolvedData,
-      resolvedConflicts: conflicts.length
+      resolvedConflicts: conflicts.length,
     };
   }
 
@@ -273,7 +278,8 @@ export class Sync extends EventEmitter {
         // Use most recent progress
         const localTime = new Date(conflict.local.lastUpdated);
         const serverTime = new Date(conflict.server.lastUpdated);
-        resolvedData.readingProgress[conflict.contentId] = localTime > serverTime ? conflict.local : conflict.server;
+        resolvedData.readingProgress[conflict.contentId] =
+          localTime > serverTime ? conflict.local : conflict.server;
         break;
       }
       case 'library_item': {
@@ -292,7 +298,8 @@ export class Sync extends EventEmitter {
         const serverBookmarkTime = new Date(conflict.server.lastModified);
         const bookmarkIndex = resolvedData.bookmarks.findIndex(b => b.id === conflict.bookmarkId);
         if (bookmarkIndex > -1) {
-          resolvedData.bookmarks[bookmarkIndex] = localBookmarkTime > serverBookmarkTime ? conflict.local : conflict.server;
+          resolvedData.bookmarks[bookmarkIndex] =
+            localBookmarkTime > serverBookmarkTime ? conflict.local : conflict.server;
         }
         break;
       }
@@ -310,7 +317,7 @@ export class Sync extends EventEmitter {
 
       localItems.forEach(localItem => {
         const serverItem = serverItems.get(localItem.id);
-        
+
         if (!serverItem) {
           // New item from local
           merged.library[type].push(localItem);
@@ -325,8 +332,11 @@ export class Sync extends EventEmitter {
     // Merge reading progress
     Object.entries(localData.readingProgress || {}).forEach(([contentId, localProgress]) => {
       const serverProgress = merged.readingProgress[contentId];
-      
-      if (!serverProgress || new Date(localProgress.lastUpdated) > new Date(serverProgress.lastUpdated)) {
+
+      if (
+        !serverProgress ||
+        new Date(localProgress.lastUpdated) > new Date(serverProgress.lastUpdated)
+      ) {
         merged.readingProgress[contentId] = localProgress;
       }
     });
@@ -369,7 +379,7 @@ export class Sync extends EventEmitter {
   setConflictResolution(userId, strategy, autoResolve = false) {
     this.conflictResolution.set(userId, {
       strategy,
-      autoResolve
+      autoResolve,
     });
   }
 
@@ -383,9 +393,11 @@ export class Sync extends EventEmitter {
   }
 
   isProgressEqual(progress1, progress2) {
-    return progress1.currentChapter === progress2.currentChapter &&
-           progress1.currentPage === progress2.currentPage &&
-           progress1.status === progress2.status;
+    return (
+      progress1.currentChapter === progress2.currentChapter &&
+      progress1.currentPage === progress2.currentPage &&
+      progress1.status === progress2.status
+    );
   }
 
   isItemEqual(item1, item2) {
@@ -393,9 +405,11 @@ export class Sync extends EventEmitter {
   }
 
   isBookmarkEqual(bookmark1, bookmark2) {
-    return bookmark1.chapter === bookmark2.chapter &&
-           bookmark1.page === bookmark2.page &&
-           bookmark1.note === bookmark2.note;
+    return (
+      bookmark1.chapter === bookmark2.chapter &&
+      bookmark1.page === bookmark2.page &&
+      bookmark1.note === bookmark2.note
+    );
   }
 
   calculateDataSize(data) {
@@ -410,12 +424,14 @@ export class Sync extends EventEmitter {
 
     return {
       devicesCount: devices.length,
-      activeDevices: devices.filter(d => Date.now() - new Date(d.lastSeen).getTime() < 7 * 24 * 60 * 60 * 1000).length,
+      activeDevices: devices.filter(
+        d => Date.now() - new Date(d.lastSeen).getTime() < 7 * 24 * 60 * 60 * 1000
+      ).length,
       lastSyncTime: lastSync,
       dataSize: this.calculateDataSize(syncData),
       libraryItems: Object.values(syncData.library).flat().length,
       readingProgressItems: Object.keys(syncData.readingProgress).length,
-      bookmarksCount: syncData.bookmarks.length
+      bookmarksCount: syncData.bookmarks.length,
     };
   }
 }

@@ -75,7 +75,7 @@ The `manifest.json` file defines your extension's metadata:
   "homepage": "https://github.com/yourusername/example-extension",
   "icon": "assets/icon.png",
   "banner": "assets/banner.png",
-  
+
   "sources": [
     {
       "id": "example-manga",
@@ -87,19 +87,16 @@ The `manifest.json` file defines your extension's metadata:
       "nsfw": false
     }
   ],
-  
-  "permissions": [
-    "network",
-    "storage"
-  ],
-  
+
+  "permissions": ["network", "storage"],
+
   "content_rating": "teen",
   "update_url": "https://your-server.com/extensions/updates.json",
-  
+
   "dependencies": {
     "myriad_api": ">=1.0.0"
   },
-  
+
   "settings": {
     "user_agent": {
       "type": "string",
@@ -147,7 +144,7 @@ export class ExampleMangaSource extends MangaSource {
       const url = `${this.baseUrl}/search?q=${encodeURIComponent(query)}&page=${page}`;
       const response = await this.request(url);
       const html = await response.text();
-      
+
       return this.parseSearchResults(html);
     } catch (error) {
       throw new Error(`Search failed: ${error.message}`);
@@ -163,7 +160,7 @@ export class ExampleMangaSource extends MangaSource {
     const url = `${this.baseUrl}/manga/${mangaId}`;
     const response = await this.request(url);
     const html = await response.text();
-    
+
     return this.parseMangaDetails(html);
   }
 
@@ -176,7 +173,7 @@ export class ExampleMangaSource extends MangaSource {
     const url = `${this.baseUrl}/manga/${mangaId}/chapters`;
     const response = await this.request(url);
     const html = await response.text();
-    
+
     return this.parseChapterList(html);
   }
 
@@ -190,7 +187,7 @@ export class ExampleMangaSource extends MangaSource {
     const url = `${this.baseUrl}/manga/${mangaId}/chapter/${chapterId}`;
     const response = await this.request(url);
     const html = await response.text();
-    
+
     return this.parseChapterPages(html);
   }
 
@@ -203,7 +200,7 @@ export class ExampleMangaSource extends MangaSource {
     const url = `${this.baseUrl}/popular?page=${page}`;
     const response = await this.request(url);
     const html = await response.text();
-    
+
     return this.parseSearchResults(html);
   }
 
@@ -216,7 +213,7 @@ export class ExampleMangaSource extends MangaSource {
     const url = `${this.baseUrl}/latest?page=${page}`;
     const response = await this.request(url);
     const html = await response.text();
-    
+
     return this.parseSearchResults(html);
   }
 
@@ -233,8 +230,8 @@ export class ExampleMangaSource extends MangaSource {
         options: [
           { value: 'action', label: 'Action' },
           { value: 'romance', label: 'Romance' },
-          { value: 'comedy', label: 'Comedy' }
-        ]
+          { value: 'comedy', label: 'Comedy' },
+        ],
       },
       {
         name: 'Status',
@@ -243,16 +240,16 @@ export class ExampleMangaSource extends MangaSource {
         options: [
           { value: 'ongoing', label: 'Ongoing' },
           { value: 'completed', label: 'Completed' },
-          { value: 'hiatus', label: 'On Hiatus' }
-        ]
+          { value: 'hiatus', label: 'On Hiatus' },
+        ],
       },
       {
         name: 'Year',
         key: 'year',
         type: 'range',
         min: 1990,
-        max: new Date().getFullYear()
-      }
+        max: new Date().getFullYear(),
+      },
     ];
   }
 
@@ -260,7 +257,7 @@ export class ExampleMangaSource extends MangaSource {
   parseSearchResults(html) {
     const $ = this.parseHTML(html);
     const results = [];
-    
+
     $('.manga-item').each((i, element) => {
       const $element = $(element);
       results.push({
@@ -270,35 +267,42 @@ export class ExampleMangaSource extends MangaSource {
         url: $element.find('a').attr('href'),
         latest_chapter: $element.find('.latest-chapter').text().trim(),
         rating: parseFloat($element.find('.rating').text()) || 0,
-        tags: $element.find('.tags .tag').map((i, tag) => $(tag).text()).get()
+        tags: $element
+          .find('.tags .tag')
+          .map((i, tag) => $(tag).text())
+          .get(),
       });
     });
-    
+
     return results;
   }
 
   parseMangaDetails(html) {
     const $ = this.parseHTML(html);
-    
+
     return {
       title: $('.manga-title').text().trim(),
-      alternativeTitles: $('.alt-titles .title').map((i, el) => $(el).text()).get(),
+      alternativeTitles: $('.alt-titles .title')
+        .map((i, el) => $(el).text())
+        .get(),
       description: $('.description').text().trim(),
       cover: $('.cover img').attr('src'),
       status: $('.status').text().trim(),
       author: $('.author').text().trim(),
       artist: $('.artist').text().trim(),
-      genres: $('.genres .genre').map((i, el) => $(el).text()).get(),
+      genres: $('.genres .genre')
+        .map((i, el) => $(el).text())
+        .get(),
       year: parseInt($('.year').text()) || null,
       rating: parseFloat($('.rating').text()) || 0,
-      views: parseInt($('.views').text().replace(/\D/g, '')) || 0
+      views: parseInt($('.views').text().replace(/\D/g, '')) || 0,
     };
   }
 
   parseChapterList(html) {
     const $ = this.parseHTML(html);
     const chapters = [];
-    
+
     $('.chapter-item').each((i, element) => {
       const $element = $(element);
       chapters.push({
@@ -307,27 +311,27 @@ export class ExampleMangaSource extends MangaSource {
         title: $element.find('.chapter-title').text().trim(),
         url: $element.find('a').attr('href'),
         date: $element.find('.date').text().trim(),
-        views: parseInt($element.find('.views').text().replace(/\D/g, '')) || 0
+        views: parseInt($element.find('.views').text().replace(/\D/g, '')) || 0,
       });
     });
-    
+
     return chapters.reverse(); // Most sources list newest first
   }
 
   parseChapterPages(html) {
     const $ = this.parseHTML(html);
     const pages = [];
-    
+
     $('.page-img').each((i, element) => {
       const $element = $(element);
       pages.push({
         page: i + 1,
         url: $element.attr('src') || $element.attr('data-src'),
         width: parseInt($element.attr('width')) || null,
-        height: parseInt($element.attr('height')) || null
+        height: parseInt($element.attr('height')) || null,
       });
     });
-    
+
     return pages;
   }
 }
@@ -368,9 +372,9 @@ export class ExampleAnimeSource extends AnimeSource {
         quality: '720p',
         type: 'hls',
         headers: {
-          'Referer': this.baseUrl
-        }
-      }
+          Referer: this.baseUrl,
+        },
+      },
     ];
   }
 
@@ -380,8 +384,8 @@ export class ExampleAnimeSource extends AnimeSource {
       {
         url: 'https://example.com/subs.vtt',
         language: 'en',
-        label: 'English'
-      }
+        label: 'English',
+      },
     ];
   }
 }
@@ -402,15 +406,15 @@ class MySource extends Source {
     return await this.fetch(url, {
       headers: {
         'User-Agent': this.getUserAgent(),
-        ...options.headers
+        ...options.headers,
       },
-      ...options
+      ...options,
     });
   }
 
   // Parse HTML with cheerio-like interface
   parseHTML(html) {
-    return this.$ = this.cheerio.load(html);
+    return (this.$ = this.cheerio.load(html));
   }
 
   // Get user agent from settings
@@ -515,37 +519,37 @@ class AuthenticatedSource extends MangaSource {
     const response = await this.request('/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' },
     });
 
     const data = await response.json();
-    
+
     if (data.token) {
       await this.store('auth_token', data.token);
       return true;
     }
-    
+
     throw new Error('Authentication failed');
   }
 
   async request(url, options = {}) {
     const token = await this.retrieve('auth_token');
-    
+
     if (token) {
       options.headers = {
-        'Authorization': `Bearer ${token}`,
-        ...options.headers
+        Authorization: `Bearer ${token}`,
+        ...options.headers,
       };
     }
 
     const response = await super.request(url, options);
-    
+
     // Handle token expiration
     if (response.status === 401) {
       await this.store('auth_token', null);
       throw new Error('Authentication required');
     }
-    
+
     return response;
   }
 }
@@ -567,11 +571,11 @@ class RateLimitedSource extends MangaSource {
   async request(url, options = {}) {
     const now = Date.now();
     const timeSinceLastRequest = now - this.lastRequest;
-    
+
     if (timeSinceLastRequest < this.minDelay) {
       await this.delay(this.minDelay - timeSinceLastRequest);
     }
-    
+
     this.lastRequest = Date.now();
     return await super.request(url, options);
   }
@@ -591,18 +595,19 @@ class CachedSource extends MangaSource {
   async getMangaDetails(mangaId) {
     const cacheKey = `manga_details_${mangaId}`;
     const cached = await this.retrieve(cacheKey);
-    
-    if (cached && Date.now() - cached.timestamp < 3600000) { // 1 hour
+
+    if (cached && Date.now() - cached.timestamp < 3600000) {
+      // 1 hour
       return cached.data;
     }
-    
+
     const details = await super.getMangaDetails(mangaId);
-    
+
     await this.store(cacheKey, {
       data: details,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
-    
+
     return details;
   }
 }
@@ -616,14 +621,14 @@ Handle different image formats and optimization:
 class ImageOptimizedSource extends MangaSource {
   async getChapterPages(mangaId, chapterId) {
     const pages = await super.getChapterPages(mangaId, chapterId);
-    
+
     return pages.map(page => ({
       ...page,
       url: this.optimizeImageUrl(page.url),
       headers: {
-        'Referer': this.baseUrl,
-        'User-Agent': this.getUserAgent()
-      }
+        Referer: this.baseUrl,
+        'User-Agent': this.getUserAgent(),
+      },
     }));
   }
 
@@ -631,10 +636,10 @@ class ImageOptimizedSource extends MangaSource {
     const quality = this.getSetting('preferred_quality', 'high');
     const qualityMap = {
       low: 'q_30,f_auto',
-      medium: 'q_70,f_auto', 
-      high: 'q_90,f_auto'
+      medium: 'q_70,f_auto',
+      high: 'q_90,f_auto',
     };
-    
+
     // Cloudinary-style optimization
     return url.replace('/upload/', `/upload/${qualityMap[quality]}/`);
   }
@@ -658,11 +663,11 @@ describe('ExampleMangaSource', () => {
 
   test('should search for manga', async () => {
     const results = await source.search('one piece');
-    
+
     expect(results).toBeDefined();
     expect(Array.isArray(results)).toBe(true);
     expect(results.length).toBeGreaterThan(0);
-    
+
     const firstResult = results[0];
     expect(firstResult).toHaveProperty('id');
     expect(firstResult).toHaveProperty('title');
@@ -671,7 +676,7 @@ describe('ExampleMangaSource', () => {
 
   test('should get manga details', async () => {
     const details = await source.getMangaDetails('one-piece');
-    
+
     expect(details).toBeDefined();
     expect(details).toHaveProperty('title');
     expect(details).toHaveProperty('description');
@@ -682,10 +687,10 @@ describe('ExampleMangaSource', () => {
 
   test('should get chapter list', async () => {
     const chapters = await source.getChapterList('one-piece');
-    
+
     expect(chapters).toBeDefined();
     expect(Array.isArray(chapters)).toBe(true);
-    
+
     if (chapters.length > 0) {
       const firstChapter = chapters[0];
       expect(firstChapter).toHaveProperty('id');
@@ -696,10 +701,10 @@ describe('ExampleMangaSource', () => {
 
   test('should get chapter pages', async () => {
     const pages = await source.getChapterPages('one-piece', 'chapter-1');
-    
+
     expect(pages).toBeDefined();
     expect(Array.isArray(pages)).toBe(true);
-    
+
     if (pages.length > 0) {
       const firstPage = pages[0];
       expect(firstPage).toHaveProperty('page');
@@ -719,11 +724,11 @@ import { installExtension, loadExtension } from '@myriad/extension-loader';
 describe('Extension Integration', () => {
   test('should install and load extension', async () => {
     const extensionPath = './dist/extension.zip';
-    
+
     // Install extension
     const installResult = await installExtension(extensionPath);
     expect(installResult.success).toBe(true);
-    
+
     // Load extension
     const extension = await loadExtension('example-manga');
     expect(extension).toBeDefined();

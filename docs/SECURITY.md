@@ -58,24 +58,20 @@ class AuthService {
       userId,
       role: userRole,
       iat: Math.floor(Date.now() / 1000),
-      jti: crypto.randomUUID() // Unique token ID
+      jti: crypto.randomUUID(), // Unique token ID
     };
 
     const accessToken = jwt.sign(payload, this.accessTokenSecret, {
       expiresIn: this.accessTokenExpiry,
       issuer: 'myriad-api',
-      audience: 'myriad-client'
+      audience: 'myriad-client',
     });
 
-    const refreshToken = jwt.sign(
-      { ...payload, type: 'refresh' },
-      this.refreshTokenSecret,
-      {
-        expiresIn: this.refreshTokenExpiry,
-        issuer: 'myriad-api',
-        audience: 'myriad-client'
-      }
-    );
+    const refreshToken = jwt.sign({ ...payload, type: 'refresh' }, this.refreshTokenSecret, {
+      expiresIn: this.refreshTokenExpiry,
+      issuer: 'myriad-api',
+      audience: 'myriad-client',
+    });
 
     return { accessToken, refreshToken };
   }
@@ -84,7 +80,7 @@ class AuthService {
     try {
       return jwt.verify(token, this.accessTokenSecret, {
         issuer: 'myriad-api',
-        audience: 'myriad-client'
+        audience: 'myriad-client',
       });
     } catch (error) {
       throw new Error('Invalid access token');
@@ -95,13 +91,13 @@ class AuthService {
     try {
       const payload = jwt.verify(token, this.refreshTokenSecret, {
         issuer: 'myriad-api',
-        audience: 'myriad-client'
+        audience: 'myriad-client',
       });
-      
+
       if (payload.type !== 'refresh') {
         throw new Error('Invalid refresh token type');
       }
-      
+
       return payload;
     } catch (error) {
       throw new Error('Invalid refresh token');
@@ -117,34 +113,34 @@ const authenticateToken = async (req, res, next) => {
   if (!token) {
     return res.status(401).json({
       success: false,
-      error: { code: 'UNAUTHORIZED', message: 'Access token required' }
+      error: { code: 'UNAUTHORIZED', message: 'Access token required' },
     });
   }
 
   try {
     const authService = new AuthService();
     const payload = authService.verifyAccessToken(token);
-    
+
     // Check if token is blacklisted
     const isBlacklisted = await redis.get(`blacklist:${payload.jti}`);
     if (isBlacklisted) {
       return res.status(401).json({
         success: false,
-        error: { code: 'UNAUTHORIZED', message: 'Token has been revoked' }
+        error: { code: 'UNAUTHORIZED', message: 'Token has been revoked' },
       });
     }
 
     req.user = {
       id: payload.userId,
       role: payload.role,
-      tokenId: payload.jti
+      tokenId: payload.jti,
     };
-    
+
     next();
   } catch (error) {
     return res.status(401).json({
       success: false,
-      error: { code: 'UNAUTHORIZED', message: 'Invalid access token' }
+      error: { code: 'UNAUTHORIZED', message: 'Invalid access token' },
     });
   }
 };
@@ -188,8 +184,8 @@ class PasswordService {
         hasUppercase: /[A-Z]/.test(password),
         hasLowercase: /[a-z]/.test(password),
         hasNumbers: /\d/.test(password),
-        hasSpecialChars: /[!@#$%^&*(),.?":{}|<>]/.test(password)
-      }
+        hasSpecialChars: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+      },
     };
   }
 }
@@ -202,7 +198,7 @@ class PasswordService {
 const roles = {
   USER: 'user',
   MODERATOR: 'moderator',
-  ADMIN: 'admin'
+  ADMIN: 'admin',
 };
 
 const permissions = {
@@ -211,23 +207,20 @@ const permissions = {
   DELETE_LIBRARY: 'delete:library',
   MANAGE_USERS: 'manage:users',
   MANAGE_EXTENSIONS: 'manage:extensions',
-  MODERATE_CONTENT: 'moderate:content'
+  MODERATE_CONTENT: 'moderate:content',
 };
 
 const rolePermissions = {
-  [roles.USER]: [
-    permissions.READ_LIBRARY,
-    permissions.WRITE_LIBRARY
-  ],
+  [roles.USER]: [permissions.READ_LIBRARY, permissions.WRITE_LIBRARY],
   [roles.MODERATOR]: [
     permissions.READ_LIBRARY,
     permissions.WRITE_LIBRARY,
-    permissions.MODERATE_CONTENT
+    permissions.MODERATE_CONTENT,
   ],
-  [roles.ADMIN]: Object.values(permissions)
+  [roles.ADMIN]: Object.values(permissions),
 };
 
-const authorize = (requiredPermissions) => {
+const authorize = requiredPermissions => {
   return (req, res, next) => {
     const userRole = req.user?.role;
     const userPermissions = rolePermissions[userRole] || [];
@@ -241,8 +234,8 @@ const authorize = (requiredPermissions) => {
         success: false,
         error: {
           code: 'FORBIDDEN',
-          message: 'Insufficient permissions'
-        }
+          message: 'Insufficient permissions',
+        },
       });
     }
 
@@ -251,7 +244,8 @@ const authorize = (requiredPermissions) => {
 };
 
 // Usage
-router.delete('/library/:id', 
+router.delete(
+  '/library/:id',
   authenticateToken,
   authorize([permissions.DELETE_LIBRARY]),
   deleteLibraryItem
@@ -270,36 +264,29 @@ const DOMPurify = require('isomorphic-dompurify');
 const schemas = {
   user: {
     register: Joi.object({
-      username: Joi.string()
-        .alphanum()
-        .min(3)
-        .max(30)
-        .required()
-        .messages({
-          'string.alphanum': 'Username must contain only alphanumeric characters',
-          'string.min': 'Username must be at least 3 characters long',
-          'string.max': 'Username cannot exceed 30 characters'
-        }),
-      email: Joi.string()
-        .email()
-        .required()
-        .messages({
-          'string.email': 'Please provide a valid email address'
-        }),
+      username: Joi.string().alphanum().min(3).max(30).required().messages({
+        'string.alphanum': 'Username must contain only alphanumeric characters',
+        'string.min': 'Username must be at least 3 characters long',
+        'string.max': 'Username cannot exceed 30 characters',
+      }),
+      email: Joi.string().email().required().messages({
+        'string.email': 'Please provide a valid email address',
+      }),
       password: Joi.string()
         .min(8)
         .pattern(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])'))
         .required()
         .messages({
-          'string.pattern.base': 'Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character'
-        })
+          'string.pattern.base':
+            'Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character',
+        }),
     }),
 
     updateProfile: Joi.object({
       username: Joi.string().alphanum().min(3).max(30),
       bio: Joi.string().max(500),
-      avatar: Joi.string().uri()
-    })
+      avatar: Joi.string().uri(),
+    }),
   },
 
   library: {
@@ -312,9 +299,12 @@ const schemas = {
         artist: Joi.string().max(255),
         description: Joi.string().max(2000),
         genres: Joi.array().items(Joi.string().max(50)).max(20),
-        year: Joi.number().integer().min(1900).max(new Date().getFullYear() + 5)
-      })
-    })
+        year: Joi.number()
+          .integer()
+          .min(1900)
+          .max(new Date().getFullYear() + 5),
+      }),
+    }),
   },
 
   search: {
@@ -324,22 +314,22 @@ const schemas = {
       page: Joi.number().integer().min(1).max(1000).default(1),
       limit: Joi.number().integer().min(1).max(100).default(20),
       sort: Joi.string().valid('title', 'created_at', 'updated_at', 'rating'),
-      order: Joi.string().valid('asc', 'desc').default('desc')
-    })
-  }
+      order: Joi.string().valid('asc', 'desc').default('desc'),
+    }),
+  },
 };
 
-const validate = (schema) => {
+const validate = schema => {
   return (req, res, next) => {
     const { error, value } = schema.validate(req.body, {
       stripUnknown: true,
-      abortEarly: false
+      abortEarly: false,
     });
 
     if (error) {
       const details = error.details.map(detail => ({
         field: detail.path.join('.'),
-        message: detail.message
+        message: detail.message,
       }));
 
       return res.status(400).json({
@@ -347,8 +337,8 @@ const validate = (schema) => {
         error: {
           code: 'VALIDATION_ERROR',
           message: 'Request validation failed',
-          details
-        }
+          details,
+        },
       });
     }
 
@@ -358,15 +348,15 @@ const validate = (schema) => {
   };
 };
 
-const sanitizeObject = (obj) => {
+const sanitizeObject = obj => {
   if (typeof obj === 'string') {
     return DOMPurify.sanitize(obj.trim());
   }
-  
+
   if (Array.isArray(obj)) {
     return obj.map(sanitizeObject);
   }
-  
+
   if (obj && typeof obj === 'object') {
     const sanitized = {};
     for (const [key, value] of Object.entries(obj)) {
@@ -374,7 +364,7 @@ const sanitizeObject = (obj) => {
     }
     return sanitized;
   }
-  
+
   return obj;
 };
 ```
@@ -402,13 +392,13 @@ const storage = multer.diskStorage({
     const uniqueSuffix = crypto.randomUUID();
     const extension = path.extname(file.originalname);
     cb(null, `${uniqueSuffix}${extension}`);
-  }
+  },
 });
 
 const fileFilter = (req, file, cb) => {
   const isImage = ALLOWED_IMAGE_TYPES.includes(file.mimetype);
   const isDocument = ALLOWED_DOCUMENT_TYPES.includes(file.mimetype);
-  
+
   if (isImage || isDocument) {
     cb(null, true);
   } else {
@@ -421,8 +411,8 @@ const upload = multer({
   fileFilter,
   limits: {
     fileSize: MAX_FILE_SIZE,
-    files: 10
-  }
+    files: 10,
+  },
 });
 
 const validateAndProcessImage = async (req, res, next) => {
@@ -435,7 +425,7 @@ const validateAndProcessImage = async (req, res, next) => {
       if (ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
         // Validate image file
         const metadata = await sharp(file.path).metadata();
-        
+
         // Check if file is actually an image
         if (!metadata.format) {
           throw new Error('Invalid image file');
@@ -447,7 +437,7 @@ const validateAndProcessImage = async (req, res, next) => {
             .resize(2000, 2000, { fit: 'inside', withoutEnlargement: true })
             .jpeg({ quality: 85 })
             .toFile(file.path + '_optimized');
-          
+
           // Replace original with optimized version
           await fs.rename(file.path + '_optimized', file.path);
         }
@@ -463,13 +453,13 @@ const validateAndProcessImage = async (req, res, next) => {
         console.error('Failed to clean up file:', unlinkError);
       }
     }
-    
+
     return res.status(400).json({
       success: false,
       error: {
         code: 'INVALID_FILE',
-        message: error.message
-      }
+        message: error.message,
+      },
     });
   }
 };
@@ -500,37 +490,33 @@ class EncryptionService {
     const salt = crypto.randomBytes(this.saltLength);
     const key = this.generateKey(password, salt);
     const iv = crypto.randomBytes(this.ivLength);
-    
+
     const cipher = crypto.createCipher(this.algorithm, key, iv);
-    
+
     let encrypted = cipher.update(JSON.stringify(data), 'utf8', 'hex');
     encrypted += cipher.final('hex');
-    
+
     const tag = cipher.getAuthTag();
-    
+
     return {
       encrypted,
       salt: salt.toString('hex'),
       iv: iv.toString('hex'),
-      tag: tag.toString('hex')
+      tag: tag.toString('hex'),
     };
   }
 
   decrypt(encryptedData, password) {
     const { encrypted, salt, iv, tag } = encryptedData;
-    
+
     const key = this.generateKey(password, Buffer.from(salt, 'hex'));
-    const decipher = crypto.createDecipher(
-      this.algorithm,
-      key,
-      Buffer.from(iv, 'hex')
-    );
-    
+    const decipher = crypto.createDecipher(this.algorithm, key, Buffer.from(iv, 'hex'));
+
     decipher.setAuthTag(Buffer.from(tag, 'hex'));
-    
+
     let decrypted = decipher.update(encrypted, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
-    
+
     return JSON.parse(decrypted);
   }
 }
@@ -543,13 +529,13 @@ class FieldEncryption {
 
   encryptField(value) {
     if (!value) return value;
-    
+
     const iv = crypto.randomBytes(16);
     const cipher = crypto.createCipher('aes-256-cbc', this.encryptionKey, iv);
-    
+
     let encrypted = cipher.update(String(value), 'utf8', 'hex');
     encrypted += cipher.final('hex');
-    
+
     return iv.toString('hex') + ':' + encrypted;
   }
 
@@ -557,15 +543,15 @@ class FieldEncryption {
     if (!encryptedValue || !encryptedValue.includes(':')) {
       return encryptedValue;
     }
-    
+
     const [ivHex, encrypted] = encryptedValue.split(':');
     const iv = Buffer.from(ivHex, 'hex');
-    
+
     const decipher = crypto.createDecipher('aes-256-cbc', this.encryptionKey, iv);
-    
+
     let decrypted = decipher.update(encrypted, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
-    
+
     return decrypted;
   }
 }
@@ -578,31 +564,33 @@ class FieldEncryption {
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
-const securityMiddleware = (app) => {
+const securityMiddleware = app => {
   // Helmet for security headers
-  app.use(helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'", "fonts.googleapis.com"],
-        fontSrc: ["'self'", "fonts.gstatic.com"],
-        imgSrc: ["'self'", "data:", "https:"],
-        scriptSrc: ["'self'"],
-        connectSrc: ["'self'", "ws:", "wss:"],
-        mediaSrc: ["'self'", "blob:"],
-        objectSrc: ["'none'"],
-        baseUri: ["'self'"],
-        formAction: ["'self'"],
-        frameAncestors: ["'none'"],
-        upgradeInsecureRequests: []
-      }
-    },
-    hsts: {
-      maxAge: 31536000,
-      includeSubDomains: true,
-      preload: true
-    }
-  }));
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'", 'fonts.googleapis.com'],
+          fontSrc: ["'self'", 'fonts.gstatic.com'],
+          imgSrc: ["'self'", 'data:', 'https:'],
+          scriptSrc: ["'self'"],
+          connectSrc: ["'self'", 'ws:', 'wss:'],
+          mediaSrc: ["'self'", 'blob:'],
+          objectSrc: ["'none'"],
+          baseUri: ["'self'"],
+          formAction: ["'self'"],
+          frameAncestors: ["'none'"],
+          upgradeInsecureRequests: [],
+        },
+      },
+      hsts: {
+        maxAge: 31536000,
+        includeSubDomains: true,
+        preload: true,
+      },
+    })
+  );
 
   // Rate limiting
   const generalLimiter = rateLimit({
@@ -612,11 +600,11 @@ const securityMiddleware = (app) => {
       success: false,
       error: {
         code: 'RATE_LIMITED',
-        message: 'Too many requests from this IP'
-      }
+        message: 'Too many requests from this IP',
+      },
     },
     standardHeaders: true,
-    legacyHeaders: false
+    legacyHeaders: false,
   });
 
   const authLimiter = rateLimit({
@@ -627,9 +615,9 @@ const securityMiddleware = (app) => {
       success: false,
       error: {
         code: 'AUTH_RATE_LIMITED',
-        message: 'Too many authentication attempts'
-      }
-    }
+        message: 'Too many authentication attempts',
+      },
+    },
   });
 
   app.use('/api', generalLimiter);
@@ -639,10 +627,10 @@ const securityMiddleware = (app) => {
   app.use((req, res, next) => {
     res.setHeader('X-API-Version', '1.0');
     res.setHeader('X-Request-ID', req.id || crypto.randomUUID());
-    
+
     // Remove server information
     res.removeHeader('X-Powered-By');
-    
+
     next();
   });
 };
@@ -668,7 +656,7 @@ class ExtensionSandbox {
       console: {
         log: (...args) => this.log('info', ...args),
         error: (...args) => this.log('error', ...args),
-        warn: (...args) => this.log('warn', ...args)
+        warn: (...args) => this.log('warn', ...args),
       },
       setTimeout: (fn, delay) => {
         if (delay > 5000) throw new Error('Timeout too long');
@@ -676,9 +664,9 @@ class ExtensionSandbox {
       },
       fetch: this.createSecureFetch(),
       crypto: {
-        randomUUID: crypto.randomUUID
+        randomUUID: crypto.randomUUID,
       },
-      ...context
+      ...context,
     };
 
     // Create isolated context
@@ -687,7 +675,7 @@ class ExtensionSandbox {
     try {
       const result = vm.runInContext(extensionCode, vmContext, {
         timeout: this.timeout,
-        displayErrors: true
+        displayErrors: true,
       });
 
       return result;
@@ -719,8 +707,8 @@ class ExtensionSandbox {
           signal: controller.signal,
           headers: {
             'User-Agent': 'Myriad-Extension/1.0',
-            ...options.headers
-          }
+            ...options.headers,
+          },
         });
 
         clearTimeout(timeoutId);
@@ -738,7 +726,7 @@ class ExtensionSandbox {
       /^172\.(1[6-9]|2\d|3[01])\./,
       /^192\.168\./,
       /^127\./,
-      /^localhost$/i
+      /^localhost$/i,
     ];
 
     return internalRanges.some(range => range.test(hostname));
@@ -758,17 +746,15 @@ class ExtensionValidator {
   validateManifest(manifest) {
     const required = ['name', 'version', 'sources', 'permissions'];
     const missing = required.filter(field => !manifest[field]);
-    
+
     if (missing.length > 0) {
       throw new Error(`Missing required fields: ${missing.join(', ')}`);
     }
 
     // Validate permissions
     const allowedPermissions = ['network', 'storage'];
-    const invalidPermissions = manifest.permissions.filter(
-      p => !allowedPermissions.includes(p)
-    );
-    
+    const invalidPermissions = manifest.permissions.filter(p => !allowedPermissions.includes(p));
+
     if (invalidPermissions.length > 0) {
       throw new Error(`Invalid permissions: ${invalidPermissions.join(', ')}`);
     }
@@ -778,7 +764,7 @@ class ExtensionValidator {
       if (!source.id || !source.name || !source.type) {
         throw new Error('Invalid source configuration');
       }
-      
+
       if (!['manga', 'anime', 'light_novel'].includes(source.type)) {
         throw new Error(`Invalid source type: ${source.type}`);
       }
@@ -797,7 +783,7 @@ class ExtensionValidator {
       /process\./,
       /__dirname/,
       /__filename/,
-      /Buffer\s*\(/
+      /Buffer\s*\(/,
     ];
 
     for (const pattern of dangerousPatterns) {
@@ -823,13 +809,13 @@ class SecurityMonitor {
     this.alertThresholds = {
       failedLogins: 5,
       rateLimitHits: 10,
-      suspiciousRequests: 20
+      suspiciousRequests: 20,
     };
   }
 
   logSecurityEvent(event) {
     const { type, userId, ip, userAgent, details } = event;
-    
+
     console.log({
       timestamp: new Date().toISOString(),
       type,
@@ -837,7 +823,7 @@ class SecurityMonitor {
       ip,
       userAgent,
       details,
-      severity: this.getSeverity(type)
+      severity: this.getSeverity(type),
     });
 
     this.updateSuspiciousActivity(ip, type);
@@ -870,7 +856,7 @@ class SecurityMonitor {
 
   async triggerAlert(type, data) {
     console.error(`SECURITY ALERT: ${type}`, data);
-    
+
     // Send to monitoring service
     if (process.env.SECURITY_WEBHOOK_URL) {
       try {
@@ -880,8 +866,8 @@ class SecurityMonitor {
           body: JSON.stringify({
             alert_type: type,
             timestamp: new Date().toISOString(),
-            data
-          })
+            data,
+          }),
         });
       } catch (error) {
         console.error('Failed to send security alert:', error);
@@ -897,7 +883,7 @@ class SecurityMonitor {
       invalid_token: 'medium',
       unauthorized_access: 'high',
       extension_error: 'medium',
-      file_upload_error: 'medium'
+      file_upload_error: 'medium',
     };
 
     return severityMap[eventType] || 'low';

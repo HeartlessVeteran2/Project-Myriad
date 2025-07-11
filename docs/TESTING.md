@@ -11,7 +11,7 @@ This guide covers testing strategies, frameworks, and best practices for Project
 ```
     /\
    /  \    E2E Tests (10%)
-  /____\   
+  /____\
  /      \   Integration Tests (30%)
 /________\  Unit Tests (60%)
 ```
@@ -58,7 +58,7 @@ describe('LibraryService', () => {
       const itemData = {
         title: 'Test Manga',
         type: 'manga',
-        source: 'test-source'
+        source: 'test-source',
       };
       const expectedItem = { id: 'item123', ...itemData, userId };
 
@@ -80,12 +80,12 @@ describe('LibraryService', () => {
       const invalidItem = {
         title: 'Test Item',
         type: 'invalid-type',
-        source: 'test-source'
+        source: 'test-source',
       };
 
-      await expect(libraryService.addItem(userId, invalidItem))
-        .rejects
-        .toThrow('Invalid item type: invalid-type');
+      await expect(libraryService.addItem(userId, invalidItem)).rejects.toThrow(
+        'Invalid item type: invalid-type'
+      );
     });
 
     it('should handle database errors gracefully', async () => {
@@ -93,14 +93,14 @@ describe('LibraryService', () => {
       const itemData = {
         title: 'Test Manga',
         type: 'manga',
-        source: 'test-source'
+        source: 'test-source',
       };
 
       mockDb.query.mockRejectedValue(new Error('Database connection failed'));
 
-      await expect(libraryService.addItem(userId, itemData))
-        .rejects
-        .toThrow('Failed to add item to library');
+      await expect(libraryService.addItem(userId, itemData)).rejects.toThrow(
+        'Failed to add item to library'
+      );
     });
   });
 
@@ -110,7 +110,7 @@ describe('LibraryService', () => {
       const options = { page: 1, limit: 10, type: 'manga' };
       const mockItems = [
         { id: 'item1', title: 'Manga 1', type: 'manga' },
-        { id: 'item2', title: 'Manga 2', type: 'manga' }
+        { id: 'item2', title: 'Manga 2', type: 'manga' },
       ];
 
       mockDb.query.mockResolvedValue(mockItems);
@@ -155,15 +155,15 @@ describe('Library API Integration Tests', () => {
   beforeAll(async () => {
     // Setup test database
     await DatabaseService.setupTestDatabase();
-    
+
     // Create test user and get auth token
     const authService = new AuthService();
     const testUser = await authService.register({
       username: 'testuser',
       email: 'test@example.com',
-      password: 'TestPassword123!'
+      password: 'TestPassword123!',
     });
-    
+
     userId = testUser.id;
     authToken = testUser.accessToken;
   });
@@ -184,8 +184,8 @@ describe('Library API Integration Tests', () => {
         source: 'test-source',
         metadata: {
           author: 'Test Author',
-          genres: ['action', 'adventure']
-        }
+          genres: ['action', 'adventure'],
+        },
       };
 
       const response = await request(app)
@@ -201,8 +201,8 @@ describe('Library API Integration Tests', () => {
           title: itemData.title,
           type: itemData.type,
           source: itemData.source,
-          userId: userId
-        }
+          userId: userId,
+        },
       });
     });
 
@@ -210,7 +210,7 @@ describe('Library API Integration Tests', () => {
       const invalidData = {
         title: '', // Empty title
         type: 'invalid-type',
-        source: 'test-source'
+        source: 'test-source',
       };
 
       const response = await request(app)
@@ -223,8 +223,8 @@ describe('Library API Integration Tests', () => {
         success: false,
         error: {
           code: 'VALIDATION_ERROR',
-          message: expect.any(String)
-        }
+          message: expect.any(String),
+        },
       });
     });
 
@@ -232,36 +232,27 @@ describe('Library API Integration Tests', () => {
       const itemData = {
         title: 'Test Manga',
         type: 'manga',
-        source: 'test-source'
+        source: 'test-source',
       };
 
-      await request(app)
-        .post('/api/library')
-        .send(itemData)
-        .expect(401);
+      await request(app).post('/api/library').send(itemData).expect(401);
     });
   });
 
   describe('GET /api/library', () => {
     beforeEach(async () => {
       // Create test data
-      await request(app)
-        .post('/api/library')
-        .set('Authorization', `Bearer ${authToken}`)
-        .send({
-          title: 'Manga 1',
-          type: 'manga',
-          source: 'source1'
-        });
+      await request(app).post('/api/library').set('Authorization', `Bearer ${authToken}`).send({
+        title: 'Manga 1',
+        type: 'manga',
+        source: 'source1',
+      });
 
-      await request(app)
-        .post('/api/library')
-        .set('Authorization', `Bearer ${authToken}`)
-        .send({
-          title: 'Anime 1',
-          type: 'anime',
-          source: 'source2'
-        });
+      await request(app).post('/api/library').set('Authorization', `Bearer ${authToken}`).send({
+        title: 'Anime 1',
+        type: 'anime',
+        source: 'source2',
+      });
     });
 
     it('should return user library items', async () => {
@@ -276,19 +267,19 @@ describe('Library API Integration Tests', () => {
           items: expect.arrayContaining([
             expect.objectContaining({
               title: 'Manga 1',
-              type: 'manga'
+              type: 'manga',
             }),
             expect.objectContaining({
               title: 'Anime 1',
-              type: 'anime'
-            })
+              type: 'anime',
+            }),
           ]),
           pagination: {
             page: 1,
             limit: 20,
-            total: 2
-          }
-        }
+            total: 2,
+          },
+        },
       });
     });
 
@@ -312,7 +303,7 @@ describe('Library API Integration Tests', () => {
       expect(response.body.data.pagination).toMatchObject({
         page: 1,
         limit: 1,
-        total: 2
+        total: 2,
       });
     });
   });
@@ -350,7 +341,7 @@ describe('Database Integration Tests', () => {
       const userData = {
         username: 'testuser',
         email: 'test@example.com',
-        passwordHash: 'hashed_password'
+        passwordHash: 'hashed_password',
       };
 
       const userId = await db.query(
@@ -358,15 +349,12 @@ describe('Database Integration Tests', () => {
         [userData.username, userData.email, userData.passwordHash]
       );
 
-      const user = await db.query(
-        'SELECT * FROM users WHERE id = ?',
-        [userId]
-      );
+      const user = await db.query('SELECT * FROM users WHERE id = ?', [userId]);
 
       expect(user[0]).toMatchObject({
         id: userId,
         username: userData.username,
-        email: userData.email
+        email: userData.email,
       });
     });
 
@@ -374,20 +362,22 @@ describe('Database Integration Tests', () => {
       const userData = {
         username: 'testuser',
         email: 'test@example.com',
-        passwordHash: 'hashed_password'
+        passwordHash: 'hashed_password',
       };
 
-      await db.query(
-        'INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)',
-        [userData.username, userData.email, userData.passwordHash]
-      );
+      await db.query('INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)', [
+        userData.username,
+        userData.email,
+        userData.passwordHash,
+      ]);
 
       // Try to insert duplicate
       await expect(
-        db.query(
-          'INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)',
-          [userData.username, userData.email, userData.passwordHash]
-        )
+        db.query('INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)', [
+          userData.username,
+          userData.email,
+          userData.passwordHash,
+        ])
       ).rejects.toThrow();
     });
   });
@@ -407,7 +397,7 @@ describe('Database Integration Tests', () => {
         userId: userId,
         title: 'Test Manga',
         type: 'manga',
-        source: 'test-source'
+        source: 'test-source',
       };
 
       const itemId = await db.query(
@@ -418,10 +408,7 @@ describe('Database Integration Tests', () => {
       // Delete user should cascade delete library items
       await db.query('DELETE FROM users WHERE id = ?', [userId]);
 
-      const items = await db.query(
-        'SELECT * FROM library_items WHERE user_id = ?',
-        [userId]
-      );
+      const items = await db.query('SELECT * FROM library_items WHERE user_id = ?', [userId]);
 
       expect(items).toHaveLength(0);
     });
@@ -448,23 +435,21 @@ jest.mock('../../services/api');
 
 const mockStore = configureStore({
   reducer: {
-    library: libraryReducer
+    library: libraryReducer,
   },
   preloadedState: {
     library: {
       items: [],
       loading: false,
-      error: null
-    }
-  }
+      error: null,
+    },
+  },
 });
 
 const renderWithProviders = (ui, options = {}) => {
   const Wrapper = ({ children }) => (
     <Provider store={options.store || mockStore}>
-      <BrowserRouter>
-        {children}
-      </BrowserRouter>
+      <BrowserRouter>{children}</BrowserRouter>
     </Provider>
   );
 
@@ -482,8 +467,8 @@ describe('LibraryItem', () => {
     totalChapters: 100,
     metadata: {
       author: 'Test Author',
-      genres: ['action', 'adventure']
-    }
+      genres: ['action', 'adventure'],
+    },
   };
 
   it('renders item information correctly', () => {
@@ -527,7 +512,7 @@ describe('LibraryItem', () => {
     const mockNavigate = jest.fn();
     jest.mock('react-router-dom', () => ({
       ...jest.requireActual('react-router-dom'),
-      useNavigate: () => mockNavigate
+      useNavigate: () => mockNavigate,
     }));
 
     renderWithProviders(<LibraryItem item={mockItem} />);
@@ -553,7 +538,7 @@ describe('LibraryItem', () => {
     renderWithProviders(<LibraryItem item={mockItem} />);
 
     const itemElement = screen.getByTestId('library-item');
-    
+
     fireEvent.keyDown(itemElement, { key: 'Enter' });
     expect(mockNavigate).toHaveBeenCalledWith(`/library/${mockItem.id}`);
 
@@ -579,21 +564,19 @@ jest.mock('../../services/api');
 const createWrapper = (initialState = {}) => {
   const store = configureStore({
     reducer: {
-      library: libraryReducer
+      library: libraryReducer,
     },
     preloadedState: {
       library: {
         items: [],
         loading: false,
         error: null,
-        ...initialState
-      }
-    }
+        ...initialState,
+      },
+    },
   });
 
-  return ({ children }) => (
-    <Provider store={store}>{children}</Provider>
-  );
+  return ({ children }) => <Provider store={store}>{children}</Provider>;
 };
 
 describe('useLibrary', () => {
@@ -604,17 +587,16 @@ describe('useLibrary', () => {
   it('fetches library items on mount', async () => {
     const mockItems = [
       { id: 'item1', title: 'Manga 1' },
-      { id: 'item2', title: 'Manga 2' }
+      { id: 'item2', title: 'Manga 2' },
     ];
 
     api.getLibraryItems.mockResolvedValue({
-      data: { items: mockItems, pagination: { total: 2 } }
+      data: { items: mockItems, pagination: { total: 2 } },
     });
 
-    const { result, waitForNextUpdate } = renderHook(
-      () => useLibrary(),
-      { wrapper: createWrapper() }
-    );
+    const { result, waitForNextUpdate } = renderHook(() => useLibrary(), {
+      wrapper: createWrapper(),
+    });
 
     expect(result.current.loading).toBe(true);
 
@@ -624,7 +606,7 @@ describe('useLibrary', () => {
     expect(result.current.items).toEqual(mockItems);
     expect(api.getLibraryItems).toHaveBeenCalledWith({
       page: 1,
-      limit: 20
+      limit: 20,
     });
   });
 
@@ -632,10 +614,9 @@ describe('useLibrary', () => {
     const errorMessage = 'Failed to fetch library';
     api.getLibraryItems.mockRejectedValue(new Error(errorMessage));
 
-    const { result, waitForNextUpdate } = renderHook(
-      () => useLibrary(),
-      { wrapper: createWrapper() }
-    );
+    const { result, waitForNextUpdate } = renderHook(() => useLibrary(), {
+      wrapper: createWrapper(),
+    });
 
     await waitForNextUpdate();
 
@@ -650,10 +631,7 @@ describe('useLibrary', () => {
 
     api.addLibraryItem.mockResolvedValue({ data: createdItem });
 
-    const { result } = renderHook(
-      () => useLibrary(),
-      { wrapper: createWrapper() }
-    );
+    const { result } = renderHook(() => useLibrary(), { wrapper: createWrapper() });
 
     await act(async () => {
       await result.current.addItem(newItem);
@@ -664,54 +642,46 @@ describe('useLibrary', () => {
   });
 
   it('updates existing item', async () => {
-    const initialItems = [
-      { id: 'item1', title: 'Original Title', progress: 10 }
-    ];
+    const initialItems = [{ id: 'item1', title: 'Original Title', progress: 10 }];
 
     const updatedItem = { id: 'item1', title: 'Updated Title', progress: 20 };
 
     api.updateLibraryItem.mockResolvedValue({ data: updatedItem });
 
-    const { result } = renderHook(
-      () => useLibrary(),
-      { wrapper: createWrapper({ items: initialItems }) }
-    );
+    const { result } = renderHook(() => useLibrary(), {
+      wrapper: createWrapper({ items: initialItems }),
+    });
 
     await act(async () => {
       await result.current.updateItem('item1', {
         title: 'Updated Title',
-        progress: 20
+        progress: 20,
       });
     });
 
     expect(api.updateLibraryItem).toHaveBeenCalledWith('item1', {
       title: 'Updated Title',
-      progress: 20
+      progress: 20,
     });
 
-    const updatedItemInState = result.current.items.find(
-      item => item.id === 'item1'
-    );
+    const updatedItemInState = result.current.items.find(item => item.id === 'item1');
     expect(updatedItemInState).toEqual(updatedItem);
   });
 
   it('filters items by type', async () => {
     const mockItems = [
       { id: 'item1', title: 'Manga 1', type: 'manga' },
-      { id: 'item2', title: 'Anime 1', type: 'anime' }
+      { id: 'item2', title: 'Anime 1', type: 'anime' },
     ];
 
     api.getLibraryItems.mockResolvedValue({
-      data: { items: mockItems.filter(item => item.type === 'manga') }
+      data: { items: mockItems.filter(item => item.type === 'manga') },
     });
 
-    const { result, rerender } = renderHook(
-      (props) => useLibrary(props),
-      {
-        wrapper: createWrapper(),
-        initialProps: { filters: { type: 'manga' } }
-      }
-    );
+    const { result, rerender } = renderHook(props => useLibrary(props), {
+      wrapper: createWrapper(),
+      initialProps: { filters: { type: 'manga' } },
+    });
 
     await act(async () => {
       await result.current.refetch();
@@ -720,7 +690,7 @@ describe('useLibrary', () => {
     expect(api.getLibraryItems).toHaveBeenCalledWith({
       page: 1,
       limit: 20,
-      type: 'manga'
+      type: 'manga',
     });
   });
 });
@@ -745,37 +715,37 @@ module.exports = defineConfig({
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
-    video: 'retain-on-failure'
+    video: 'retain-on-failure',
   },
 
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] }
+      use: { ...devices['Desktop Chrome'] },
     },
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] }
+      use: { ...devices['Desktop Firefox'] },
     },
     {
       name: 'webkit',
-      use: { ...devices['Desktop Safari'] }
+      use: { ...devices['Desktop Safari'] },
     },
     {
       name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] }
+      use: { ...devices['Pixel 5'] },
     },
     {
       name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] }
-    }
+      use: { ...devices['iPhone 12'] },
+    },
   ],
 
   webServer: {
     command: 'npm run dev',
     url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI
-  }
+    reuseExistingServer: !process.env.CI,
+  },
 });
 ```
 
@@ -797,7 +767,7 @@ test.describe('Library Management', () => {
 
   test('should add new manga to library', async ({ page }) => {
     await page.goto('/library');
-    
+
     // Open add item dialog
     await page.click('[data-testid="add-item-button"]');
     await expect(page.locator('[data-testid="add-item-dialog"]')).toBeVisible();
@@ -829,7 +799,7 @@ test.describe('Library Management', () => {
 
     // Verify progress updated
     await expect(page.locator('[data-testid="progress-display"]')).toContainText('25');
-    
+
     // Check progress bar reflects change
     const progressBar = page.locator('[data-testid="progress-bar"]');
     await expect(progressBar).toHaveAttribute('aria-valuenow', '25');
@@ -840,14 +810,14 @@ test.describe('Library Management', () => {
 
     // Apply manga filter
     await page.selectOption('[data-testid="type-filter"]', 'manga');
-    
+
     // Wait for filter to apply
     await page.waitForLoadState('networkidle');
 
     // Verify only manga items are shown
     const items = page.locator('[data-testid="library-item"]');
     const count = await items.count();
-    
+
     for (let i = 0; i < count; i++) {
       await expect(items.nth(i).locator('[data-testid="item-type"]')).toContainText('manga');
     }
@@ -866,7 +836,7 @@ test.describe('Library Management', () => {
     // Verify search results
     const items = page.locator('[data-testid="library-item"]');
     const count = await items.count();
-    
+
     for (let i = 0; i < count; i++) {
       await expect(items.nth(i)).toContainText('One Piece');
     }
@@ -904,71 +874,71 @@ config:
   phases:
     - duration: 60
       arrivalRate: 5
-      name: "Warm up"
+      name: 'Warm up'
     - duration: 120
       arrivalRate: 10
-      name: "Ramp up load"
+      name: 'Ramp up load'
     - duration: 300
       arrivalRate: 20
-      name: "Sustained load"
-  processor: "./auth-processor.js"
+      name: 'Sustained load'
+  processor: './auth-processor.js'
 
 scenarios:
-  - name: "Library operations"
+  - name: 'Library operations'
     weight: 70
     flow:
       - post:
-          url: "/api/auth/login"
+          url: '/api/auth/login'
           json:
-            email: "test@example.com"
-            password: "TestPassword123!"
+            email: 'test@example.com'
+            password: 'TestPassword123!'
           capture:
-            - json: "$.data.accessToken"
-              as: "token"
+            - json: '$.data.accessToken'
+              as: 'token'
       - get:
-          url: "/api/library"
+          url: '/api/library'
           headers:
-            Authorization: "Bearer {{ token }}"
+            Authorization: 'Bearer {{ token }}'
       - post:
-          url: "/api/library"
+          url: '/api/library'
           headers:
-            Authorization: "Bearer {{ token }}"
+            Authorization: 'Bearer {{ token }}'
           json:
-            title: "Load Test Manga {{ $randomString() }}"
-            type: "manga"
-            source: "load-test"
+            title: 'Load Test Manga {{ $randomString() }}'
+            type: 'manga'
+            source: 'load-test'
 
-  - name: "Search operations"
+  - name: 'Search operations'
     weight: 20
     flow:
       - post:
-          url: "/api/auth/login"
+          url: '/api/auth/login'
           json:
-            email: "test@example.com"
-            password: "TestPassword123!"
+            email: 'test@example.com'
+            password: 'TestPassword123!'
           capture:
-            - json: "$.data.accessToken"
-              as: "token"
+            - json: '$.data.accessToken'
+              as: 'token'
       - get:
-          url: "/api/search?q={{ $randomString() }}"
+          url: '/api/search?q={{ $randomString() }}'
           headers:
-            Authorization: "Bearer {{ token }}"
+            Authorization: 'Bearer {{ token }}'
 
-  - name: "Extension operations"
+  - name: 'Extension operations'
     weight: 10
     flow:
       - post:
-          url: "/api/auth/login"
+          url: '/api/auth/login'
           json:
-            email: "test@example.com"
-            password: "TestPassword123!"
+            email: 'test@example.com'
+            password: 'TestPassword123!'
           capture:
-            - json: "$.data.accessToken"
-              as: "token"
+            - json: '$.data.accessToken'
+              as: 'token'
       - get:
-          url: "/api/extensions"
+          url: '/api/extensions'
           headers:
-            Authorization: "Bearer {{ token }}"
+            Authorization: 'Bearer {{ token }}'
 ```
 
 ### Frontend Performance Testing
@@ -980,19 +950,19 @@ const chromeLauncher = require('chrome-launcher');
 
 async function runLighthouseTests() {
   const chrome = await chromeLauncher.launch({ chromeFlags: ['--headless'] });
-  
+
   const options = {
     logLevel: 'info',
     output: 'html',
     onlyCategories: ['performance', 'accessibility', 'best-practices', 'seo'],
-    port: chrome.port
+    port: chrome.port,
   };
 
   const pages = [
     'http://localhost:3000/',
     'http://localhost:3000/library',
     'http://localhost:3000/search',
-    'http://localhost:3000/reader/sample-manga'
+    'http://localhost:3000/reader/sample-manga',
   ];
 
   const results = [];
@@ -1000,13 +970,13 @@ async function runLighthouseTests() {
   for (const url of pages) {
     console.log(`Testing ${url}...`);
     const runnerResult = await lighthouse(url, options);
-    
+
     const scores = {
       url,
       performance: runnerResult.lhr.categories.performance.score * 100,
       accessibility: runnerResult.lhr.categories.accessibility.score * 100,
       bestPractices: runnerResult.lhr.categories['best-practices'].score * 100,
-      seo: runnerResult.lhr.categories.seo.score * 100
+      seo: runnerResult.lhr.categories.seo.score * 100,
     };
 
     results.push(scores);
@@ -1022,12 +992,12 @@ const thresholds = {
   performance: 80,
   accessibility: 90,
   bestPractices: 85,
-  seo: 85
+  seo: 85,
 };
 
 runLighthouseTests().then(results => {
   let failed = false;
-  
+
   results.forEach(result => {
     Object.keys(thresholds).forEach(category => {
       if (result[category] < thresholds[category]) {
@@ -1036,9 +1006,7 @@ runLighthouseTests().then(results => {
         );
         failed = true;
       } else {
-        console.log(
-          `✅ ${result.url} ${category}: ${result[category]} >= ${thresholds[category]}`
-        );
+        console.log(`✅ ${result.url} ${category}: ${result[category]} >= ${thresholds[category]}`);
       }
     });
   });
@@ -1079,14 +1047,14 @@ class TestDatabaseService extends DatabaseService {
 
   async clearTestData() {
     const tables = ['library_items', 'users', 'reading_progress'];
-    
+
     // Disable foreign key checks
     await this.query('SET FOREIGN_KEY_CHECKS = 0');
-    
+
     for (const table of tables) {
       await this.query(`TRUNCATE TABLE ${table}`);
     }
-    
+
     // Re-enable foreign key checks
     await this.query('SET FOREIGN_KEY_CHECKS = 1');
   }
@@ -1129,12 +1097,12 @@ class ApiTestHelpers {
     const defaultUserData = {
       username: `testuser_${Date.now()}`,
       email: `test_${Date.now()}@example.com`,
-      password: 'TestPassword123!'
+      password: 'TestPassword123!',
     };
 
     const user = await this.authService.register({
       ...defaultUserData,
-      ...userData
+      ...userData,
     });
 
     return user;
@@ -1142,7 +1110,7 @@ class ApiTestHelpers {
 
   async authenticatedRequest(method, url, data = {}) {
     const user = await this.createTestUser();
-    
+
     return request(this.app)
       [method](url)
       .set('Authorization', `Bearer ${user.accessToken}`)
@@ -1168,14 +1136,14 @@ class ApiTestHelpers {
   expectSuccessResponse(response, expectedData = {}) {
     expect(response.body).toMatchObject({
       success: true,
-      data: expectedData
+      data: expectedData,
     });
   }
 
   expectErrorResponse(response, expectedError = {}) {
     expect(response.body).toMatchObject({
       success: false,
-      error: expectedError
+      error: expectedError,
     });
   }
 }
@@ -1193,14 +1161,14 @@ name: Test Suite
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test-backend:
     runs-on: ubuntu-latest
-    
+
     services:
       mysql:
         image: mysql:8.0
@@ -1214,104 +1182,104 @@ jobs:
           --health-retries=3
 
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
-        cache: 'npm'
-        cache-dependency-path: backend/package-lock.json
-    
-    - name: Install dependencies
-      working-directory: ./backend
-      run: npm ci
-    
-    - name: Run unit tests
-      working-directory: ./backend
-      run: npm run test:unit
-      env:
-        NODE_ENV: test
-        DB_HOST: localhost
-        DB_PORT: 3306
-        DB_NAME: test_db
-        DB_USER: root
-        DB_PASSWORD: test_password
-    
-    - name: Run integration tests
-      working-directory: ./backend
-      run: npm run test:integration
-      env:
-        NODE_ENV: test
-        DB_HOST: localhost
-        DB_PORT: 3306
-        DB_NAME: test_db
-        DB_USER: root
-        DB_PASSWORD: test_password
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Run unit tests
+        working-directory: ./backend
+        run: npm run test:unit
+        env:
+          NODE_ENV: test
+          DB_HOST: localhost
+          DB_PORT: 3306
+          DB_NAME: test_db
+          DB_USER: root
+          DB_PASSWORD: test_password
+
+      - name: Run integration tests
+        working-directory: ./backend
+        run: npm run test:integration
+        env:
+          NODE_ENV: test
+          DB_HOST: localhost
+          DB_PORT: 3306
+          DB_NAME: test_db
+          DB_USER: root
+          DB_PASSWORD: test_password
 
   test-frontend:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
-        cache: 'npm'
-        cache-dependency-path: frontend/package-lock.json
-    
-    - name: Install dependencies
-      working-directory: ./frontend
-      run: npm ci
-    
-    - name: Run tests
-      working-directory: ./frontend
-      run: npm run test -- --coverage --watchAll=false
-    
-    - name: Upload coverage
-      uses: codecov/codecov-action@v3
-      with:
-        directory: ./frontend/coverage
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run tests
+        working-directory: ./frontend
+        run: npm run test -- --coverage --watchAll=false
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          directory: ./frontend/coverage
 
   test-e2e:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
-    
-    - name: Install dependencies
-      run: |
-        cd backend && npm ci
-        cd ../frontend && npm ci
-        cd ../e2e && npm ci
-    
-    - name: Install Playwright
-      working-directory: ./e2e
-      run: npx playwright install --with-deps
-    
-    - name: Start services
-      run: |
-        cd backend && npm start &
-        cd frontend && npm start &
-        sleep 30
-    
-    - name: Run E2E tests
-      working-directory: ./e2e
-      run: npx playwright test
-    
-    - name: Upload test results
-      uses: actions/upload-artifact@v3
-      if: always()
-      with:
-        name: playwright-report
-        path: e2e/playwright-report/
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: |
+          cd backend && npm ci
+          cd ../frontend && npm ci
+          cd ../e2e && npm ci
+
+      - name: Install Playwright
+        working-directory: ./e2e
+        run: npx playwright install --with-deps
+
+      - name: Start services
+        run: |
+          cd backend && npm start &
+          cd frontend && npm start &
+          sleep 30
+
+      - name: Run E2E tests
+        working-directory: ./e2e
+        run: npx playwright test
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: playwright-report
+          path: e2e/playwright-report/
 ```
 
 This comprehensive testing guide ensures Project Myriad maintains high quality and reliability across all components and features.
