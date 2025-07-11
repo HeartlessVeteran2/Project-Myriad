@@ -108,7 +108,7 @@ export class Community {
       this.addNotification(userId, {
         type: 'club_joined',
         message: `You joined ${club.name}`,
-        clubId: clubId
+        clubId
       });
       
       return true;
@@ -164,8 +164,8 @@ export class Community {
     
     const comment = {
       id: Date.now().toString(),
-      userId: userId,
-      contentId: contentId,
+      userId,
+      contentId,
       text: commentData.text,
       parentId: commentData.parentId || null,
       timestamp: new Date(),
@@ -270,7 +270,7 @@ export class Community {
         this.addNotification(userId, {
           type: 'event_joined',
           message: `You joined the event: ${event.title}`,
-          eventId: eventId
+          eventId
         });
         
         return true;
@@ -308,7 +308,7 @@ export class Community {
       this.addNotification(toUserId, {
         type: 'friend_request',
         message: `${fromUser.displayName} sent you a friend request`,
-        fromUserId: fromUserId,
+        fromUserId,
         status: 'pending'
       });
       
@@ -339,7 +339,7 @@ export class Community {
       this.addNotification(friendId, {
         type: 'friend_accepted',
         message: `${this.users.get(userId).displayName} accepted your friend request`,
-        userId: userId
+        userId
       });
       
       return true;

@@ -26,8 +26,8 @@ export class ParentalControls {
   // Initialize parental controls for a user
   initializeParentalControls(userId, parentEmail, settings = {}) {
     const profile = {
-      userId: userId,
-      parentEmail: parentEmail,
+      userId,
+      parentEmail,
       pin: this.generateSecurePin(),
       settings: { ...this.defaultSettings, ...settings },
       createdAt: new Date(),
@@ -364,7 +364,7 @@ export class ParentalControls {
         rating: contentInfo.rating,
         genres: contentInfo.genres
       },
-      allowed: allowed
+      allowed
     });
 
     // Keep only last 1000 entries

@@ -124,7 +124,7 @@ export class Sync extends EventEmitter {
         
         conflicts.push({
           type: 'reading_progress',
-          contentId: contentId,
+          contentId,
           local: localProgress,
           server: serverProgress,
           field: 'progress'
@@ -152,7 +152,7 @@ export class Sync extends EventEmitter {
           conflicts.push({
             type: 'library_item',
             contentType: type,
-            itemId: itemId,
+            itemId,
             local: localItem,
             server: serverItem,
             field: 'metadata'
@@ -178,7 +178,7 @@ export class Sync extends EventEmitter {
         
         conflicts.push({
           type: 'bookmark',
-          bookmarkId: bookmarkId,
+          bookmarkId,
           local: localBookmark,
           server: serverBookmark,
           field: 'content'
@@ -204,7 +204,7 @@ export class Sync extends EventEmitter {
     return {
       success: false,
       message: 'Sync conflicts detected',
-      conflicts: conflicts,
+      conflicts,
       requiresResolution: true,
       resolutionToken: this.generateResolutionToken(userId, conflicts)
     };
@@ -213,7 +213,7 @@ export class Sync extends EventEmitter {
   // Auto-resolve conflicts based on strategy
   async autoResolveConflicts(userId, conflicts, localData, strategy) {
     const serverData = this.userSyncData.get(userId) || this.getEmptySyncData();
-    let resolvedData = { ...serverData };
+    const resolvedData = { ...serverData };
 
     conflicts.forEach(conflict => {
       switch (strategy) {
@@ -242,37 +242,41 @@ export class Sync extends EventEmitter {
   }
 
   // Apply local resolution to conflict
-  applyLocalResolution(resolvedData, conflict, localData) {
+  applyLocalResolution(resolvedData, conflict, _localData) {
     switch (conflict.type) {
-      case 'reading_progress':
+      case 'reading_progress': {
         resolvedData.readingProgress[conflict.contentId] = conflict.local;
         break;
-      case 'library_item':
+      }
+      case 'library_item': {
         const typeArray = resolvedData.library[conflict.contentType];
         const index = typeArray.findIndex(item => item.id === conflict.itemId);
         if (index > -1) {
           typeArray[index] = conflict.local;
         }
         break;
-      case 'bookmark':
+      }
+      case 'bookmark': {
         const bookmarkIndex = resolvedData.bookmarks.findIndex(b => b.id === conflict.bookmarkId);
         if (bookmarkIndex > -1) {
           resolvedData.bookmarks[bookmarkIndex] = conflict.local;
         }
         break;
+      }
     }
   }
 
   // Apply merge resolution to conflict
-  applyMergeResolution(resolvedData, conflict, localData) {
+  applyMergeResolution(resolvedData, conflict, _localData) {
     switch (conflict.type) {
-      case 'reading_progress':
+      case 'reading_progress': {
         // Use most recent progress
         const localTime = new Date(conflict.local.lastUpdated);
         const serverTime = new Date(conflict.server.lastUpdated);
         resolvedData.readingProgress[conflict.contentId] = localTime > serverTime ? conflict.local : conflict.server;
         break;
-      case 'library_item':
+      }
+      case 'library_item': {
         // Merge metadata, preferring most recent
         const mergedItem = { ...conflict.server, ...conflict.local };
         const typeArray = resolvedData.library[conflict.contentType];
@@ -281,7 +285,8 @@ export class Sync extends EventEmitter {
           typeArray[index] = mergedItem;
         }
         break;
-      case 'bookmark':
+      }
+      case 'bookmark': {
         // Use most recent bookmark
         const localBookmarkTime = new Date(conflict.local.lastModified);
         const serverBookmarkTime = new Date(conflict.server.lastModified);
@@ -290,6 +295,7 @@ export class Sync extends EventEmitter {
           resolvedData.bookmarks[bookmarkIndex] = localBookmarkTime > serverBookmarkTime ? conflict.local : conflict.server;
         }
         break;
+      }
     }
   }
 
@@ -362,8 +368,8 @@ export class Sync extends EventEmitter {
   // Set conflict resolution strategy
   setConflictResolution(userId, strategy, autoResolve = false) {
     this.conflictResolution.set(userId, {
-      strategy: strategy,
-      autoResolve: autoResolve
+      strategy,
+      autoResolve
     });
   }
 

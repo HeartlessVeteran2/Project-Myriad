@@ -22,7 +22,7 @@ export class Web3Module extends EventEmitter {
   async connectWallet(userId, walletInfo) {
     try {
       const connection = {
-        userId: userId,
+        userId,
         address: walletInfo.address,
         type: walletInfo.type, // 'metamask', 'walletconnect', 'coinbase', etc.
         chainId: walletInfo.chainId || 1, // Ethereum mainnet by default
@@ -56,7 +56,7 @@ export class Web3Module extends EventEmitter {
   }
 
   // Verify wallet ownership
-  async verifyWalletOwnership(address, signature) {
+  async verifyWalletOwnership(_address, _signature) {
     // In a real implementation, verify the signature against a known message
     // For now, return true for demo purposes
     return true;
@@ -75,7 +75,7 @@ export class Web3Module extends EventEmitter {
 
       const achievementNFT = {
         id: this.generateTokenId(),
-        userId: userId,
+        userId,
         type: achievementType,
         title: metadata.title,
         description: metadata.description,
@@ -140,9 +140,9 @@ export class Web3Module extends EventEmitter {
       
       const backup = {
         id: this.generateBackupId(),
-        userId: userId,
+        userId,
         dataHash: this.calculateDataHash(libraryData),
-        encryptedData: encryptedData,
+        encryptedData,
         ipfsHash: this.generateMockIPFSHash(),
         blockchainTx: this.generateMockTxHash(),
         createdAt: new Date(),
@@ -284,8 +284,8 @@ export class Web3Module extends EventEmitter {
       const votingWeight = this.calculateVotingWeight(userId, weight);
 
       const vote = {
-        userId: userId,
-        option: option,
+        userId,
+        option,
         weight: votingWeight,
         timestamp: new Date(),
         transactionHash: this.generateMockTxHash()
@@ -298,8 +298,8 @@ export class Web3Module extends EventEmitter {
         this.userVotes.set(userId, []);
       }
       this.userVotes.get(userId).push({
-        proposalId: proposalId,
-        vote: vote
+        proposalId,
+        vote
       });
 
       this.emit('voteCast', { proposalId, vote });

@@ -53,7 +53,7 @@ export class ExtensionManager extends EventEmitter {
       // Create extension instance
       const extension = {
         id: extensionId,
-        manifest: manifest,
+        manifest,
         path: extensionPath,
         loadedAt: new Date(),
         active: true,
@@ -92,7 +92,7 @@ export class ExtensionManager extends EventEmitter {
     
     const sourceInfo = {
       id: sourceId,
-      extensionId: extensionId,
+      extensionId,
       name: source.name,
       type: source.type, // 'manga', 'anime', 'novel'
       baseUrl: source.baseUrl,
@@ -146,7 +146,6 @@ export class ExtensionManager extends EventEmitter {
       active: true
     });
     
-    const results = [];
     const searchPromises = sources.map(async (source) => {
       try {
         const sourceResults = await this.searchInSource(source, query, options);
@@ -178,7 +177,7 @@ export class ExtensionManager extends EventEmitter {
   }
 
   // Generate mock search results
-  generateMockResults(source, query, options) {
+  generateMockResults(source, query, _options) {
     const baseResults = {
       manga: [
         { id: '1', title: `${query} Manga 1`, chapters: 245, status: 'ongoing', rating: 8.5 },
@@ -286,7 +285,7 @@ export class ExtensionManager extends EventEmitter {
   }
 
   // HTTP request with rate limiting
-  async makeRequest(extensionId, method, url, options = {}) {
+  async makeRequest(extensionId, method, url, _options = {}) {
     // Mock HTTP request
     await new Promise(resolve => setTimeout(resolve, 100)); // Simulate network delay
     

@@ -2,7 +2,6 @@
 // Database migration rollback script for Project Myriad
 
 import fs from 'fs/promises';
-import path from 'path';
 
 class RollbackManager {
   constructor() {

@@ -1,7 +1,6 @@
 // Download Manager with queue and progress tracking
 import { EventEmitter } from 'events';
 import fs from 'fs/promises';
-import path from 'path';
 
 export class DownloadManager extends EventEmitter {
   constructor() {

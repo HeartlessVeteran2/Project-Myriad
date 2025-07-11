@@ -92,7 +92,7 @@ export class AI {
   // Visual search using image analysis
   visualSearch(imageData) {
     // Simulate image analysis and content matching
-    const features = this.extractImageFeatures(imageData);
+    this.extractImageFeatures(imageData);
     
     const results = [
       {
@@ -122,7 +122,7 @@ export class AI {
   }
 
   // Extract features from image (simulated)
-  extractImageFeatures(imageData) {
+  extractImageFeatures(_imageData) {
     return {
       colors: ['#FF0000', '#00FF00', '#0000FF'],
       style: 'anime',

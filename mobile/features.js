@@ -1,5 +1,11 @@
 // Feature definitions and implementations for mobile UI
-import { Platform } from 'react-native';
+let Platform;
+try {
+  Platform = require('react-native').Platform;
+} catch (error) {
+  // Fallback for non-React Native environments
+  Platform = { OS: 'web', Version: '1.0' };
+}
 
 export const features = [
   {
@@ -240,14 +246,24 @@ export const getMobileFeatureConfig = (featureId) => {
   return configs[featureId] || {};
 };
 
-// Native module integration
-export const nativeModules = {
-  DownloadManager: require('./native/DownloadManager'),
-  BiometricAuth: require('./native/BiometricAuth'),
-  NotificationManager: require('./native/NotificationManager'),
-  VideoPlayer: require('./native/VideoPlayer'),
-  FileManager: require('./native/FileManager')
-};
+// Native module integration  
+export const nativeModules = {};
+
+// Mock native modules for non-React Native environments
+try {
+  nativeModules.DownloadManager = require('./native/DownloadManager');
+  nativeModules.BiometricAuth = require('./native/BiometricAuth');
+  nativeModules.NotificationManager = require('./native/NotificationManager');
+  nativeModules.VideoPlayer = require('./native/VideoPlayer');
+  nativeModules.FileManager = require('./native/FileManager');
+} catch (error) {
+  // Mock modules for web/testing environments
+  nativeModules.DownloadManager = null;
+  nativeModules.BiometricAuth = null;
+  nativeModules.NotificationManager = null;
+  nativeModules.VideoPlayer = null;
+  nativeModules.FileManager = null;
+}
 
 // Check if native module is available
 export const isNativeModuleAvailable = (moduleName) => {
@@ -336,8 +352,18 @@ const requestPermission = async (permission) => {
 // Initialize mobile feature states
 export const initializeMobileFeatureStates = async () => {
   try {
-    // Load saved states from AsyncStorage
-    const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+    // Load saved states from AsyncStorage (React Native only)
+    let AsyncStorage;
+    try {
+      AsyncStorage = require('@react-native-async-storage/async-storage').default;
+    } catch (error) {
+      // Mock AsyncStorage for non-React Native environments
+      AsyncStorage = {
+        getItem: () => Promise.resolve(null),
+        setItem: () => Promise.resolve(),
+        removeItem: () => Promise.resolve()
+      };
+    }
     
     const enabledFeatures = await AsyncStorage.getItem('enabledFeatures');
     const disabledFeatures = await AsyncStorage.getItem('disabledFeatures');
@@ -368,15 +394,31 @@ export const initializeMobileFeatureStates = async () => {
 };
 
 // Export platform info
-export const platformInfo = {
-  os: Platform.OS,
-  version: Platform.Version,
-  isTablet: Platform.isPad || (Platform.OS === 'android' && Platform.constants.uiMode === 'tablet'),
-  screenSize: {
-    width: require('react-native').Dimensions.get('window').width,
-    height: require('react-native').Dimensions.get('window').height
+export const platformInfo = (() => {
+  try {
+    const { Dimensions } = require('react-native');
+    return {
+      os: Platform.OS,
+      version: Platform.Version,
+      isTablet: Platform.isPad || (Platform.OS === 'android' && Platform.constants?.uiMode === 'tablet'),
+      screenSize: {
+        width: Dimensions.get('window').width,
+        height: Dimensions.get('window').height
+      }
+    };
+  } catch (error) {
+    // Fallback for non-React Native environments
+    return {
+      os: 'web',
+      version: '1.0',
+      isTablet: false,
+      screenSize: {
+        width: 1920,
+        height: 1080
+      }
+    };
   }
-};
+})();
 
 // Auto-initialize on module load
 initializeMobileFeatureStates();

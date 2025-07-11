@@ -238,7 +238,7 @@ export class Accessibility {
     return {
       success: true,
       message: 'Text-to-speech initiated',
-      text: text,
+      text,
       audioUrl: `/api/tts?text=${encodeURIComponent(text)}`
     };
   }
@@ -247,13 +247,13 @@ export class Accessibility {
   generateAccessibilityReport(userId) {
     const settings = this.getUserSettings(userId);
     const enabledFeatures = Object.entries(settings)
-      .filter(([key, value]) => value === true || (typeof value === 'string' && value !== 'none'))
+      .filter(([_key, value]) => value === true || (typeof value === 'string' && value !== 'none'))
       .map(([key]) => key);
 
     return {
-      userId: userId,
-      enabledFeatures: enabledFeatures,
-      settings: settings,
+      userId,
+      enabledFeatures,
+      settings,
       recommendations: this.getAccessibilityRecommendations(settings),
       complianceLevel: this.calculateComplianceLevel(settings)
     };

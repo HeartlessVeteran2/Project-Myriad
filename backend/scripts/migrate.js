@@ -121,7 +121,7 @@ async function main() {
   await migrationManager.init();
 
   switch (command) {
-    case 'create':
+    case 'create': {
       const name = args[1];
       if (!name) {
         console.error('Please provide a migration name');
@@ -129,6 +129,7 @@ async function main() {
       }
       await migrationManager.createMigration(name);
       break;
+    }
       
     case 'run':
       await migrationManager.runMigrations();
