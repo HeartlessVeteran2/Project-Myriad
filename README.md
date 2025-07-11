@@ -3,7 +3,7 @@
 
 <div align="center">
 
-![Project Myriad Logo](https://via.placeholder.com/400x150?text=Project+Myriad&style=flat-square)
+![Project Myriad Logo](https://raw.githubusercontent.com/HeartlessVeteran2/Project-Myriad/main/docs/assets/logo.png)
 
 **The definitive, open-source platform for manga and anime enthusiasts**
 
