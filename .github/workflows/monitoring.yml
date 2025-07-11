@@ -1,0 +1,269 @@
+name: Monitoring & Health Checks
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # Every 15 minutes
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to monitor'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+        - production
+        - staging
+        - development
+      check_type:
+        description: 'Type of health check to perform'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+        - all
+        - api
+        - frontend
+        - database
+        - performance
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: 
+          - ${{ github.event.inputs.environment || 'production' }}
+    env:
+      ENVIRONMENT: ${{ matrix.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      
+      - name: Install monitoring dependencies
+        run: |
+          npm install -g autocannon artillery @lhci/cli
+          npm install axios cheerio node-fetch
+      
+      - name: Set environment URLs
+        id: urls
+        run: |
+          case "${{ matrix.environment }}" in
+            production)
+              echo "api_url=https://api.project-myriad.com" >> $GITHUB_OUTPUT
+              echo "frontend_url=https://project-myriad.com" >> $GITHUB_OUTPUT
+              echo "mobile_url=https://m.project-myriad.com" >> $GITHUB_OUTPUT
+              ;;
+            staging)
+              echo "api_url=https://staging-api.project-myriad.com" >> $GITHUB_OUTPUT
+              echo "frontend_url=https://staging.project-myriad.com" >> $GITHUB_OUTPUT
+              echo "mobile_url=https://staging-m.project-myriad.com" >> $GITHUB_OUTPUT
+              ;;
+            development)
+              echo "api_url=http://localhost:3000" >> $GITHUB_OUTPUT
+              echo "frontend_url=http://localhost:3001" >> $GITHUB_OUTPUT
+              echo "mobile_url=http://localhost:3002" >> $GITHUB_OUTPUT
+              ;;
+          esac
+      
+      - name: API Health Check
+        if: ${{ github.event.inputs.check_type == 'all' || github.event.inputs.check_type == 'api' || github.event.inputs.check_type == '' }}
+        run: |
+          echo "## API Health Check - ${{ matrix.environment }}" > health-report.md
+          echo "" >> health-report.md
+          
+          API_URL="${{ steps.urls.outputs.api_url }}"
+          
+          # Basic connectivity
+          echo "### Connectivity Test:" >> health-report.md
+          if curl -f -s --max-time 10 "$API_URL/health" >/dev/null 2>&1; then
+            echo "✅ API is responding" >> health-report.md
+            API_STATUS="UP"
+          elif curl -f -s --max-time 10 "$API_URL" >/dev/null 2>&1; then
+            echo "⚠️ API responding but no health endpoint" >> health-report.md
+            API_STATUS="PARTIAL"
+          else
+            echo "❌ API is not responding" >> health-report.md
+            API_STATUS="DOWN"
+          fi
+          
+          echo "api_status=$API_STATUS" >> $GITHUB_ENV
+          
+          if [ "$API_STATUS" != "DOWN" ]; then
+            echo "" >> health-report.md
+            echo "### Endpoint Tests:" >> health-report.md
+            
+            # Test key endpoints
+            endpoints=("/api/library" "/api/tracking" "/api/extensions" "/api/download")
+            for endpoint in "${endpoints[@]}"; do
+              if curl -f -s --max-time 5 "$API_URL$endpoint" >/dev/null 2>&1; then
+                echo "✅ $endpoint - OK" >> health-report.md
+              else
+                echo "❌ $endpoint - FAILED" >> health-report.md
+              fi
+            done
+            
+            # Performance test
+            echo "" >> health-report.md
+            echo "### Performance Test:" >> health-report.md
+            echo "\`\`\`" >> health-report.md
+            autocannon -d 10 -c 5 "$API_URL" 2>/dev/null || echo "Performance test failed" >> health-report.md
+            echo "\`\`\`" >> health-report.md
+          fi
+      
+      - name: Frontend Health Check
+        if: ${{ github.event.inputs.check_type == 'all' || github.event.inputs.check_type == 'frontend' || github.event.inputs.check_type == '' }}
+        run: |
+          echo "" >> health-report.md
+          echo "## Frontend Health Check - ${{ matrix.environment }}" >> health-report.md
+          echo "" >> health-report.md
+          
+          FRONTEND_URL="${{ steps.urls.outputs.frontend_url }}"
+          
+          # Basic connectivity
+          echo "### Connectivity Test:" >> health-report.md
+          if curl -f -s --max-time 10 "$FRONTEND_URL" >/dev/null 2>&1; then
+            echo "✅ Frontend is responding" >> health-report.md
+            FRONTEND_STATUS="UP"
+            
+            # Check for critical elements
+            RESPONSE=$(curl -s --max-time 10 "$FRONTEND_URL")
+            if echo "$RESPONSE" | grep -q "<title>"; then
+              echo "✅ HTML structure looks valid" >> health-report.md
+            else
+              echo "⚠️ HTML structure may be invalid" >> health-report.md
+            fi
+            
+            if echo "$RESPONSE" | grep -q "Project Myriad\|Myriad\|manga\|anime"; then
+              echo "✅ Content appears correct" >> health-report.md
+            else
+              echo "⚠️ Content may be incorrect" >> health-report.md
+            fi
+          else
+            echo "❌ Frontend is not responding" >> health-report.md
+            FRONTEND_STATUS="DOWN"
+          fi
+          
+          echo "frontend_status=$FRONTEND_STATUS" >> $GITHUB_ENV
+      
+      - name: Database Health Check
+        if: ${{ github.event.inputs.check_type == 'all' || github.event.inputs.check_type == 'database' || github.event.inputs.check_type == '' }}
+        run: |
+          echo "" >> health-report.md
+          echo "## Database Health Check - ${{ matrix.environment }}" >> health-report.md
+          echo "" >> health-report.md
+          
+          API_URL="${{ steps.urls.outputs.api_url }}"
+          
+          if [ "${{ env.api_status }}" != "DOWN" ]; then
+            # Test database connectivity through API
+            echo "### Database Connectivity:" >> health-report.md
+            if curl -f -s --max-time 10 "$API_URL/api/library/stats" >/dev/null 2>&1; then
+              echo "✅ Database appears accessible" >> health-report.md
+            elif curl -f -s --max-time 10 "$API_URL/api/health/db" >/dev/null 2>&1; then
+              echo "✅ Database health endpoint responding" >> health-report.md
+            else
+              echo "⚠️ Database connectivity unclear" >> health-report.md
+            fi
+          else
+            echo "⚠️ Cannot test database (API down)" >> health-report.md
+          fi
+      
+      - name: Generate overall status
+        id: status
+        run: |
+          echo "" >> health-report.md
+          echo "## Overall Status Summary" >> health-report.md
+          echo "" >> health-report.md
+          echo "| Component | Status |" >> health-report.md
+          echo "|-----------|--------|" >> health-report.md
+          echo "| API | ${{ env.api_status || 'UNKNOWN' }} |" >> health-report.md
+          echo "| Frontend | ${{ env.frontend_status || 'UNKNOWN' }} |" >> health-report.md
+          echo "| Environment | ${{ matrix.environment }} |" >> health-report.md
+          echo "| Timestamp | $(date -u) |" >> health-report.md
+          
+          # Determine overall status
+          if [[ "${{ env.api_status }}" == "UP" && "${{ env.frontend_status }}" == "UP" ]]; then
+            echo "overall_status=HEALTHY" >> $GITHUB_OUTPUT
+            echo "" >> health-report.md
+            echo "🟢 **System Status: HEALTHY**" >> health-report.md
+          elif [[ "${{ env.api_status }}" == "DOWN" || "${{ env.frontend_status }}" == "DOWN" ]]; then
+            echo "overall_status=CRITICAL" >> $GITHUB_OUTPUT
+            echo "" >> health-report.md
+            echo "🔴 **System Status: CRITICAL**" >> health-report.md
+          else
+            echo "overall_status=DEGRADED" >> $GITHUB_OUTPUT
+            echo "" >> health-report.md
+            echo "🟡 **System Status: DEGRADED**" >> health-report.md
+          fi
+      
+      - name: Upload health report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: health-report-${{ matrix.environment }}-${{ github.run_number }}
+          path: health-report.md
+          retention-days: 30
+
+  metrics-collection:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Collect system metrics
+        run: |
+          echo "# System Metrics Report" > metrics-report.md
+          echo "" >> metrics-report.md
+          echo "**Generated:** $(date -u)" >> metrics-report.md
+          echo "" >> metrics-report.md
+          
+          # Repository metrics
+          echo "## Repository Metrics" >> metrics-report.md
+          echo "- **Total commits:** $(git rev-list --all --count)" >> metrics-report.md
+          echo "- **Contributors:** $(git log --format='%aN' | sort -u | wc -l)" >> metrics-report.md
+          echo "- **Current branch:** $(git branch --show-current)" >> metrics-report.md
+          echo "- **Last commit:** $(git log -1 --format='%h - %s (%cr)')" >> metrics-report.md
+          echo "" >> metrics-report.md
+          
+          # Codebase metrics
+          echo "## Codebase Metrics" >> metrics-report.md
+          echo "- **Total lines of code:** $(find . -name '*.js' -o -name '*.jsx' -o -name '*.ts' -o -name '*.tsx' | xargs wc -l | tail -1 | awk '{print $1}')" >> metrics-report.md
+          echo "- **JavaScript files:** $(find . -name '*.js' -o -name '*.jsx' | wc -l)" >> metrics-report.md
+          echo "- **TypeScript files:** $(find . -name '*.ts' -o -name '*.tsx' | wc -l)" >> metrics-report.md
+          echo "- **React components:** $(find . -name '*.jsx' -o -name '*.tsx' | xargs grep -l 'export.*function\|export.*const.*=' | wc -l)" >> metrics-report.md
+          echo "" >> metrics-report.md
+          
+          # Dependencies metrics
+          echo "## Dependencies Overview" >> metrics-report.md
+          
+          if [ -f backend/package.json ]; then
+            BACKEND_DEPS=$(node -e "console.log(Object.keys(require('./backend/package.json').dependencies || {}).length)")
+            BACKEND_DEV_DEPS=$(node -e "console.log(Object.keys(require('./backend/package.json').devDependencies || {}).length)")
+            echo "- **Backend dependencies:** $BACKEND_DEPS" >> metrics-report.md
+            echo "- **Backend dev dependencies:** $BACKEND_DEV_DEPS" >> metrics-report.md
+          fi
+          
+          if [ -f frontend/package.json ]; then
+            FRONTEND_DEPS=$(node -e "console.log(Object.keys(require('./frontend/package.json').dependencies || {}).length)")
+            FRONTEND_DEV_DEPS=$(node -e "console.log(Object.keys(require('./frontend/package.json').devDependencies || {}).length)")
+            echo "- **Frontend dependencies:** $FRONTEND_DEPS" >> metrics-report.md
+            echo "- **Frontend dev dependencies:** $FRONTEND_DEV_DEPS" >> metrics-report.md
+          fi
+          
+          if [ -f mobile/package.json ]; then
+            MOBILE_DEPS=$(node -e "console.log(Object.keys(require('./mobile/package.json').dependencies || {}).length)")
+            MOBILE_DEV_DEPS=$(node -e "console.log(Object.keys(require('./mobile/package.json').devDependencies || {}).length)")
+            echo "- **Mobile dependencies:** $MOBILE_DEPS" >> metrics-report.md
+            echo "- **Mobile dev dependencies:** $MOBILE_DEV_DEPS" >> metrics-report.md
+          fi
+      
+      - name: Upload metrics report
+        uses: actions/upload-artifact@v4
+        with:
+          name: metrics-report-${{ github.run_number }}
+          path: metrics-report.md
+          retention-days: 90

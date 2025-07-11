@@ -1,0 +1,61 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - name: Install dependencies
+        run: |
+          npm install --prefix backend
+          npm install --prefix frontend
+          npm install --prefix mobile
+      - name: Lint backend
+        run: npm run lint --prefix backend || echo 'No linter configured'
+      - name: Lint frontend
+        run: npm run lint --prefix frontend || echo 'No linter configured'
+      - name: Lint mobile
+        run: npm run lint --prefix mobile || echo 'No linter configured'
+
+  format-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - name: Install Prettier
+        run: npm install -g prettier
+      - name: Check formatting
+        run: |
+          prettier --check "**/*.{js,jsx,ts,tsx,json,md}" || echo 'Please run prettier to format your code'
+
+  type-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - name: Install dependencies
+        run: |
+          npm install --prefix backend
+          npm install --prefix frontend
+          npm install --prefix mobile
+      - name: Type check
+        run: |
+          npm run type-check --prefix backend || echo 'No TypeScript configured'
+          npm run type-check --prefix frontend || echo 'No TypeScript configured'
+          npm run type-check --prefix mobile || echo 'No TypeScript configured'

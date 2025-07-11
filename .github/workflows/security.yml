@@ -1,0 +1,86 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 6 * * 1'  # Weekly on Monday at 6 AM
+
+jobs:
+  dependency-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      
+      - name: Audit backend
+        if: hashFiles('backend/package.json') != ''
+        run: |
+          cd backend
+          npm install --package-lock-only || true
+          npm audit --audit-level=moderate --json > ../backend-audit.json || true
+          
+      - name: Audit frontend
+        if: hashFiles('frontend/package.json') != ''
+        run: |
+          cd frontend
+          npm install --package-lock-only || true
+          npm audit --audit-level=moderate --json > ../frontend-audit.json || true
+          
+      - name: Audit mobile
+        if: hashFiles('mobile/package.json') != ''
+        run: |
+          cd mobile
+          npm install --package-lock-only || true
+          npm audit --audit-level=moderate --json > ../mobile-audit.json || true
+      
+      - name: Upload audit results
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit-${{ github.sha }}
+          path: |
+            *-audit.json
+          retention-days: 30
+
+  codeql-analysis:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+          queries: security-and-quality
+          
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+        
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript"
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Run TruffleHog OSS
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified

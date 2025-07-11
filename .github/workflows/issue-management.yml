@@ -1,0 +1,77 @@
+name: Issue Management
+
+on:
+  issues:
+    types: [opened, labeled]
+  pull_request:
+    types: [opened, closed]
+
+jobs:
+  auto-assign:
+    if: github.event_name == 'issues' && github.event.action == 'opened'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Auto-assign issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.addAssignees({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              assignees: ['HeartlessVeteran2']
+            });
+
+  auto-label:
+    if: github.event_name == 'issues' && github.event.action == 'opened'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Auto-label based on content
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const labels = [];
+            
+            if (issue.title.toLowerCase().includes('bug')) {
+              labels.push('bug');
+            }
+            if (issue.title.toLowerCase().includes('feature')) {
+              labels.push('enhancement');
+            }
+            if (issue.body.toLowerCase().includes('frontend')) {
+              labels.push('frontend');
+            }
+            if (issue.body.toLowerCase().includes('backend')) {
+              labels.push('backend');
+            }
+            if (issue.body.toLowerCase().includes('mobile')) {
+              labels.push('mobile');
+            }
+            
+            if (labels.length > 0) {
+              github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: labels
+              });
+            }
+
+  thank-contributor:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Thank contributor
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (pr.user.login !== 'HeartlessVeteran2') {
+              github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                body: `Thank you @${pr.user.login} for your contribution to Project Myriad! 🎉`
+              });
+            }

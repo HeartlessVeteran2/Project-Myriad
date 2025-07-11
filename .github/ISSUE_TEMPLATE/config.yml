@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Community Discussion
+    url: https://github.com/Project-Myriad/Project-Myriad/discussions
+    about: Ask questions and discuss ideas with the community
+  - name: 🔒 Security Issue
+    url: https://github.com/Project-Myriad/Project-Myriad/security/advisories/new
+    about: Report security vulnerabilities privately
+  - name: 📚 Documentation
+    url: https://github.com/Project-Myriad/Project-Myriad/tree/main/docs
+    about: Read the documentation for guides and API reference
+  - name: 💡 Discord Community
+    url: https://discord.gg/project-myriad
+    about: Join our Discord for real-time community support
