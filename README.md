@@ -155,6 +155,7 @@ npm start
 | [📱 Mobile Development](docs/MOBILE.md) | Mobile app development guide |
 | [🔐 Security Guide](docs/SECURITY.md) | Security best practices |
 | [📊 Performance](docs/PERFORMANCE.md) | Performance optimization guide |
+| [📦 Dependency Management](docs/DEPENDENCY_MANAGEMENT.md) | Dependency management and dashboard guide |
 
 ## 🗺 Roadmap
 
