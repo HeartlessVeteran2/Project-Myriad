@@ -166,3 +166,30 @@ jobs:
             dependencies
             automated
           assignees: HeartlessVeteran2
+
+      - name: Auto-merge Renovate PRs
+        if: github.actor == 'renovate[bot]' && success()
+        run: |
+          gh pr review --approve "$PR_URL"
+          gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Delete head branch
+        if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'renovate/')
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const ref = `heads/${{github.head_ref}}`;
+            try {
+              await github.rest.git.deleteRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: ref
+              });
+              console.log(`Successfully deleted branch: ${ref}`);
+            } catch (err) {
+              console.error(`Failed to delete branch ${ref}:`, err);
+            }

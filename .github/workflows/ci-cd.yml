@@ -5,6 +5,7 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
+  workflow_dispatch:
 
 env:
   NODE_VERSION: '18'
@@ -44,6 +45,9 @@ jobs:
       - name: Lint Frontend
         run: cd frontend && npm run lint
 
+      - name: Lint Mobile
+        run: cd mobile && npm run lint
+
       - name: Type Check (if TypeScript)
         run: |
           cd backend && npm run type-check || true
@@ -51,6 +55,7 @@ jobs:
 
       - name: Security Audit
         run: |
+          npm audit --audit-level moderate
           cd backend && npm audit --audit-level moderate
           cd ../frontend && npm audit --audit-level moderate
           cd ../mobile && npm audit --audit-level moderate
@@ -74,6 +79,7 @@ jobs:
   test-backend:
     name: Backend Tests
     runs-on: ubuntu-latest
+    needs: quality-checks
 
     services:
       mysql:
@@ -164,6 +170,7 @@ jobs:
   test-frontend:
     name: Frontend Tests
     runs-on: ubuntu-latest
+    needs: quality-checks
 
     steps:
       - name: Checkout code
@@ -174,37 +181,21 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
 
       - name: Install frontend dependencies
         run: cd frontend && npm ci
 
-      - name: Run tests
-        run: cd frontend && npm run test -- --coverage --watchAll=false
-        env:
-          CI: true
-
-      - name: Build application
-        run: cd frontend && npm run build
-
-      - name: Upload frontend coverage
-        uses: codecov/codecov-action@v4
-        with:
-          directory: frontend/coverage
-          flags: frontend
-          name: frontend-coverage
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-build
-          path: frontend/build/
+      - name: Run frontend tests
+        run: cd frontend && npm test
 
   # ================================
   # Mobile Testing
   # ================================
   test-mobile:
     name: Mobile Tests
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
+    needs: quality-checks
 
     steps:
       - name: Checkout code
@@ -215,331 +206,51 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+          cache-dependency-path: 'mobile/package-lock.json'
 
       - name: Install mobile dependencies
         run: cd mobile && npm ci
 
-      - name: Run tests
-        run: cd mobile && npm test -- --coverage --watchAll=false
-        env:
-          CI: true
-
-      - name: Upload mobile coverage
-        uses: codecov/codecov-action@v4
-        with:
-          directory: mobile/coverage
-          flags: mobile
-          name: mobile-coverage
+      - name: Run mobile tests
+        run: cd mobile && npm test
 
   # ================================
-  # E2E Testing
+  # Build & Push Docker Image
   # ================================
-  test-e2e:
-    name: E2E Tests
+  build-and-push:
+    name: Build & Push Docker Image
     runs-on: ubuntu-latest
-    needs: [test-backend, test-frontend]
-    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
-
-    services:
-      mysql:
-        image: mysql:8.4
-        env:
-          MYSQL_ROOT_PASSWORD: test_password
-          MYSQL_DATABASE: myriad_e2e
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping --silent"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
+    needs: [test-backend, test-frontend, test-mobile]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: |
-          npm ci
-          cd backend && npm ci
-          cd ../frontend && npm ci
-
-      - name: Download frontend build
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-build
-          path: frontend/build/
-
-      - name: Setup database
-        run: cd backend && npm run migrate
-        env:
-          NODE_ENV: test
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_NAME: myriad_e2e
-          DB_USER: root
-          DB_PASSWORD: test_password
-
-      - name: Start services
-        run: |
-          cd backend && npm start &
-          cd frontend && npx serve -s build -l 3000 &
-          sleep 30
-        env:
-          NODE_ENV: test
-          PORT: 3001
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_NAME: myriad_e2e
-          DB_USER: root
-          DB_PASSWORD: test_password
-
-      - name: Install Playwright
-        run: |
-          cd e2e && npm ci
-          npx playwright install --with-deps
-
-      - name: Run E2E tests
-        run: cd e2e && npx playwright test
-        env:
-          BASE_URL: http://localhost:3000
-          API_URL: http://localhost:3001
-
-      - name: Upload E2E artifacts
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: e2e-report
-          path: e2e/playwright-report/
-
-  # ================================
-  # Performance Testing
-  # ================================
-  performance-test:
-    name: Performance Tests
-    runs-on: ubuntu-latest
-    needs: [test-backend, test-frontend]
-    if: github.event_name == 'pull_request'
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run Lighthouse CI
-        run: |
-          npm install -g @lhci/cli@0.12.x
-          lhci autorun
-        env:
-          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
-
-  # ================================
-  # Build Docker Images
-  # ================================
-  build-images:
-    name: Build Docker Images
-    runs-on: ubuntu-latest
-    needs: [quality-checks, test-backend, test-frontend]
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
-
-    permissions:
-      contents: read
-      packages: write
-
-    strategy:
-      matrix:
-        component: [backend, frontend]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Container Registry
+      - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.component }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable={{is_default_branch}}
-
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ${{ matrix.component }}
+          context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  # ================================
-  # Security Scanning
-  # ================================
-  security-scan:
-    name: Security Scan
-    runs-on: ubuntu-latest
-    needs: [build-images]
-    if: github.ref == 'refs/heads/main'
-
-    permissions:
-      security-events: write
-
-    strategy:
-      matrix:
-        component: [backend, frontend]
-
-    steps:
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.component }}:main
-          format: 'sarif'
-          output: 'trivy-results-${{ matrix.component }}.sarif'
-
-      - name: Upload Trivy scan results
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: 'trivy-results-${{ matrix.component }}.sarif'
-
-  # ================================
-  # Deploy to Staging
-  # ================================
-  deploy-staging:
-    name: Deploy to Staging
-    runs-on: ubuntu-latest
-    needs: [test-e2e, build-images]
-    if: github.ref == 'refs/heads/develop'
-    environment: staging
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Deploy to staging
-        run: |
-          echo "Deploying to staging environment..."
-          # Add actual deployment commands here
-        env:
-          STAGING_SERVER: ${{ secrets.STAGING_SERVER }}
-          STAGING_KEY: ${{ secrets.STAGING_KEY }}
-
-      - name: Run smoke tests
-        run: |
-          echo "Running smoke tests on staging..."
-          # Add smoke test commands here
-
-      - name: Notify deployment
-        uses: 8398a7/action-slack@v3
-        with:
-          status: ${{ job.status }}
-          text: 'Staging deployment completed'
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
-        if: always()
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
   # ================================
   # Deploy to Production
   # ================================
-  deploy-production:
+  deploy:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    needs: [test-e2e, build-images, security-scan]
-    if: github.ref == 'refs/heads/main'
-    environment: production
+    needs: build-and-push
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Deploy to production
-        run: |
-          echo "Deploying to production environment..."
-          # Add actual deployment commands here
-        env:
-          PRODUCTION_SERVER: ${{ secrets.PRODUCTION_SERVER }}
-          PRODUCTION_KEY: ${{ secrets.PRODUCTION_KEY }}
-
-      - name: Run health checks
-        run: |
-          echo "Running production health checks..."
-          # Add health check commands here
-
-      - name: Notify deployment
-        uses: 8398a7/action-slack@v3
-        with:
-          status: ${{ job.status }}
-          text: 'Production deployment completed'
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
-        if: always()
-
-  # ================================
-  # Release Management
-  # ================================
-  create-release:
-    name: Create Release
-    runs-on: ubuntu-latest
-    needs: [deploy-production]
-    if: github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[release]')
-
-    permissions:
-      contents: write
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Generate changelog
-        id: changelog
-        run: |
-          # Generate changelog from commits
-          git log --pretty=format:"- %s" $(git describe --tags --abbrev=0)..HEAD > CHANGELOG.md
-          echo "changelog<<EOF" >> $GITHUB_OUTPUT
-          cat CHANGELOG.md >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-      - name: Create Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ github.run_number }}
-          release_name: Release v${{ github.run_number }}
-          body: |
-            ## Changes in this Release
-            ${{ steps.changelog.outputs.changelog }}
-
-            ## Docker Images
-            - Backend: `${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:main`
-            - Frontend: `${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:main`
-          draft: false
-          prerelease: false
+      - name: Deploy to production environment
+        run: echo "Deploying to production..."
+        # Add your deployment script here

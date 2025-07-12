@@ -1,0 +1,19 @@
+name: Grep
+on:
+  pull_request:
+    paths:
+      - '**.js'
+      - '**.jsx'
+      - '**.ts'
+      - '**.tsx'
+jobs:
+  grep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Grep for console.log
+        run: |
+          if grep -r "console.log" . --include=\*.{js,jsx,ts,tsx}; then
+            echo "Error: console.log statements found."
+            exit 1
+          fi

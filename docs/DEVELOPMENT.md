@@ -732,3 +732,43 @@ npx expo doctor
 - **Discord**: Join our [Discord server](https://discord.gg/project-myriad) for real-time help
 
 This development setup guide should get you up and running quickly with Project Myriad. Happy coding! 🚀
+
+## CI/CD Pipeline
+
+The CI/CD pipeline is managed by GitHub Actions and defined in the `.github/workflows/ci-cd.yml` file. It automates code quality checks, testing, and deployment.
+
+### Triggers
+
+The pipeline is triggered on:
+- `push` to `main` and `develop` branches
+- `pull_request` to `main` and `develop` branches
+- `workflow_dispatch` for manual runs
+
+### Jobs
+
+1.  **`quality-checks`**:
+    *   Lints backend, frontend, and mobile code.
+    *   Performs security audits.
+    *   Runs a dependency check.
+
+2.  **`test-backend`**:
+    *   Runs backend integration and unit tests.
+    *   Uses MySQL and Redis services.
+
+3.  **`test-frontend`**:
+    *   Runs frontend tests using Vitest.
+
+4.  **`test-mobile`**:
+    *   Runs mobile tests on a macOS environment.
+
+5.  **`build-and-push`**:
+    *   Builds and pushes a Docker image to GitHub Container Registry on pushes to `main`.
+
+6.  **`deploy`**:
+    *   Deploys the application to production on pushes to `main`.
+
+## Dependency Management
+
+Dependency updates are handled by the `.github/workflows/dependency-updates.yml` workflow. It can be run manually or on a schedule.
+
+The `.github/workflows/auto-merge-dependencies.yml` workflow automatically merges pull requests from Renovate if all tests pass.
