@@ -15,10 +15,10 @@ export class AI {
         avgChaptersPerSession: 0,
         avgReadingTime: 0,
         preferredTime: 'evening',
-        completionRate: 0
+        completionRate: 0,
       },
       contentTypes: new Map(),
-      ratings: []
+      ratings: [],
     };
 
     // Analyze genres
@@ -28,15 +28,18 @@ export class AI {
           profile.favoriteGenres.set(genre, (profile.favoriteGenres.get(genre) || 0) + 1);
         });
       }
-      
+
       if (item.author) {
-        profile.favoriteAuthors.set(item.author, (profile.favoriteAuthors.get(item.author) || 0) + 1);
+        profile.favoriteAuthors.set(
+          item.author,
+          (profile.favoriteAuthors.get(item.author) || 0) + 1
+        );
       }
-      
+
       if (item.type) {
         profile.contentTypes.set(item.type, (profile.contentTypes.get(item.type) || 0) + 1);
       }
-      
+
       if (item.rating) {
         profile.ratings.push(item.rating);
       }
@@ -45,7 +48,7 @@ export class AI {
     // Calculate reading patterns
     const completedItems = history.filter(item => item.completed);
     profile.readingPatterns.completionRate = completedItems.length / Math.max(history.length, 1);
-    
+
     this.userProfiles.set(userId, profile);
     return profile;
   }
@@ -58,7 +61,7 @@ export class AI {
     }
 
     const recommendations = [];
-    
+
     // Genre-based recommendations
     const topGenres = Array.from(profile.favoriteGenres.entries())
       .sort((a, b) => b[1] - a[1])
@@ -84,7 +87,7 @@ export class AI {
 
     // Remove duplicates and score
     const uniqueRecs = this.deduplicateAndScore(recommendations, profile);
-    
+
     this.recommendations.set(userId, uniqueRecs);
     return uniqueRecs.slice(0, options.limit || 20);
   }
@@ -113,14 +116,14 @@ export class AI {
     this.recommendations.set(userId, {
       items: recommendations.slice(0, limit),
       generatedAt: new Date(),
-      basedOn: favoriteGenres
+      basedOn: favoriteGenres,
     });
 
     return {
       success: true,
       recommendations: recommendations.slice(0, limit),
       basedOn: favoriteGenres,
-      generatedAt: new Date()
+      generatedAt: new Date(),
     };
   }
 
@@ -131,19 +134,19 @@ export class AI {
       const mockResults = [
         { id: 1, title: 'Similar Manga Series', type: 'manga', similarity: 0.92 },
         { id: 2, title: 'Related Anime', type: 'anime', similarity: 0.88 },
-        { id: 3, title: 'Matching Light Novel', type: 'novel', similarity: 0.85 }
+        { id: 3, title: 'Matching Light Novel', type: 'novel', similarity: 0.85 },
       ];
 
       return {
         success: true,
         results: mockResults,
-        searchedAt: new Date()
+        searchedAt: new Date(),
       };
     } catch (error) {
       return {
         success: false,
         message: 'Visual search failed',
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -163,7 +166,7 @@ export class AI {
         type: 'new_content',
         message: 'New chapters available for your favorite series!',
         priority: 'high',
-        scheduledFor: '18:00'
+        scheduledFor: '18:00',
       });
     }
 
@@ -173,7 +176,7 @@ export class AI {
         type: 'recommendation',
         message: 'Try these shorter series that match your preferences',
         priority: 'medium',
-        action: 'view_recommendations'
+        action: 'view_recommendations',
       });
     }
 
@@ -183,21 +186,27 @@ export class AI {
   // Get content by genre (mock implementation)
   getContentByGenre(genre, limit = 5) {
     const mockContent = {
-      'Action': [
+      Action: [
         { id: 1, title: 'Attack on Titan', type: 'manga', rating: 9.0, genre },
         { id: 2, title: 'Demon Slayer', type: 'anime', rating: 8.7, genre },
-        { id: 3, title: 'One Punch Man', type: 'manga', rating: 8.9, genre }
+        { id: 3, title: 'One Punch Man', type: 'manga', rating: 8.9, genre },
       ],
-      'Romance': [
+      Romance: [
         { id: 4, title: 'Your Name', type: 'anime', rating: 8.4, genre },
         { id: 5, title: 'Kaguya-sama', type: 'manga', rating: 8.6, genre },
-        { id: 6, title: 'Toradora', type: 'novel', rating: 8.2, genre }
+        { id: 6, title: 'Toradora', type: 'novel', rating: 8.2, genre },
       ],
-      'Fantasy': [
+      Fantasy: [
         { id: 7, title: 'Overlord', type: 'novel', rating: 8.6, genre },
         { id: 8, title: 'Re:Zero', type: 'anime', rating: 8.8, genre },
-        { id: 9, title: 'That Time I Got Reincarnated as a Slime', type: 'manga', rating: 8.5, genre }
-      ]
+        {
+          id: 9,
+          title: 'That Time I Got Reincarnated as a Slime',
+          type: 'manga',
+          rating: 8.5,
+          genre,
+        },
+      ],
     };
 
     return mockContent[genre] ? mockContent[genre].slice(0, limit) : [];
@@ -207,7 +216,7 @@ export class AI {
   getContentByAuthor(author, limit = 3) {
     return [
       { id: `author_${author}_1`, title: `${author}'s Latest Work`, author, rating: 8.7 },
-      { id: `author_${author}_2`, title: `${author}'s Popular Series`, author, rating: 9.2 }
+      { id: `author_${author}_2`, title: `${author}'s Popular Series`, author, rating: 9.2 },
     ].slice(0, limit);
   }
 
@@ -218,7 +227,7 @@ export class AI {
       { id: 'trending_2', title: 'Hot Anime Series', type: 'anime', trendScore: 92 },
       { id: 'trending_3', title: 'Popular Light Novel', type: 'novel', trendScore: 88 },
       { id: 'trending_4', title: 'Rising Manhwa', type: 'manga', trendScore: 85 },
-      { id: 'trending_5', title: 'Viral Webtoon', type: 'manga', trendScore: 83 }
+      { id: 'trending_5', title: 'Viral Webtoon', type: 'manga', trendScore: 83 },
     ].slice(0, limit);
   }
 
@@ -229,7 +238,7 @@ export class AI {
       { id: 'popular_2', title: 'Attack on Titan', type: 'anime', rating: 9.3, popularity: 96 },
       { id: 'popular_3', title: 'Demon Slayer', type: 'manga', rating: 9.1, popularity: 94 },
       { id: 'popular_4', title: 'Your Name', type: 'anime', rating: 8.9, popularity: 92 },
-      { id: 'popular_5', title: 'Solo Leveling', type: 'novel', rating: 9.0, popularity: 90 }
+      { id: 'popular_5', title: 'Solo Leveling', type: 'novel', rating: 9.0, popularity: 90 },
     ].slice(0, options.limit || 5);
   }
 
@@ -243,34 +252,36 @@ export class AI {
     });
 
     // Calculate scores based on user preferences
-    return unique.map(item => ({
-      ...item,
-      score: this.calculateRecommendationScore(item, profile)
-    })).sort((a, b) => b.score - a.score);
+    return unique
+      .map(item => ({
+        ...item,
+        score: this.calculateRecommendationScore(item, profile),
+      }))
+      .sort((a, b) => b.score - a.score);
   }
 
   // Calculate recommendation score
   calculateRecommendationScore(item, profile) {
     let score = item.rating || 5;
-    
+
     // Boost for favorite genres
     if (item.genre && profile.favoriteGenres.has(item.genre)) {
       score += profile.favoriteGenres.get(item.genre) * 0.5;
     }
-    
+
     // Boost for favorite authors
     if (item.author && profile.favoriteAuthors.has(item.author)) {
       score += profile.favoriteAuthors.get(item.author) * 0.7;
     }
-    
+
     // Boost for preferred content types
     if (item.type && profile.contentTypes.has(item.type)) {
       score += profile.contentTypes.get(item.type) * 0.3;
     }
-    
+
     // Add randomness to prevent stale recommendations
     score += Math.random() * 0.5;
-    
+
     return Math.min(score, 10);
   }
 
@@ -284,7 +295,7 @@ export class AI {
   updateContentFeatures(contentId, features) {
     this.contentFeatures.set(contentId, {
       ...features,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
     return { success: true };
   }
@@ -295,7 +306,7 @@ export class AI {
       totalUserProfiles: this.userProfiles.size,
       totalContentFeatures: this.contentFeatures.size,
       totalRecommendations: this.recommendations.size,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
   }
 
