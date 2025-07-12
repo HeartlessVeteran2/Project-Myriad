@@ -340,9 +340,13 @@ export class Web3Module extends EventEmitter {
 
     // Determine if quorum is met and if proposal passes
     const quorumMet = proposal.votes.size >= proposal.quorum;
-    const winningOption = Object.entries(voteTotals).reduce((a, b) =>
-      voteTotals[a[0]] > voteTotals[b[0]] ? a : b
-    );
+    // Determine winning option with explicit tie-handling: pick lexicographically smallest key in case of tie
+    const winningOption = Object.entries(voteTotals).reduce((a, b) => {
+      if (voteTotals[a[0]] > voteTotals[b[0]]) return a;
+      if (voteTotals[a[0]] < voteTotals[b[0]]) return b;
+      // Tie: pick lexicographically smallest key
+      return a[0] < b[0] ? a : b;
+    });
     const passes = quorumMet && voteTotals[winningOption[0]] / totalWeight >= proposal.threshold;
 
     return {
