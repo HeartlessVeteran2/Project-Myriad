@@ -1,18 +1,18 @@
 # Root Dockerfile for multi-stage build
-FROM node:20 AS backend
+FROM node:22 AS backend
 WORKDIR /app/backend
 COPY backend/package.json ./
 RUN npm install
 COPY backend/ .
 
-FROM node:20 AS frontend
+FROM node:22 AS frontend
 WORKDIR /app/frontend
 COPY frontend/package.json ./
 RUN npm install
 COPY frontend/ .
 RUN npm run build || echo "No build script"
 
-FROM node:20 AS final
+FROM node:22 AS final
 WORKDIR /app
 COPY --from=backend /app/backend ./backend
 COPY --from=frontend /app/frontend ./frontend
