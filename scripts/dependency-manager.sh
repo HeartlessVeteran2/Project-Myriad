@@ -1,4 +1,5 @@
 #!/bin/bash
+#!/bin/bash
 
 # Dependency Manager Script for Project Myriad
 # This script helps manage dependencies across all workspaces
