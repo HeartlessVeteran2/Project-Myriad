@@ -98,7 +98,7 @@
     "react-test-renderer": "^18.2.0",
     "metro-react-native-babel-preset": "^0.77.0",
     "husky": "^8.0.3",
-    "lint-staged": "^15.2.0"
+    "lint-staged": "^16.0.0"
   },
   "jest": {
     "testEnvironment": "node",
