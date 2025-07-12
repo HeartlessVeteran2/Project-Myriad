@@ -155,6 +155,7 @@ npm start
 | [📱 Mobile Development](docs/MOBILE.md) | Mobile app development guide |
 | [🔐 Security Guide](docs/SECURITY.md) | Security best practices |
 | [📊 Performance](docs/PERFORMANCE.md) | Performance optimization guide |
+| [📦 Dependency Management](docs/DEPENDENCY_MANAGEMENT.md) | Dependency management and dashboard guide |
 
 ## 🗺 Roadmap
 
@@ -189,6 +190,30 @@ npm start
 - [ ] Enterprise features
 - [ ] Advanced analytics
 - [ ] Third-party integrations
+
+## 📦 Dependency Management
+
+Project Myriad uses automated dependency management with Renovate to keep dependencies up-to-date and secure.
+
+### Dependency Dashboard
+
+The [Dependency Dashboard](../../issues/5) provides a centralized view of all dependency updates:
+- **Security Updates**: Critical security patches are prioritized
+- **Grouped Updates**: Related packages are updated together
+- **Automated Testing**: All updates are tested before merging
+
+### Managing Dependencies
+
+```bash
+# Check dependency status
+npm run deps:check
+
+# Update patch versions
+npm run deps:update:patch
+
+# Generate dependency report
+npm run deps:report
+```
 
 ## 🤝 Contributing
 

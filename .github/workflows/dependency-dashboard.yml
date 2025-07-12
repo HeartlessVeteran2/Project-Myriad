@@ -1,0 +1,297 @@
+name: Dependency Dashboard Management
+
+on:
+  schedule:
+    # Run every Monday at 6 AM UTC (after Renovate runs)
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      force_update:
+        description: 'Force update dependency dashboard'
+        required: false
+        default: 'false'
+        type: boolean
+      check_security:
+        description: 'Run security audit'
+        required: false
+        default: 'true'
+        type: boolean
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+  security-events: write
+
+jobs:
+  dependency-audit:
+    name: Dependency Security Audit
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.check_security == 'true' || github.event_name == 'schedule' }}
+    
+    strategy:
+      matrix:
+        workspace: ['.', 'backend', 'frontend', 'mobile']
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            backend/package-lock.json
+            frontend/package-lock.json
+            mobile/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: ${{ matrix.workspace }}
+        run: npm ci
+        
+      - name: Run security audit
+        working-directory: ${{ matrix.workspace }}
+        run: |
+          echo "## Security Audit for ${{ matrix.workspace }}" >> audit-results.txt
+          npm audit --audit-level=moderate --json > audit.json || true
+          
+          # Parse audit results
+          if [ -s audit.json ]; then
+            vulnerabilities=$(cat audit.json | jq -r '.metadata.vulnerabilities | to_entries[] | "\(.key): \(.value)"' 2>/dev/null || echo "No vulnerabilities data")
+            echo "Vulnerabilities found: $vulnerabilities" >> audit-results.txt
+            
+            # Check for high/critical vulnerabilities
+            critical=$(cat audit.json | jq -r '.metadata.vulnerabilities.critical // 0' 2>/dev/null || echo "0")
+            high=$(cat audit.json | jq -r '.metadata.vulnerabilities.high // 0' 2>/dev/null || echo "0")
+            
+            if [ "$critical" -gt 0 ] || [ "$high" -gt 0 ]; then
+              echo "::warning::Critical or high vulnerabilities found in ${{ matrix.workspace }}"
+              echo "SECURITY_ISSUES=true" >> $GITHUB_ENV
+            fi
+          else
+            echo "No vulnerabilities found" >> audit-results.txt
+          fi
+          
+      - name: Upload audit results
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-results-${{ matrix.workspace }}
+          path: ${{ matrix.workspace }}/audit-results.txt
+          retention-days: 30
+
+  dependency-summary:
+    name: Generate Dependency Summary
+    runs-on: ubuntu-latest
+    needs: dependency-audit
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          
+      - name: Download audit results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: audit-results-*
+          merge-multiple: true
+          
+      - name: Generate dependency summary
+        run: |
+          echo "# Dependency Summary Report" > dependency-summary.md
+          echo "Generated on: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> dependency-summary.md
+          echo "" >> dependency-summary.md
+          
+          # Count total dependencies
+          echo "## Dependency Counts" >> dependency-summary.md
+          echo "" >> dependency-summary.md
+          
+          for workspace in "." "backend" "frontend" "mobile"; do
+            if [ -f "$workspace/package.json" ]; then
+              deps=$(cat "$workspace/package.json" | jq -r '.dependencies // {} | keys | length' 2>/dev/null || echo "0")
+              devDeps=$(cat "$workspace/package.json" | jq -r '.devDependencies // {} | keys | length' 2>/dev/null || echo "0")
+              total=$((deps + devDeps))
+              
+              echo "### $workspace" >> dependency-summary.md
+              echo "- Production dependencies: $deps" >> dependency-summary.md
+              echo "- Development dependencies: $devDeps" >> dependency-summary.md
+              echo "- Total: $total" >> dependency-summary.md
+              echo "" >> dependency-summary.md
+            fi
+          done
+          
+          # Add audit results
+          echo "## Security Audit Results" >> dependency-summary.md
+          echo "" >> dependency-summary.md
+          
+          if ls audit-results.txt >/dev/null 2>&1; then
+            cat audit-results.txt >> dependency-summary.md
+          else
+            echo "No audit results available" >> dependency-summary.md
+          fi
+          
+          # Add outdated packages check
+          echo "" >> dependency-summary.md
+          echo "## Outdated Packages" >> dependency-summary.md
+          echo "" >> dependency-summary.md
+          
+          for workspace in "." "backend" "frontend" "mobile"; do
+            if [ -f "$workspace/package.json" ]; then
+              echo "### $workspace" >> dependency-summary.md
+              cd "$workspace"
+              npm outdated --json > outdated.json 2>/dev/null || echo "{}" > outdated.json
+              
+              if [ -s outdated.json ] && [ "$(cat outdated.json)" != "{}" ]; then
+                echo "Outdated packages found:" >> ../dependency-summary.md
+                echo '```json' >> ../dependency-summary.md
+                cat outdated.json >> ../dependency-summary.md
+                echo '```' >> ../dependency-summary.md
+              else
+                echo "All packages are up to date" >> ../dependency-summary.md
+              fi
+              echo "" >> ../dependency-summary.md
+              cd - >/dev/null
+            fi
+          done
+          
+      - name: Upload dependency summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-summary
+          path: dependency-summary.md
+          retention-days: 90
+
+  update-dashboard-comment:
+    name: Update Dashboard Comment
+    runs-on: ubuntu-latest
+    needs: [dependency-audit, dependency-summary]
+    if: always()
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Download dependency summary
+        uses: actions/download-artifact@v4
+        with:
+          name: dependency-summary
+          
+      - name: Find or create dashboard issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            // Look for existing dependency dashboard issue
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'dependencies',
+              creator: 'renovate[bot]'
+            });
+            
+            let dashboardIssue = issues.data.find(issue => 
+              issue.title.includes('Dependency Dashboard')
+            );
+            
+            // Read the dependency summary
+            let summaryContent = '';
+            try {
+              summaryContent = fs.readFileSync('dependency-summary.md', 'utf8');
+            } catch (error) {
+              summaryContent = 'Dependency summary not available';
+            }
+            
+            const commentBody = `## Automated Dependency Report
+            
+            ${summaryContent}
+            
+            ---
+            
+            This report is automatically generated by the dependency dashboard workflow.
+            Last updated: ${new Date().toISOString()}
+            
+            For more information, see the [Dependency Management Documentation](../blob/main/docs/DEPENDENCY_MANAGEMENT.md).`;
+            
+            if (dashboardIssue) {
+              // Check if we already have a comment from this workflow
+              const comments = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: dashboardIssue.number
+              });
+              
+              const existingComment = comments.data.find(comment => 
+                comment.body.includes('Automated Dependency Report') &&
+                comment.user.login === 'github-actions[bot]'
+              );
+              
+              if (existingComment) {
+                // Update existing comment
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existingComment.id,
+                  body: commentBody
+                });
+                console.log('Updated existing dashboard comment');
+              } else {
+                // Create new comment
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: dashboardIssue.number,
+                  body: commentBody
+                });
+                console.log('Created new dashboard comment');
+              }
+            } else {
+              console.log('No dependency dashboard issue found');
+            }
+
+  notify-security-issues:
+    name: Notify Security Issues
+    runs-on: ubuntu-latest
+    needs: dependency-audit
+    if: ${{ needs.dependency-audit.result == 'success' && env.SECURITY_ISSUES == 'true' }}
+    
+    steps:
+      - name: Create security issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = `🚨 Security vulnerabilities detected in dependencies`;
+            const body = `## Security Alert
+            
+            High or critical security vulnerabilities have been detected in project dependencies.
+            
+            **Action Required:**
+            1. Review the dependency dashboard for security updates
+            2. Apply security patches immediately
+            3. Test thoroughly before deployment
+            4. Monitor for additional security advisories
+            
+            **Resources:**
+            - [Dependency Dashboard](../../issues/5)
+            - [Security Documentation](../blob/main/docs/SECURITY.md)
+            - [Dependency Management Guide](../blob/main/docs/DEPENDENCY_MANAGEMENT.md)
+            
+            This issue was automatically created by the dependency dashboard workflow.
+            Generated on: ${new Date().toISOString()}`;
+            
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['security', 'dependencies', 'urgent'],
+              assignees: ['HeartlessVeteran2']
+            });

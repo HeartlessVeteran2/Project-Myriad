@@ -1,6 +1,223 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
-  ]
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    ":separateMajorReleases",
+    ":combinePatchMinorReleases",
+    ":ignoreUnstable",
+    ":prImmediately",
+    ":updateNotScheduled",
+    ":automergeDisabled",
+    ":maintainLockFilesWeekly",
+    ":rebaseStalePrs"
+  ],
+  "dependencyDashboard": true,
+  "dependencyDashboardTitle": "Dependency Dashboard",
+  "dependencyDashboardHeader": "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.",
+  "dependencyDashboardFooter": "- [ ] <!-- manual job -->Check this box to trigger a request for Renovate to run again on this repository",
+  "prHourlyLimit": 10,
+  "prConcurrentLimit": 20,
+  "branchConcurrentLimit": 0,
+  "semanticCommits": "enabled",
+  "commitMessageTopic": "{{depName}}",
+  "commitMessageExtra": "to {{newVersion}}",
+  "commitMessageSuffix": "",
+  "rangeStrategy": "bump",
+  "bumpVersion": "patch",
+  "timezone": "UTC",
+  "schedule": [
+    "before 4am on Monday"
+  ],
+  "labels": [
+    "dependencies"
+  ],
+  "assignees": [
+    "HeartlessVeteran2"
+  ],
+  "reviewers": [
+    "HeartlessVeteran2"
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "schedule": [
+      "at any time"
+    ],
+    "labels": [
+      "security",
+      "dependencies"
+    ],
+    "assignees": [
+      "HeartlessVeteran2"
+    ],
+    "reviewers": [
+      "HeartlessVeteran2"
+    ]
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": [
+      "before 4am on Monday"
+    ]
+  },
+  "packageRules": [
+    {
+      "description": "Group all non-major dependencies",
+      "matchUpdateTypes": [
+        "patch",
+        "minor"
+      ],
+      "groupName": "all non-major dependencies",
+      "groupSlug": "all-minor-patch"
+    },
+    {
+      "description": "Group all major dependencies",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "groupName": "all major dependencies",
+      "groupSlug": "all-major"
+    },
+    {
+      "description": "Group ESLint packages",
+      "matchPackagePatterns": [
+        "^eslint",
+        "@typescript-eslint"
+      ],
+      "groupName": "ESLint packages",
+      "groupSlug": "eslint"
+    },
+    {
+      "description": "Group React packages",
+      "matchPackagePatterns": [
+        "^react",
+        "^@types/react"
+      ],
+      "groupName": "React packages",
+      "groupSlug": "react"
+    },
+    {
+      "description": "Group React Native packages",
+      "matchPackagePatterns": [
+        "react-native",
+        "@react-navigation"
+      ],
+      "groupName": "React Native packages",
+      "groupSlug": "react-native"
+    },
+    {
+      "description": "Group Expo packages",
+      "matchPackagePatterns": [
+        "^expo"
+      ],
+      "groupName": "Expo packages",
+      "groupSlug": "expo"
+    },
+    {
+      "description": "Group Testing packages",
+      "matchPackagePatterns": [
+        "^@testing-library",
+        "^jest",
+        "^@types/jest",
+        "^vitest",
+        "^@vitest"
+      ],
+      "groupName": "Testing packages",
+      "groupSlug": "testing"
+    },
+    {
+      "description": "Group GitHub Actions",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "groupName": "GitHub Actions",
+      "groupSlug": "github-actions"
+    },
+    {
+      "description": "Group Docker images",
+      "matchDatasources": [
+        "docker"
+      ],
+      "groupName": "Docker images",
+      "groupSlug": "docker"
+    },
+    {
+      "description": "Auto-merge patch updates for development dependencies",
+      "matchDepTypes": [
+        "devDependencies"
+      ],
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "automerge": true
+    },
+    {
+      "description": "Auto-merge patch updates for GitHub Actions",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "automerge": true
+    },
+    {
+      "description": "Separate major updates for critical packages",
+      "matchPackageNames": [
+        "react",
+        "react-dom",
+        "react-native",
+        "expo",
+        "express",
+        "node"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "separateMajorMinor": true,
+      "separateMinorPatch": true
+    },
+    {
+      "description": "Pin Docker digests",
+      "matchDatasources": [
+        "docker"
+      ],
+      "pinDigests": true
+    },
+    {
+      "description": "Ignore deprecated packages",
+      "matchPackageNames": [
+        "@testing-library/jest-native",
+        "@types/react-native"
+      ],
+      "enabled": false
+    }
+  ],
+  "ignoreDeps": [
+    "@testing-library/jest-native",
+    "@types/react-native"
+  ],
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/coverage/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.expo/**"
+  ],
+  "enabledManagers": [
+    "npm",
+    "dockerfile",
+    "docker-compose",
+    "github-actions"
+  ],
+  "npm": {
+    "minimumReleaseAge": "3 days"
+  },
+  "docker": {
+    "minimumReleaseAge": "3 days"
+  },
+  "github-actions": {
+    "minimumReleaseAge": "3 days"
+  }
 }

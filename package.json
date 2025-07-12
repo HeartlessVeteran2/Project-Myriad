@@ -77,6 +77,12 @@
     "docker:logs": "docker-compose logs -f",
     "docs:build": "echo 'Building documentation...'",
     "docs:serve": "echo 'Serving documentation...'",
+    "deps:check": "./scripts/dependency-manager.sh check",
+    "deps:update:patch": "./scripts/dependency-manager.sh update patch",
+    "deps:update:minor": "./scripts/dependency-manager.sh update minor",
+    "deps:update:major": "./scripts/dependency-manager.sh update major",
+    "deps:report": "./scripts/dependency-manager.sh report",
+    "deps:clean": "./scripts/dependency-manager.sh clean",
     "release": "npm run test && npm run build && npm run docs:build",
     "prepare": "husky install"
   },
