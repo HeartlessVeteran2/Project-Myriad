@@ -1,0 +1,29 @@
+name: Close Stale PRs
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Weekly on Sunday
+  workflow_dispatch:
+
+jobs:
+  close-stale-prs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Close dependency PRs (Renovate)
+        run: |
+          # Close all Renovate dependency PRs since we're restructuring
+          gh pr list --state open --author "renovate[bot]" --json number | \
+          jq -r '.[].number' | \
+          xargs -I {} gh pr close {} --comment "Closing due to repository restructuring. Dependencies will be updated manually."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Close outdated feature PRs
+        run: |
+          # Close PRs that are older than 30 days and not from main contributors
+          gh pr list --state open --json number,createdAt,author --jq '.[] | select(.createdAt < (now - 30*24*3600 | todate)) | select(.author.login != "HeartlessVeteran2") | .number' | \
+          xargs -I {} gh pr close {} --comment "Closing stale PR due to repository restructuring and unification."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
