@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="RunManager">
+    <configuration name="Start Backend" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/backend/index.js" working-dir="$PROJECT_DIR$/backend">
+      <method v="2" />
+    </configuration>
+    <configuration name="Start Mobile (Expo)" type="npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/mobile/package.json" />
+      <command value="start" />
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="Start Mobile Web" type="npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/mobile/package.json" />
+      <command value="run" />
+      <arguments value="web" />
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="Install All Dependencies" type="npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <arguments value="install:all" />
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="Run All Tests" type="npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="test" />
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="Start Unified App" type="BashConfigurationType" factoryName="Bash">
+      <option name="SCRIPT_TEXT" value="./scripts/start-unified-app.sh all" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SCRIPT_PATH" value="" />
+      <option name="PARAMETERS" value="" />
+      <module />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Node.js.Start Backend" />
+      <item itemvalue="npm.Start Mobile (Expo)" />
+      <item itemvalue="npm.Start Mobile Web" />
+      <item itemvalue="npm.Install All Dependencies" />
+      <item itemvalue="npm.Run All Tests" />
+      <item itemvalue="Bash.Start Unified App" />
+    </list>
+  </component>
+</project>

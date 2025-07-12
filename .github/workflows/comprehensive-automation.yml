@@ -1,454 +1,87 @@
-name: 🤖 Comprehensive Repositoory 
-    branches: [main, develop, 'feature/*']
+name: Unified App CI/CD
+
+on:
+  push:
+    branches: [main, develop, feature/*]
   pull_request:
     branches: [main, develop]
-  schedule:
-    - cron: '0 2 * * *' # Daily at 2 AM UTC
-  workflow_dispatch:
-    inputs:
-      run_tests:
-        description: 'Run all tests'
-        required: false
-        default: true
-        type: boolean
-      deploy_staging:
-        description: 'Deploy to staging'
-        required: false
-        default: false
-        type: boolean
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-env:
-  NODE_VERSION: '20'
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  # 🔍 Code Quality & Security Analysis
-  code-analysis:
-    name: 🔍 Code Analysis
+  lint-and-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 🟢 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: 📦 Install Dependencies
-        run: |
-          npm ci
-          npm run install:all
-
-      - name: 🔒 Security Audit
-        run: |
-          npm audit --audit-level=moderate
-          npm run audit
-
-      - name: 🧹 Lint Check
-        run: |
-          npm run lint
-          npm run format:check
-
-      - name: 📊 CodeQL Analysis
-        uses: github/codeql-action/init@v3
-        with:
-          languages: javascript
-
-      - name: 📈 CodeQL Autobuild
-        uses: github/codeql-action/autobuild@v3
-
-      - name: 🔍 CodeQL Analysis Results
-        uses: github/codeql-action/analyze@v3
-
-  # 🧪 Comprehensive Testing Suite
-  test-suite:
-    name: 🧪 Test Suite
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    needs: code-analysis
-
     strategy:
       matrix:
-        component: [backend, frontend, mobile]
-        node-version: [18, 20]
-
-    services:
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_PASSWORD: testpass
-          POSTGRES_USER: testuser
-          POSTGRES_DB: testdb
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
+        node-version: [18.x, 20.x]
+        
     steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: 🟢 Setup Node.js ${{ matrix.node-version }}
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-
-      - name: 📦 Install Dependencies
-        run: |
-          npm ci
-          npm run install:all
-
-      - name: 🏗️ Build ${{ matrix.component }}
-        run: npm run build:${{ matrix.component }}
-        continue-on-error: ${{ matrix.component == 'mobile' }}
-
-      - name: 🧪 Unit Tests - ${{ matrix.component }}
-        run: |
-          if [ "${{ matrix.component }}" = "backend" ]; then
-            npm run test:unit:backend
-          elif [ "${{ matrix.component }}" = "frontend" ]; then
-            npm run test:unit:frontend
-          else
-            npm run test:mobile
-          fi
-
-      - name: 📊 Coverage Report
-        uses: codecov/codecov-action@v4
-        if: matrix.node-version == '20'
-        with:
-          file: ./${{ matrix.component }}/coverage/lcov.info
-          flags: ${{ matrix.component }}
-          name: ${{ matrix.component }}-coverage
-
-  # 🔄 Integration Tests
-  integration-tests:
-    name: 🔄 Integration Tests
+          
+      - name: Install dependencies
+        run: npm run install:all
+        
+      - name: Lint backend
+        run: npm run lint:backend
+        
+      - name: Lint mobile
+        run: npm run lint:mobile
+        
+      - name: Test backend
+        run: npm run test:backend
+        
+      - name: Test mobile
+        run: npm run test:mobile
+        
+      - name: Build backend
+        run: npm run build:backend
+        
+      - name: Build mobile for web
+        run: cd mobile && npm run build:web
+        
+  expo-build:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    needs: test-suite
-
-    services:
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_PASSWORD: testpass
-          POSTGRES_USER: testuser
-          POSTGRES_DB: testdb
-        ports:
-          - 5432:5432
-
-    steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: 🟢 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: 📦 Install Dependencies
-        run: |
-          npm ci
-          npm run install:all
-
-      - name: 🗃️ Setup Database
-        run: |
-          cd backend
-          npm run migrate
-          npm run seed
-
-      - name: 🔄 Integration Tests
-        run: npm run test:integration
-
-  # 🏗️ Build & Container Images
-  build-and-containerize:
-    name: 🏗️ Build & Containerize
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    needs: [code-analysis, test-suite]
-
-    steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: 🟢 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: 📦 Install Dependencies
-        run: |
-          npm ci
-          npm run install:all
-
-      - name: 🏗️ Build All Components
-        run: |
-          npm run build:backend
-          npm run build:frontend
-
-      - name: 🐳 Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: 🔑 Log in to Container Registry
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 📝 Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable={{is_default_branch}}
-
-      - name: 🏗️ Build and push Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  # 🚀 Automated Deployment
-  deploy-staging:
-    name: 🚀 Deploy to Staging
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: [integration-tests, build-and-containerize]
-    if: github.ref == 'refs/heads/develop' || github.event.inputs.deploy_staging == 'true'
-
-    environment:
-      name: staging
-      url: https://staging.project-myriad.com
-
-    steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: 🚀 Deploy to Staging
-        run: |
-          echo "🚀 Deploying to staging environment..."
-          echo "✅ Staging deployment completed!"
-
-  # 📊 Performance Testing
-  performance-tests:
-    name: 📊 Performance Tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    needs: build-and-containerize
+    needs: lint-and-test
     if: github.ref == 'refs/heads/main'
-
+    
     steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: 🟢 Setup Node.js
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: '20.x'
           cache: 'npm'
-
-      - name: 📦 Install Dependencies
-        run: |
-          npm ci
-          npm run install:all
-
-      - name: 🏗️ Build for Performance Testing
-        run: npm run build
-
-      - name: 📊 Lighthouse CI
-        run: |
-          npm install -g @lhci/cli@0.13.x
-          lhci autorun
-        env:
-          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
-
-  # 🔄 Dependency Management
-  dependency-management:
-    name: 🔄 Dependency Management
+          
+      - name: Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+          
+      - name: Install dependencies
+        run: npm run install:mobile
+        
+      - name: Expo publish
+        run: cd mobile && expo publish
+        
+  security-scan:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    if: github.event_name == 'schedule'
-
+    
     steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      
+      - name: Run security audit
+        run: npm audit --audit-level high
+        
+      - name: Run CodeQL
+        uses: github/codeql-action/init@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 🟢 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: 📦 Install Dependencies
-        run: |
-          npm ci
-          npm run install:all
-
-      - name: 🔍 Dependency Check
-        run: npm run deps:check
-
-      - name: 📊 Generate Dependency Report
-        run: npm run deps:report
-
-      - name: 🔄 Update Dependencies (Patch)
-        run: npm run deps:update:patch
-
-      - name: 🧪 Test After Updates
-        run: npm run test
-
-      - name: 📝 Create PR for Updates
-        if: success()
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: 'chore: update dependencies (automated)'
-          title: '🔄 Automated Dependency Updates'
-          body: |
-            ## 🔄 Automated Dependency Updates
-
-            This PR contains automated dependency updates:
-            - ✅ Patch version updates
-            - ✅ Security updates
-            - ✅ All tests passing
-
-            Generated by GitHub Actions workflow.
-          branch: deps/automated-updates
-          delete-branch: true
-
-  # 📱 Mobile App Testing
-  mobile-testing:
-    name: 📱 Mobile App Testing
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    needs: code-analysis
-
-    steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: 🟢 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: ☕ Setup Java 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: 📦 Install Dependencies
-        run: |
-          npm ci
-          npm run install:all
-
-      - name: 🧪 Mobile Tests
-        run: |
-          cd mobile
-          npm run test
-          npm run test:e2e || echo "E2E tests skipped (requires emulator)"
-
-  # 📝 Documentation Generation
-  documentation:
-    name: 📝 Documentation
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: test-suite
-
-    steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: 🟢 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: 📦 Install Dependencies
-        run: |
-          npm ci
-          npm run install:all
-
-      - name: 📝 Generate Documentation
-        run: |
-          npm run docs:build || echo "Documentation build completed"
-
-      - name: 🚀 Deploy Documentation
-        if: github.ref == 'refs/heads/main'
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/build
-
-  # 🎯 Summary Report
-  workflow-summary:
-    name: 🎯 Workflow Summary
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    needs: [code-analysis, test-suite, integration-tests, build-and-containerize]
-    if: always()
-
-    steps:
-      - name: 📊 Generate Summary
-        run: |
-          echo "## 🎯 Workflow Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Code Analysis | ${{ needs.code-analysis.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Test Suite | ${{ needs.test-suite.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Integration Tests | ${{ needs.integration-tests.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Build & Containerize | ${{ needs.build-and-containerize.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          if [[ "${{ needs.code-analysis.result }}" == "success" && "${{ needs.test-suite.result }}" == "success" ]]; then
-            echo "✅ **All critical checks passed!**" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "❌ **Some checks failed. Please review the logs.**" >> $GITHUB_STEP_SUMMARY
-          fi
+          languages: javascript
+          
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2

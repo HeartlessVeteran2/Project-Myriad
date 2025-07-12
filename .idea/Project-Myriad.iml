@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="WEB_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/backend" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/mobile/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/shared" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/backend/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/mobile/__tests__" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/node_modules" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/node_modules" />
+      <excludeFolder url="file://$MODULE_DIR$/mobile/node_modules" />
+      <excludeFolder url="file://$MODULE_DIR$/mobile/.expo" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/logs" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/downloads" />
+      <excludeFolder url="file://$MODULE_DIR$/mobile/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/coverage" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>

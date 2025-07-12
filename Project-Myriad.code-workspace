@@ -1,0 +1,165 @@
+{
+  "folders": [
+    {
+      "name": "🏠 Root",
+      "path": "."
+    },
+    {
+      "name": "🖥️ Backend",
+      "path": "./backend"
+    },
+    {
+      "name": "📱 Mobile (Unified App)",
+      "path": "./mobile"
+    },
+    {
+      "name": "🔗 Shared",
+      "path": "./shared"
+    },
+    {
+      "name": "📝 Scripts",
+      "path": "./scripts"
+    },
+    {
+      "name": "📚 Documentation",
+      "path": "./docs"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/.expo": true,
+      "**/dist": true,
+      "**/coverage": true,
+      "**/.git": true,
+      "**/.DS_Store": true,
+      "**/logs": true,
+      "**/downloads": true
+    },
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/coverage": true,
+      "**/.expo": true,
+      "**/dist": true
+    },
+    "eslint.workingDirectories": [
+      "./backend",
+      "./mobile"
+    ],
+    "prettier.configPath": "./.prettierrc",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true
+    },
+    "typescript.preferences.includePackageJsonAutoImports": "auto",
+    "npm.packageManager": "npm",
+    "git.ignoreLimitWarning": true
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-vscode.vscode-eslint",
+      "esbenp.prettier-vscode",
+      "ms-vscode.vscode-typescript-next",
+      "ms-vscode.vscode-json",
+      "bradlc.vscode-tailwindcss",
+      "expo.vscode-expo-tools",
+      "ms-vscode.vscode-react-native",
+      "formulahendry.auto-rename-tag",
+      "christian-kohler.path-intellisense",
+      "ms-vscode.vscode-npm-script"
+    ]
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "🖥️ Start Backend",
+        "type": "node",
+        "request": "launch",
+        "program": "${workspaceFolder}/backend/index.js",
+        "cwd": "${workspaceFolder}/backend",
+        "env": {
+          "NODE_ENV": "development"
+        },
+        "console": "integratedTerminal"
+      },
+      {
+        "name": "📱 Start Mobile App",
+        "type": "node",
+        "request": "launch",
+        "program": "${workspaceFolder}/mobile/node_modules/.bin/expo",
+        "args": ["start"],
+        "cwd": "${workspaceFolder}/mobile",
+        "console": "integratedTerminal"
+      },
+      {
+        "name": "🌐 Start Web App",
+        "type": "node",
+        "request": "launch",
+        "program": "${workspaceFolder}/mobile/node_modules/.bin/expo",
+        "args": ["start", "--web"],
+        "cwd": "${workspaceFolder}/mobile",
+        "console": "integratedTerminal"
+      }
+    ],
+    "compounds": [
+      {
+        "name": "🚀 Start All (Backend + Mobile)",
+        "configurations": ["🖥️ Start Backend", "📱 Start Mobile App"]
+      }
+    ]
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "📦 Install All Dependencies",
+        "type": "shell",
+        "command": "npm run install:all",
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared"
+        }
+      },
+      {
+        "label": "🧪 Run All Tests",
+        "type": "shell",
+        "command": "npm test",
+        "group": "test",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared"
+        }
+      },
+      {
+        "label": "🏗️ Build All",
+        "type": "shell",
+        "command": "npm run build",
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared"
+        }
+      },
+      {
+        "label": "🚀 Start Unified App",
+        "type": "shell",
+        "command": "./scripts/start-unified-app.sh all",
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="JavaScriptSettings">
+    <option name="languageLevel" value="ES6" />
+    <option name="preferStrict" value="false" />
+    <option name="preferSemicolons" value="true" />
+  </component>
+  <component name="JavaScriptLibraryMappings">
+    <file url="PROJECT" libraries="{Node.js Core}" />
+  </component>
+</project>
