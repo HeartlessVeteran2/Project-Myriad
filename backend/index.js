@@ -1,6 +1,34 @@
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import compression from 'compression';
+import winston from 'winston';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
+
+// Logger configuration
+const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.errors({ stack: true }),
+    winston.format.json()
+  ),
+  transports: [
+    new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
+    new winston.transports.File({ filename: 'logs/combined.log' }),
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.simple()
+      )
+    })
+  ]
+});
 
 // Import modules
 import { Tracking } from './tracking.js';
@@ -31,9 +59,38 @@ extensionManager.loadExtensions().then(() => {
   console.log('📦 Extensions loaded');
 });
 
+// Security middleware
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+}));
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: {
+    error: 'Too many requests from this IP, please try again later.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api', limiter);
+
 // Middleware
-app.use(cors());
-app.use(morgan('dev'));
+app.use(compression());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true
+}));
+app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));
 app.use(express.json());
 
 // Basic routes
@@ -232,44 +289,167 @@ app.get('/api/web3/proposals', (req, res) => {
 });
 
 // Error handling middleware
-app.use((err, req, res, _next) => {
-  console.error(err.stack);
-  res.status(500).json({ 
-    success: false, 
-    message: 'Internal server error',
-    error: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
+const errorHandler = (err, req, res, next) => {
+  logger.error('Unhandled error:', {
+    error: err.message,
+    stack: err.stack,
+    url: req.url,
+    method: req.method,
+    ip: req.ip,
+    userAgent: req.get('User-Agent')
   });
-});
+
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  const status = err.status || err.statusCode || 500;
+  const message = process.env.NODE_ENV === 'production' 
+    ? 'Internal Server Error' 
+    : err.message;
+
+  res.status(status).json({
+    error: {
+      message,
+      status,
+      timestamp: new Date().toISOString(),
+      ...(process.env.NODE_ENV !== 'production' && { stack: err.stack })
+    }
+  });
+};
 
 // 404 handler
-app.use((req, res) => {
-  res.status(404).json({ 
-    success: false, 
-    message: 'API endpoint not found',
-    availableEndpoints: [
-      'GET /',
-      'GET /api/health',
-      'GET /api/manga',
-      'GET /api/anime', 
-      'GET /api/novels',
-      'GET /api/stats',
-      'GET /api/tracking/:userId/history',
-      'GET /api/downloads/queue',
-      'GET /api/ai/recommendations/:userId',
-      'GET /api/community/clubs',
-      'GET /api/extensions',
-      'GET /api/accessibility/:userId/settings',
-      'GET /api/sync/:userId/devices',
-      'GET /api/web3/:userId/nfts',
-      'GET /api/web3/proposals'
-    ]
+const notFoundHandler = (req, res) => {
+  logger.warn(`404 - Route not found: ${req.method} ${req.url}`, {
+    ip: req.ip,
+    userAgent: req.get('User-Agent')
   });
+  
+  res.status(404).json({
+    error: {
+      message: 'Route not found',
+      status: 404,
+      timestamp: new Date().toISOString()
+    }
+  });
+};
+
+// Health check endpoints
+app.get('/api/health', (req, res) => {
+  const healthData = {
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+    environment: process.env.NODE_ENV || 'development',
+    version: process.env.npm_package_version || '1.0.0',
+    services: {
+      tracking: 'operational',
+      downloads: 'operational',
+      ai: 'operational',
+      community: 'operational',
+      extensions: 'operational',
+      accessibility: 'operational',
+      parental: 'operational',
+      sync: 'operational',
+      web3: 'operational'
+    }
+  };
+  
+  res.json(healthData);
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Backend server running on port ${PORT}`);
-  console.log(`📡 API available at http://localhost:${PORT}`);
-  console.log(`❤️  Health check: http://localhost:${PORT}/api/health`);
-  console.log(`📖 Documentation: http://localhost:${PORT}/`);
-  console.log(`🎯 Features: Tracking, Downloads, AI, Community, Extensions, Accessibility, Parental Controls, Sync, Web3`);
+app.get('/api/health/detailed', (req, res) => {
+  const detailedHealth = {
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+    cpu: process.cpuUsage(),
+    environment: process.env.NODE_ENV || 'development',
+    version: process.env.npm_package_version || '1.0.0',
+    node_version: process.version,
+    platform: process.platform,
+    arch: process.arch,
+    services: {
+      tracking: { status: 'operational', lastCheck: new Date().toISOString() },
+      downloads: { status: 'operational', lastCheck: new Date().toISOString() },
+      ai: { status: 'operational', lastCheck: new Date().toISOString() },
+      community: { status: 'operational', lastCheck: new Date().toISOString() },
+      extensions: { status: 'operational', lastCheck: new Date().toISOString() },
+      accessibility: { status: 'operational', lastCheck: new Date().toISOString() },
+      parental: { status: 'operational', lastCheck: new Date().toISOString() },
+      sync: { status: 'operational', lastCheck: new Date().toISOString() },
+      web3: { status: 'operational', lastCheck: new Date().toISOString() }
+    },
+    endpoints: {
+      '/api/health': 'Health check endpoint',
+      '/api/stats': 'System statistics',
+      '/api/tracking': 'Reading progress tracking',
+      '/api/downloads': 'Download management',
+      '/api/ai': 'AI recommendations',
+      '/api/community': 'Community features',
+      '/api/extensions': 'Extension management',
+      '/api/accessibility': 'Accessibility features',
+      '/api/parental': 'Parental controls',
+      '/api/sync': 'Cross-platform sync',
+      '/api/web3': 'Blockchain integration'
+    }
+  };
+  
+  res.json(detailedHealth);
 });
+
+// Use the error handling middleware
+app.use(errorHandler);
+
+// Use the 404 handler
+app.use(notFoundHandler);
+
+const server = app.listen(PORT, () => {
+  logger.info(`🚀 Backend server running on port ${PORT}`);
+  logger.info(`📡 API available at http://localhost:${PORT}`);
+  logger.info(`❤️  Health check: http://localhost:${PORT}/api/health`);
+  logger.info(`📖 Documentation: http://localhost:${PORT}/`);
+  logger.info(`🎯 Features: Tracking, Downloads, AI, Community, Extensions, Accessibility, Parental Controls, Sync, Web3`);
+});
+
+// Move the graceful shutdown and error handlers after server declaration
+// Graceful shutdown handler
+const gracefulShutdownHandler = (signal) => {
+  logger.info(`Received ${signal}. Starting graceful shutdown...`);
+  
+  server.close((err) => {
+    if (err) {
+      logger.error('Error during server shutdown:', err);
+      process.exit(1);
+    }
+    
+    logger.info('Server closed successfully');
+    process.exit(0);
+  });
+  
+  // Force close after 30 seconds
+  setTimeout(() => {
+    logger.error('Forced shutdown after timeout');
+    process.exit(1);
+  }, 30000);
+};
+
+// Register shutdown handlers
+process.on('SIGTERM', () => gracefulShutdownHandler('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdownHandler('SIGINT'));
+
+// Unhandled rejection handler
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+// Uncaught exception handler
+process.on('uncaughtException', (error) => {
+  logger.error('Uncaught Exception:', error);
+  process.exit(1);
+});
+
+// Export for testing
+export default app;
