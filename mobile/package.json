@@ -75,7 +75,7 @@
     "react-native-screens": "^3.29.0",
     "react-native-gesture-handler": "^2.14.1",
     "react-native-reanimated": "^3.6.2",
-    "react-native-svg": "^14.1.0",
+    "react-native-svg": "^15.0.0",
     "react-native-toast-message": "^2.2.0",
     "date-fns": "^2.30.0"
   },
