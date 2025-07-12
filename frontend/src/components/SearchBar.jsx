@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-const SearchBar = ({ onSearch, theme, placeholder = "Search manga, anime, light novels..." }) => {
+const SearchBar = ({ onSearch, theme, placeholder = 'Search manga, anime, light novels...' }) => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -10,7 +10,7 @@ const SearchBar = ({ onSearch, theme, placeholder = "Search manga, anime, light 
   const searchBarStyle = {
     position: 'relative',
     width: '100%',
-    maxWidth: '500px'
+    maxWidth: '500px',
   };
 
   const inputStyle = {
@@ -23,13 +23,13 @@ const SearchBar = ({ onSearch, theme, placeholder = "Search manga, anime, light 
     fontSize: '1rem',
     outline: 'none',
     transition: 'all 0.3s ease',
-    boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+    boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
   };
 
   const inputFocusStyle = {
     ...inputStyle,
     borderColor: '#007bff',
-    boxShadow: '0 4px 20px rgba(0,123,255,0.2)'
+    boxShadow: '0 4px 20px rgba(0,123,255,0.2)',
   };
 
   const iconStyle = {
@@ -39,7 +39,7 @@ const SearchBar = ({ onSearch, theme, placeholder = "Search manga, anime, light 
     transform: 'translateY(-50%)',
     color: theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
     pointerEvents: 'none',
-    zIndex: 1
+    zIndex: 1,
   };
 
   const suggestionsStyle = {
@@ -55,7 +55,7 @@ const SearchBar = ({ onSearch, theme, placeholder = "Search manga, anime, light 
     overflowY: 'auto',
     zIndex: 1000,
     boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
-    display: showSuggestions && suggestions.length > 0 ? 'block' : 'none'
+    display: showSuggestions && suggestions.length > 0 ? 'block' : 'none',
   };
 
   const suggestionItemStyle = {
@@ -66,11 +66,11 @@ const SearchBar = ({ onSearch, theme, placeholder = "Search manga, anime, light 
     transition: 'background-color 0.2s',
     display: 'flex',
     alignItems: 'center',
-    gap: '0.75rem'
+    gap: '0.75rem',
   };
 
   const suggestionHoverStyle = {
-    background: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,123,255,0.1)'
+    background: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,123,255,0.1)',
   };
 
   const loadingStyle = {
@@ -78,7 +78,7 @@ const SearchBar = ({ onSearch, theme, placeholder = "Search manga, anime, light 
     right: '1rem',
     top: '50%',
     transform: 'translateY(-50%)',
-    color: theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)'
+    color: theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
   };
 
   // Mock suggestions for demonstration
@@ -87,7 +87,7 @@ const SearchBar = ({ onSearch, theme, placeholder = "Search manga, anime, light 
     { id: 2, title: 'Your Name', type: 'Anime', category: '🎬' },
     { id: 3, title: 'Sword Art Online', type: 'Light Novel', category: '📚' },
     { id: 4, title: 'Demon Slayer', type: 'Manga', category: '📖' },
-    { id: 5, title: 'Spirited Away', type: 'Anime', category: '🎬' }
+    { id: 5, title: 'Spirited Away', type: 'Anime', category: '🎬' },
   ];
 
   useEffect(() => {
@@ -112,17 +112,17 @@ const SearchBar = ({ onSearch, theme, placeholder = "Search manga, anime, light 
     return () => clearTimeout(timeoutId);
   }, [query]);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     setQuery(e.target.value);
   };
 
-  const handleSuggestionClick = (suggestion) => {
+  const handleSuggestionClick = suggestion => {
     setQuery(suggestion.title);
     setShowSuggestions(false);
     onSearch(suggestion.title);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = e => {
     e.preventDefault();
     if (query.trim()) {
       setShowSuggestions(false);
@@ -146,7 +146,7 @@ const SearchBar = ({ onSearch, theme, placeholder = "Search manga, anime, light 
       <div style={{ position: 'relative' }}>
         <Search size={20} style={iconStyle} />
         <input
-          type="text"
+          type='text'
           value={query}
           onChange={handleInputChange}
           onFocus={handleInputFocus}
@@ -156,38 +156,42 @@ const SearchBar = ({ onSearch, theme, placeholder = "Search manga, anime, light 
         />
         {isLoading && (
           <div style={loadingStyle}>
-            <div style={{
-              width: '16px',
-              height: '16px',
-              border: '2px solid transparent',
-              borderTop: '2px solid currentColor',
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite'
-            }} />
+            <div
+              style={{
+                width: '16px',
+                height: '16px',
+                border: '2px solid transparent',
+                borderTop: '2px solid currentColor',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite',
+              }}
+            />
           </div>
         )}
       </div>
-      
+
       <div style={suggestionsStyle}>
         {suggestions.map((suggestion, index) => (
           <div
             key={suggestion.id}
             style={suggestionItemStyle}
             onClick={() => handleSuggestionClick(suggestion)}
-            onMouseEnter={(e) => {
+            onMouseEnter={e => {
               e.target.style.background = suggestionHoverStyle.background;
             }}
-            onMouseLeave={(e) => {
+            onMouseLeave={e => {
               e.target.style.background = 'transparent';
             }}
           >
             <span>{suggestion.category}</span>
             <div>
               <div style={{ fontWeight: '600' }}>{suggestion.title}</div>
-              <div style={{
-                fontSize: '0.8rem',
-                color: theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)'
-              }}>
+              <div
+                style={{
+                  fontSize: '0.8rem',
+                  color: theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
+                }}
+              >
                 {suggestion.type}
               </div>
             </div>

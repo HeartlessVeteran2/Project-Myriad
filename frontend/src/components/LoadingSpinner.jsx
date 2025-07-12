@@ -1,10 +1,8 @@
-import React from 'react';
-
 const LoadingSpinner = ({ size = 'medium', text = 'Loading...' }) => {
   const sizes = {
     small: '20px',
     medium: '40px',
-    large: '60px'
+    large: '60px',
   };
 
   const spinnerStyle = {
@@ -14,7 +12,7 @@ const LoadingSpinner = ({ size = 'medium', text = 'Loading...' }) => {
     borderTop: '3px solid #007bff',
     borderRadius: '50%',
     animation: 'spin 1s linear infinite',
-    margin: '0 auto'
+    margin: '0 auto',
   };
 
   const containerStyle = {
@@ -23,7 +21,7 @@ const LoadingSpinner = ({ size = 'medium', text = 'Loading...' }) => {
     alignItems: 'center',
     justifyContent: 'center',
     padding: '2rem',
-    minHeight: size === 'large' ? '200px' : 'auto'
+    minHeight: size === 'large' ? '200px' : 'auto',
   };
 
   return (
@@ -38,12 +36,14 @@ const LoadingSpinner = ({ size = 'medium', text = 'Loading...' }) => {
       </style>
       <div style={spinnerStyle}></div>
       {text && (
-        <p style={{
-          marginTop: '1rem',
-          color: '#6c757d',
-          fontSize: '0.9rem',
-          textAlign: 'center'
-        }}>
+        <p
+          style={{
+            marginTop: '1rem',
+            color: '#6c757d',
+            fontSize: '0.9rem',
+            textAlign: 'center',
+          }}
+        >
           {text}
         </p>
       )}
