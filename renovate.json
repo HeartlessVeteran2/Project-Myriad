@@ -175,8 +175,7 @@
       "matchUpdateTypes": [
         "major"
       ],
-      "separateMajorMinor": true,
-      "separateMinorPatch": true
+      "groupName": "Critical package major updates"
     },
     {
       "description": "Pin Docker digests",
