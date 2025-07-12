@@ -740,6 +740,7 @@ The CI/CD pipeline is managed by GitHub Actions and defined in the `.github/work
 ### Triggers
 
 The pipeline is triggered on:
+
 - `push` to `main` and `develop` branches
 - `pull_request` to `main` and `develop` branches
 - `workflow_dispatch` for manual runs
@@ -747,25 +748,25 @@ The pipeline is triggered on:
 ### Jobs
 
 1.  **`quality-checks`**:
-    *   Lints backend, frontend, and mobile code.
-    *   Performs security audits.
-    *   Runs a dependency check.
+    - Lints backend, frontend, and mobile code.
+    - Performs security audits.
+    - Runs a dependency check.
 
 2.  **`test-backend`**:
-    *   Runs backend integration and unit tests.
-    *   Uses MySQL and Redis services.
+    - Runs backend integration and unit tests.
+    - Uses MySQL and Redis services.
 
 3.  **`test-frontend`**:
-    *   Runs frontend tests using Vitest.
+    - Runs frontend tests using Vitest.
 
 4.  **`test-mobile`**:
-    *   Runs mobile tests on a macOS environment.
+    - Runs mobile tests on a macOS environment.
 
 5.  **`build-and-push`**:
-    *   Builds and pushes a Docker image to GitHub Container Registry on pushes to `main`.
+    - Builds and pushes a Docker image to GitHub Container Registry on pushes to `main`.
 
 6.  **`deploy`**:
-    *   Deploys the application to production on pushes to `main`.
+    - Deploys the application to production on pushes to `main`.
 
 ## Dependency Management
 

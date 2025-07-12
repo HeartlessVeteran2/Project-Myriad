@@ -4,13 +4,13 @@ This document provides a high-level overview of Project Myriad's development pro
 
 ## 📊 Overall Progress
 
-| Area                | Status      | Notes                                      |
-| ------------------- | ----------- | ------------------------------------------ |
-| **Backend**         | ✅ Complete | Core API, database, and services are stable. |
-| **Frontend**        | ✅ Complete | Main UI and features are implemented.      |
-| **Mobile**          | ✅ Complete | iOS and Android apps are functional.       |
-| **CI/CD**           | ✅ Complete | Automated testing and deployment pipeline. |
-| **Documentation**   | 🔄 In Progress | Continuously improving documentation.      |
+| Area              | Status         | Notes                                        |
+| ----------------- | -------------- | -------------------------------------------- |
+| **Backend**       | ✅ Complete    | Core API, database, and services are stable. |
+| **Frontend**      | ✅ Complete    | Main UI and features are implemented.        |
+| **Mobile**        | ✅ Complete    | iOS and Android apps are functional.         |
+| **CI/CD**         | ✅ Complete    | Automated testing and deployment pipeline.   |
+| **Documentation** | 🔄 In Progress | Continuously improving documentation.        |
 
 ---
 
