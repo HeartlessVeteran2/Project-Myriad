@@ -1,0 +1,99 @@
+config:
+  target: 'http://localhost:3000'
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      name: "Warm up"
+    - duration: 120
+      arrivalRate: 10
+      name: "Ramp up load"
+    - duration: 300
+      arrivalRate: 15
+      name: "Sustained load"
+    - duration: 60
+      arrivalRate: 25
+      name: "Spike test"
+  variables:
+    userIds:
+      - "user1"
+      - "user2" 
+      - "user3"
+      - "user4"
+      - "user5"
+  plugins:
+    metrics-by-endpoint:
+      useOnlyRequestNames: true
+
+scenarios:
+  - name: "Health Check"
+    weight: 10
+    flow:
+      - get:
+          url: "/health"
+          capture:
+            - json: "$.status"
+              as: "health_status"
+
+  - name: "User Authentication"
+    weight: 20
+    flow:
+      - post:
+          url: "/api/auth/login"
+          json:
+            email: "test@example.com"
+            password: "password123"
+          capture:
+            - json: "$.token"
+              as: "auth_token"
+      - get:
+          url: "/api/user/profile"
+          headers:
+            Authorization: "Bearer {{ auth_token }}"
+
+  - name: "Data Retrieval"
+    weight: 30
+    flow:
+      - get:
+          url: "/api/data"
+          headers:
+            Authorization: "Bearer {{ auth_token }}"
+      - get:
+          url: "/api/data/{{ $randomInt(1, 100) }}"
+          headers:
+            Authorization: "Bearer {{ auth_token }}"
+
+  - name: "Search Operations"
+    weight: 25
+    flow:
+      - get:
+          url: "/api/search?q={{ $randomString() }}"
+          headers:
+            Authorization: "Bearer {{ auth_token }}"
+
+  - name: "CRUD Operations"
+    weight: 15
+    flow:
+      - post:
+          url: "/api/items"
+          json:
+            title: "Test Item {{ $randomString() }}"
+            description: "Performance test item"
+          headers:
+            Authorization: "Bearer {{ auth_token }}"
+          capture:
+            - json: "$.id"
+              as: "item_id"
+      - get:
+          url: "/api/items/{{ item_id }}"
+          headers:
+            Authorization: "Bearer {{ auth_token }}"
+      - put:
+          url: "/api/items/{{ item_id }}"
+          json:
+            title: "Updated Item {{ $randomString() }}"
+          headers:
+            Authorization: "Bearer {{ auth_token }}"
+      - delete:
+          url: "/api/items/{{ item_id }}"
+          headers:
+            Authorization: "Bearer {{ auth_token }}"
