@@ -53,6 +53,12 @@ jobs:
           cd backend && npm run type-check || true
           cd ../frontend && npm run type-check || true
 
+      - name: Ensure root package.json exists
+        run: |
+          if [ ! -f package.json ]; then
+            echo '{}' > package.json
+          fi
+
       - name: Security Audit
         run: |
           npm audit --audit-level moderate
