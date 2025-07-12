@@ -1,11 +1,11 @@
-import express from 'express';
-import cors from 'cors';
-import morgan from 'morgan';
-import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
 import compression from 'compression';
-import winston from 'winston';
+import cors from 'cors';
 import dotenv from 'dotenv';
+import express from 'express';
+import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import winston from 'winston';
 
 // Load environment variables
 dotenv.config();
@@ -22,23 +22,20 @@ const logger = winston.createLogger({
     new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
     new winston.transports.File({ filename: 'logs/combined.log' }),
     new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-      )
-    })
-  ]
+      format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
+    }),
+  ],
 });
 
 // Import modules
-import { Tracking } from './tracking.js';
-import { DownloadManager } from './downloadManager.js';
+import { Accessibility } from './accessibility/index.js';
 import { AI } from './ai/index.js';
 import { Community } from './community/index.js';
+import { DownloadManager } from './downloadManager.js';
 import { extensionManager } from './extensions/index.js';
-import { Accessibility } from './accessibility/index.js';
 import { ParentalControls } from './parental/index.js';
 import { Sync } from './sync/index.js';
+import { Tracking } from './tracking.js';
 import { Web3Module } from './web3/index.js';
 
 const app = express();
@@ -60,24 +57,26 @@ extensionManager.loadExtensions().then(() => {
 });
 
 // Security middleware
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+      },
     },
-  },
-}));
+  })
+);
 
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
   message: {
-    error: 'Too many requests from this IP, please try again later.'
+    error: 'Too many requests from this IP, please try again later.',
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -86,25 +85,35 @@ app.use('/api', limiter);
 
 // Middleware
 app.use(compression());
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    credentials: true,
+  })
+);
 app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));
 app.use(express.json());
 
 // Basic routes
 app.get('/', (req, res) => {
-  res.json({ 
-    message: 'Project Myriad Backend API', 
+  res.json({
+    message: 'Project Myriad Backend API',
     version: '1.0.0',
     status: 'running',
     timestamp: new Date().toISOString(),
     features: [
-      'manga', 'anime', 'light-novels', 'user-tracking', 
-      'downloads', 'ai-recommendations', 'community', 
-      'extensions', 'accessibility', 'parental-controls',
-      'sync', 'web3-integration'
+      'manga',
+      'anime',
+      'light-novels',
+      'user-tracking',
+      'downloads',
+      'ai-recommendations',
+      'community',
+      'extensions',
+      'accessibility',
+      'parental-controls',
+      'sync',
+      'web3-integration',
     ],
     modules: {
       tracking: 'active',
@@ -115,8 +124,8 @@ app.get('/', (req, res) => {
       accessibility: 'active',
       parentalControls: 'active',
       sync: 'active',
-      web3: 'active'
-    }
+      web3: 'active',
+    },
   });
 });
 
@@ -126,13 +135,13 @@ app.get('/api/health', (req, res) => {
     downloads: downloadManager.getStats(),
     community: community.getStats(),
     extensions: extensionManager.getSystemStats(),
-    web3: web3.getWeb3Stats()
+    web3: web3.getWeb3Stats(),
   };
 
-  res.json({ 
-    status: 'healthy', 
+  res.json({
+    status: 'healthy',
     timestamp: new Date().toISOString(),
-    modules: moduleStats
+    modules: moduleStats,
   });
 });
 
@@ -140,43 +149,106 @@ app.get('/api/health', (req, res) => {
 app.get('/api/manga', (req, res) => {
   res.json({
     manga: [
-      { id: 1, title: 'One Piece', chapters: 1090, status: 'ongoing', rating: 9.5, genres: ['Adventure', 'Comedy', 'Shounen'] },
-      { id: 2, title: 'Attack on Titan', chapters: 139, status: 'completed', rating: 9.0, genres: ['Action', 'Drama', 'Fantasy'] },
-      { id: 3, title: 'Demon Slayer', chapters: 205, status: 'completed', rating: 8.8, genres: ['Action', 'Supernatural', 'Historical'] }
-    ]
+      {
+        id: 1,
+        title: 'One Piece',
+        chapters: 1090,
+        status: 'ongoing',
+        rating: 9.5,
+        genres: ['Adventure', 'Comedy', 'Shounen'],
+      },
+      {
+        id: 2,
+        title: 'Attack on Titan',
+        chapters: 139,
+        status: 'completed',
+        rating: 9.0,
+        genres: ['Action', 'Drama', 'Fantasy'],
+      },
+      {
+        id: 3,
+        title: 'Demon Slayer',
+        chapters: 205,
+        status: 'completed',
+        rating: 8.8,
+        genres: ['Action', 'Supernatural', 'Historical'],
+      },
+    ],
   });
 });
 
 app.get('/api/anime', (req, res) => {
   res.json({
     anime: [
-      { id: 1, title: 'Demon Slayer', episodes: 44, status: 'ongoing', rating: 8.7, genres: ['Action', 'Supernatural', 'Historical'] },
-      { id: 2, title: 'Attack on Titan', episodes: 87, status: 'completed', rating: 9.0, genres: ['Action', 'Drama', 'Fantasy'] },
-      { id: 3, title: 'Jujutsu Kaisen', episodes: 24, status: 'ongoing', rating: 8.9, genres: ['Action', 'Supernatural', 'School'] }
-    ]
+      {
+        id: 1,
+        title: 'Demon Slayer',
+        episodes: 44,
+        status: 'ongoing',
+        rating: 8.7,
+        genres: ['Action', 'Supernatural', 'Historical'],
+      },
+      {
+        id: 2,
+        title: 'Attack on Titan',
+        episodes: 87,
+        status: 'completed',
+        rating: 9.0,
+        genres: ['Action', 'Drama', 'Fantasy'],
+      },
+      {
+        id: 3,
+        title: 'Jujutsu Kaisen',
+        episodes: 24,
+        status: 'ongoing',
+        rating: 8.9,
+        genres: ['Action', 'Supernatural', 'School'],
+      },
+    ],
   });
 });
 
 app.get('/api/novels', (req, res) => {
   res.json({
     novels: [
-      { id: 1, title: 'Overlord', volumes: 16, status: 'ongoing', rating: 8.6, genres: ['Fantasy', 'Adventure', 'Comedy'] },
-      { id: 2, title: 'Re:Zero', volumes: 32, status: 'ongoing', rating: 8.8, genres: ['Fantasy', 'Psychological', 'Drama'] },
-      { id: 3, title: 'Konosuba', volumes: 17, status: 'completed', rating: 8.4, genres: ['Comedy', 'Fantasy', 'Adventure'] }
-    ]
+      {
+        id: 1,
+        title: 'Overlord',
+        volumes: 16,
+        status: 'ongoing',
+        rating: 8.6,
+        genres: ['Fantasy', 'Adventure', 'Comedy'],
+      },
+      {
+        id: 2,
+        title: 'Re:Zero',
+        volumes: 32,
+        status: 'ongoing',
+        rating: 8.8,
+        genres: ['Fantasy', 'Psychological', 'Drama'],
+      },
+      {
+        id: 3,
+        title: 'Konosuba',
+        volumes: 17,
+        status: 'completed',
+        rating: 8.4,
+        genres: ['Comedy', 'Fantasy', 'Adventure'],
+      },
+    ],
   });
 });
 
 app.get('/api/stats', (req, res) => {
   res.json({
     totalManga: 3,
-    totalAnime: 3, 
+    totalAnime: 3,
     totalNovels: 3,
     lastUpdated: new Date().toISOString(),
     userActivity: 'active',
     downloads: downloadManager.getStats(),
     community: community.getStats(),
-    extensions: extensionManager.getSystemStats()
+    extensions: extensionManager.getSystemStats(),
   });
 });
 
@@ -250,7 +322,11 @@ app.post('/api/accessibility/:userId/settings', (req, res) => {
 
 // Parental controls routes
 app.post('/api/parental/:userId/init', (req, res) => {
-  const result = parentalControls.initializeParentalControls(req.params.userId, req.body.parentEmail, req.body.settings);
+  const result = parentalControls.initializeParentalControls(
+    req.params.userId,
+    req.body.parentEmail,
+    req.body.settings
+  );
   res.json(result);
 });
 
@@ -261,7 +337,8 @@ app.post('/api/parental/:userId/check-content', (req, res) => {
 
 // Sync routes
 app.post('/api/sync/:userId/library', (req, res) => {
-  sync.syncLibrary(req.params.userId, req.body.deviceId, req.body.syncData)
+  sync
+    .syncLibrary(req.params.userId, req.body.deviceId, req.body.syncData)
     .then(result => res.json(result))
     .catch(error => res.status(500).json({ success: false, error: error.message }));
 });
@@ -273,7 +350,8 @@ app.get('/api/sync/:userId/devices', (req, res) => {
 
 // Web3 routes
 app.post('/api/web3/:userId/connect-wallet', (req, res) => {
-  web3.connectWallet(req.params.userId, req.body.walletInfo)
+  web3
+    .connectWallet(req.params.userId, req.body.walletInfo)
     .then(result => res.json(result))
     .catch(error => res.status(500).json({ success: false, error: error.message }));
 });
@@ -296,7 +374,7 @@ const errorHandler = (err, req, res, next) => {
     url: req.url,
     method: req.method,
     ip: req.ip,
-    userAgent: req.get('User-Agent')
+    userAgent: req.get('User-Agent'),
   });
 
   if (res.headersSent) {
@@ -304,17 +382,15 @@ const errorHandler = (err, req, res, next) => {
   }
 
   const status = err.status || err.statusCode || 500;
-  const message = process.env.NODE_ENV === 'production' 
-    ? 'Internal Server Error' 
-    : err.message;
+  const message = process.env.NODE_ENV === 'production' ? 'Internal Server Error' : err.message;
 
   res.status(status).json({
     error: {
       message,
       status,
       timestamp: new Date().toISOString(),
-      ...(process.env.NODE_ENV !== 'production' && { stack: err.stack })
-    }
+      ...(process.env.NODE_ENV !== 'production' && { stack: err.stack }),
+    },
   });
 };
 
@@ -322,15 +398,15 @@ const errorHandler = (err, req, res, next) => {
 const notFoundHandler = (req, res) => {
   logger.warn(`404 - Route not found: ${req.method} ${req.url}`, {
     ip: req.ip,
-    userAgent: req.get('User-Agent')
+    userAgent: req.get('User-Agent'),
   });
-  
+
   res.status(404).json({
     error: {
       message: 'Route not found',
       status: 404,
-      timestamp: new Date().toISOString()
-    }
+      timestamp: new Date().toISOString(),
+    },
   });
 };
 
@@ -352,10 +428,10 @@ app.get('/api/health', (req, res) => {
       accessibility: 'operational',
       parental: 'operational',
       sync: 'operational',
-      web3: 'operational'
-    }
+      web3: 'operational',
+    },
   };
-  
+
   res.json(healthData);
 });
 
@@ -380,7 +456,7 @@ app.get('/api/health/detailed', (req, res) => {
       accessibility: { status: 'operational', lastCheck: new Date().toISOString() },
       parental: { status: 'operational', lastCheck: new Date().toISOString() },
       sync: { status: 'operational', lastCheck: new Date().toISOString() },
-      web3: { status: 'operational', lastCheck: new Date().toISOString() }
+      web3: { status: 'operational', lastCheck: new Date().toISOString() },
     },
     endpoints: {
       '/api/health': 'Health check endpoint',
@@ -393,10 +469,10 @@ app.get('/api/health/detailed', (req, res) => {
       '/api/accessibility': 'Accessibility features',
       '/api/parental': 'Parental controls',
       '/api/sync': 'Cross-platform sync',
-      '/api/web3': 'Blockchain integration'
-    }
+      '/api/web3': 'Blockchain integration',
+    },
   };
-  
+
   res.json(detailedHealth);
 });
 
@@ -411,24 +487,26 @@ const server = app.listen(PORT, () => {
   logger.info(`📡 API available at http://localhost:${PORT}`);
   logger.info(`❤️  Health check: http://localhost:${PORT}/api/health`);
   logger.info(`📖 Documentation: http://localhost:${PORT}/`);
-  logger.info(`🎯 Features: Tracking, Downloads, AI, Community, Extensions, Accessibility, Parental Controls, Sync, Web3`);
+  logger.info(
+    `🎯 Features: Tracking, Downloads, AI, Community, Extensions, Accessibility, Parental Controls, Sync, Web3`
+  );
 });
 
 // Move the graceful shutdown and error handlers after server declaration
 // Graceful shutdown handler
-const gracefulShutdownHandler = (signal) => {
+const gracefulShutdownHandler = signal => {
   logger.info(`Received ${signal}. Starting graceful shutdown...`);
-  
-  server.close((err) => {
+
+  server.close(err => {
     if (err) {
       logger.error('Error during server shutdown:', err);
       process.exit(1);
     }
-    
+
     logger.info('Server closed successfully');
     process.exit(0);
   });
-  
+
   // Force close after 30 seconds
   setTimeout(() => {
     logger.error('Forced shutdown after timeout');
@@ -446,7 +524,7 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 // Uncaught exception handler
-process.on('uncaughtException', (error) => {
+process.on('uncaughtException', error => {
   logger.error('Uncaught Exception:', error);
   process.exit(1);
 });
