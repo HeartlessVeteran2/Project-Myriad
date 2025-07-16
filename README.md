@@ -1,6 +1,4 @@
-To help you copy the **Project Myriad** guide into a document without hitting copy-paste limits, I’ve split it into smaller, logical sections. Each section is designed to be under the typical copy-paste limit (e.g., 10,000 characters) and includes clear headers for easy navigation. You can copy and paste each section individually into your document (e.g., Google Docs) to assemble the complete guide. Below are the sections:
 
----
 
 ### **Section 1: Introduction and Vision**
 
