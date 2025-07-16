@@ -1,0 +1,2 @@
+- name: GitHub Checks
+  uses: LouisBrunner/checks-action@v2.0.0
