@@ -2,7 +2,7 @@ apply plugin: "com.android.application"
 apply plugin: "com.facebook.react"
 
 // Define Flipper version
-def FLIPPER_VERSION = "0.182.0"
+def FLIPPER_VERSION = "0.273.0"
 // Define hermesEnabled variable
 def hermesEnabled = project.ext.has("react") && project.ext.react.has("enableHermes") ? project.ext.react.enableHermes : true
 
