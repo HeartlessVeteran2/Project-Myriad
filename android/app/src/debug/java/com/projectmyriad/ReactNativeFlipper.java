@@ -55,8 +55,8 @@ public class ReactNativeFlipper {
           new ReactInstanceEventListener() {
             @Override
             public void onReactContextInitialized(ReactContext reactContext) {
-              ReactInstanceManager.ReactInstanceEventListener.super
-                  .onReactContextInitialized(reactContext);
+              ReactInstanceManager.ReactInstanceEventListener.super.onReactContextInitialized(
+                  reactContext);
               client.addPlugin(new FrescoFlipperPlugin());
             }
           };
