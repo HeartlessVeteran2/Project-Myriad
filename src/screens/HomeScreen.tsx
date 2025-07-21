@@ -18,12 +18,15 @@ const HomeScreen: React.FC = () => {
     navigation.navigate('Library');
   };
 
+  // These navigation functions have been removed as the screens are no longer in the navigation stack
   const handleBrowseOnline = () => {
-    navigation.navigate('Browse');
+    // Temporarily navigate to Library instead
+    navigation.navigate('Library');
   };
 
   const handleAICore = () => {
-    navigation.navigate('AICore');
+    // Temporarily navigate to Settings instead
+    navigation.navigate('Settings');
   };
 
   const recentItems = [
@@ -59,7 +62,7 @@ const HomeScreen: React.FC = () => {
               style={styles.actionButton}
             />
             <Button
-              title="Browse Online"
+              title="Go to Library" // Changed from "Browse Online"
               onPress={handleBrowseOnline}
               style={[styles.actionButton, styles.secondaryButton]}
             />
@@ -80,17 +83,17 @@ const HomeScreen: React.FC = () => {
         </View>
 
         <View style={styles.featuresSection}>
-          <Text style={styles.sectionTitle}>AI Features</Text>
+          <Text style={styles.sectionTitle}>Settings & Features</Text>
           <TouchableOpacity style={styles.featureCard} onPress={handleAICore}>
-            <Text style={styles.featureTitle}>OCR Translation</Text>
+            <Text style={styles.featureTitle}>App Settings</Text>
             <Text style={styles.featureDescription}>
-              Translate manga text in real-time using AI
+              Configure application preferences and options
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.featureCard} onPress={handleAICore}>
-            <Text style={styles.featureTitle}>Smart Recommendations</Text>
+          <TouchableOpacity style={styles.featureCard} onPress={handleImportMedia}>
+            <Text style={styles.featureTitle}>Library Management</Text>
             <Text style={styles.featureDescription}>
-              Discover new content based on your preferences
+              Organize and manage your local media collection
             </Text>
           </TouchableOpacity>
         </View>
