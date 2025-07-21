@@ -11,6 +11,7 @@ import Card from '../components/Card';
 import Button from '../components/Button';
 import {VaultService} from '../services/VaultService';
 import {Manga, Anime} from '../types';
+import * as DocumentPicker from 'expo-document-picker';
 
 const LibraryScreen: React.FC = () => {
   const [library, setLibrary] = useState<{manga: Manga[]; anime: Anime[]}>({
@@ -38,8 +39,43 @@ const LibraryScreen: React.FC = () => {
   };
 
   const handleImportMedia = async () => {
-    // TODO: Implement document picker and import functionality
-    console.log('Import media functionality to be implemented');
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: [
+          'application/x-cbz',
+          'application/x-cbr',
+          'application/zip',
+          'application/x-rar-compressed',
+          'application/pdf',
+          'video/mp4',
+          'video/x-matroska',
+          'video/x-msvideo',
+          'video/webm',
+        ],
+        copyToCacheDirectory: true,
+        multiple: false,
+      });
+      if (result.canceled || !result.assets || !result.assets[0].uri) return;
+      const fileUri = result.assets[0].uri;
+      const fileName = result.assets[0].name || '';
+      const ext = fileName.split('.').pop()?.toLowerCase();
+      const vaultService = VaultService.getInstance();
+      if (['cbz', 'cbr', 'zip', 'rar', 'pdf'].includes(ext)) {
+        await vaultService.importManga(fileUri, {
+          extractContent: true,
+          generateThumbnail: true,
+        });
+      } else if (['mp4', 'mkv', 'avi', 'webm'].includes(ext)) {
+        await vaultService.importAnime(fileUri, {generateThumbnail: true});
+      } else {
+        alert('Unsupported file type');
+        return;
+      }
+      await loadLibrary();
+      alert('Import successful!');
+    } catch (e) {
+      alert('Import failed: ' + e.message);
+    }
   };
 
   const filteredItems = searchQuery

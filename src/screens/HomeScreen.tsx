@@ -7,31 +7,36 @@ import {
   TouchableOpacity,
   StatusBar,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import Button from '../components/Button';
 import Card from '../components/Card';
 
 const HomeScreen: React.FC = () => {
+  const navigation = useNavigation();
+
   const handleImportMedia = () => {
-    // TODO: Implement media import functionality
-    console.log('Import media pressed');
+    navigation.navigate('Library');
   };
 
   const handleBrowseOnline = () => {
-    // TODO: Navigate to browse screen
-    console.log('Browse online pressed');
+    navigation.navigate('Browse');
+  };
+
+  const handleAICore = () => {
+    navigation.navigate('AICore');
   };
 
   const recentItems = [
     {
       id: '1',
       title: 'Attack on Titan',
-      imageUrl: 'https://via.placeholder.com/300x400',
+      imageUrl: 'https://example.com/covers/attack-on-titan.jpg',
       tags: ['Action', 'Drama'],
     },
     {
       id: '2',
       title: 'One Piece',
-      imageUrl: 'https://via.placeholder.com/300x400',
+      imageUrl: 'https://example.com/covers/one-piece.jpg',
       tags: ['Adventure', 'Comedy'],
     },
   ];
@@ -76,13 +81,13 @@ const HomeScreen: React.FC = () => {
 
         <View style={styles.featuresSection}>
           <Text style={styles.sectionTitle}>AI Features</Text>
-          <TouchableOpacity style={styles.featureCard}>
+          <TouchableOpacity style={styles.featureCard} onPress={handleAICore}>
             <Text style={styles.featureTitle}>OCR Translation</Text>
             <Text style={styles.featureDescription}>
               Translate manga text in real-time using AI
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.featureCard}>
+          <TouchableOpacity style={styles.featureCard} onPress={handleAICore}>
             <Text style={styles.featureTitle}>Smart Recommendations</Text>
             <Text style={styles.featureDescription}>
               Discover new content based on your preferences

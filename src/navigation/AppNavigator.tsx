@@ -8,6 +8,7 @@ import HomeScreen from '../screens/HomeScreen';
 import LibraryScreen from '../screens/LibraryScreen';
 import BrowseScreen from '../screens/BrowseScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import AICoreScreen from '../screens/AICoreScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -64,6 +65,7 @@ export default function AppNavigator() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{headerShown: false}}>
         <Stack.Screen name="Main" component={TabNavigator} />
+        <Stack.Screen name="AICore" component={AICoreScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
