@@ -1,28 +1,22 @@
-import React, { useState, useRef, useEffect } from 'react';
-import {
-  View,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Text,
-  Animated,
-  Keyboard,
-  ViewStyle,
 } from 'react-native';
 
-interface SearchBarProps {
-  placeholder?: string;
-  onSearch: (query: string) => void;
-  onClear?: () => void;
-  initialValue?: string;
+    marginLeft: 12,
+    padding: 8,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   style?: ViewStyle;
   autoFocus?: boolean;
-  showFilterButton?: boolean;
-  onFilterPress?: () => void;
+    fontSize: 18,
+    color: '#007AFF',
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({
-  placeholder = 'Search...',
+export { SearchBar };
   onSearch,
   onClear,
   initialValue = '',
@@ -33,17 +27,28 @@ const SearchBar: React.FC<SearchBarProps> = ({
 }) => {
   const [query, setQuery] = useState(initialValue);
   const [isFocused, setIsFocused] = useState(false);
+  const animatedWidth = useRef(new Animated.Value(0)).current;
   const inputRef = useRef<TextInput>(null);
-  const animatedWidth = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    // Animate width when focus changes
     Animated.timing(animatedWidth, {
-      toValue: isFocused ? 0.85 : 1,
+      toValue: isFocused ? 1 : 0,
       duration: 200,
       useNativeDriver: false,
     }).start();
-  }, [isFocused, animatedWidth]);
+  }, [isFocused]);
+
+  const handleSearch = (text: string) => {
+    setQuery(text);
+    onSearch(text);
+  };
+
+  const handleClear = () => {
+    setQuery('');
+    onClear?.();
+    onSearch('');
+    inputRef.current?.focus();
+  };
 
   const handleFocus = () => {
     setIsFocused(true);
@@ -53,73 +58,33 @@ const SearchBar: React.FC<SearchBarProps> = ({
     setIsFocused(false);
   };
 
-  const handleClear = () => {
-    setQuery('');
-    if (onClear) {
-      onClear();
-    }
-    inputRef.current?.focus();
-  };
-
-  const handleCancel = () => {
-    Keyboard.dismiss();
-    setIsFocused(false);
-    if (query === '' && onClear) {
-      onClear();
-    }
-  };
-
-  const handleSubmit = () => {
-    if (query.trim()) {
-      onSearch(query.trim());
-    }
-  };
-
   return (
     <View style={[styles.container, style]}>
-      <Animated.View
-        style={[
-          styles.searchContainer,
-          { width: animatedWidth.interpolate({ inputRange: [0, 1], outputRange: ['85%', '100%'] }) },
-        ]}
-      >
-        <View style={styles.inputContainer}>
-          <TextInput
-            ref={inputRef}
-            style={styles.input}
-            placeholder={placeholder}
-            placeholderTextColor="#999"
-            value={query}
-            onChangeText={setQuery}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
-            onSubmitEditing={handleSubmit}
-            returnKeyType="search"
-            autoCapitalize="none"
-            autoCorrect={false}
-            autoFocus={autoFocus}
-            clearButtonMode="never"
-          />
-          {query.length > 0 && (
-            <TouchableOpacity style={styles.clearButton} onPress={handleClear}>
-              <Text style={styles.clearButtonText}>✕</Text>
-            </TouchableOpacity>
-          )}
-          {showFilterButton && (
-            <TouchableOpacity 
-              style={styles.filterButton} 
-              onPress={onFilterPress}
-              testID="filter-button"
-            >
-              <Text style={styles.filterButtonText}>Filter</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </Animated.View>
+      <View style={styles.searchContainer}>
+        <TextInput
+          ref={inputRef}
+          style={[styles.input, isFocused && styles.inputFocused]}
+          placeholder={placeholder}
+          placeholderTextColor="#999"
+          value={query}
+          onChangeText={handleSearch}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          autoFocus={autoFocus}
+          returnKeyType="search"
+          onSubmitEditing={() => Keyboard.dismiss()}
+        />
 
-      {isFocused && (
-        <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
-          <Text style={styles.cancelButtonText}>Cancel</Text>
+        {query.length > 0 && (
+          <TouchableOpacity style={styles.clearButton} onPress={handleClear}>
+            <Text style={styles.clearButtonText}>✕</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
+      {showFilterButton && (
+        <TouchableOpacity style={styles.filterButton} onPress={onFilterPress}>
+          <Text style={styles.filterButtonText}>⚙</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -130,33 +95,38 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    padding: 16,
+    backgroundColor: '#f5f5f5',
   },
   searchContainer: {
     flex: 1,
-  },
-  inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#2c2c2c',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    height: 44,
+    backgroundColor: 'white',
+    borderRadius: 25,
+    paddingHorizontal: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   input: {
     flex: 1,
-    color: '#FFFFFF',
+    height: 40,
     fontSize: 16,
-    paddingVertical: 8,
+    color: '#333',
+  },
+  inputFocused: {
+    borderColor: '#007AFF',
   },
   clearButton: {
-    padding: 8,
+    padding: 4,
+    marginLeft: 8,
   },
   clearButtonText: {
-    color: '#999',
     fontSize: 16,
+    color: '#999',
     fontWeight: 'bold',
   },
   cancelButton: {

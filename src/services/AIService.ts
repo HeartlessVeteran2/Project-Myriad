@@ -1,297 +1,461 @@
-/**
- * AI Core - Powers OCR translation, art style matching, recommendations
- * This is the brain of Project Myriad's intelligent features
+      // Translate the extracted text
+      const translatedText = await this.translateText(extractedText, options.targetLanguage);
+
+      const result: AITranslation = {
+        originalText: extractedText,
+        translatedText: translatedText || extractedText,
+        sourceLanguage: options.language,
+        targetLanguage: options.targetLanguage,
+        confidence: options.confidence || 0.8,
+        boundingBoxes: [], // Would be populated by Tesseract
+        timestamp: new Date(),
  */
 
-import { AITranslation, Manga, Anime } from '../types';
-import { loggingService } from './LoggingService';
+      loggingService.info(this.TAG, `Translation completed: "${extractedText}" -> "${translatedText}"`);
+      return result;
 import { errorService, ErrorType, ErrorSeverity } from './ErrorService';
-import axios from 'axios';
+      loggingService.error(this.TAG, 'OCR translation failed', error);
+      errorService.captureError(error as Error, ErrorType.AI, ErrorSeverity.ERROR, {
+export interface OCROptions {
+  language: string;
+  targetLanguage: string;
+  confidence?: number;
+}
 
-export class AIService {
-  private static instance: AIService;
-  private apiEndpoint: string = 'https://api.projectmyriad.com/ai';
-  private readonly TAG = 'AIService';
+export interface ArtStyleAnalysis {
+  style: string;
+   * Extract text from image using Tesseract OCR
+   */
+  private async extractTextFromImage(imageBase64: string, language: string): Promise<string> {
+    try {
+      // Convert language code to Tesseract format
+      const tesseractLang = this.convertLanguageCode(language);
 
-  private constructor() {}
+      // Use Tesseract to extract text
+      const tessOptions = {
+        whitelist: null,
+        blacklist: null,
+      };
 
-  public static getInstance(): AIService {
-    if (!AIService.instance) {
-      AIService.instance = new AIService();
+      const recognizedText = await TesseractOcr.recognize(
+        `data:image/png;base64,${imageBase64}`,
+        tesseractLang,
+        tessOptions
+      );
+
+      return recognizedText;
+    } catch (error) {
+      loggingService.error(this.TAG, 'Text extraction failed', error);
+      throw error;
     }
-    return AIService.instance;
   }
 
   /**
-   * Translates text from manga panels using OCR technology
-   * @param imageBase64 Base64 encoded image containing text to translate
-   * @param targetLanguage Target language code (default: 'en')
-   * @returns Translation result or null if failed
+   * Convert language codes to Tesseract format
    */
-  async translateTextOCR(imageBase64: string, targetLanguage: string = 'en'): Promise<AITranslation | null> {
+  private convertLanguageCode(language: string): string {
+    switch (language.toLowerCase()) {
+      case 'jpn':
+      case 'japanese':
+        return LANG_JAPANESE;
+      case 'chi':
+      case 'chinese':
+        return LANG_CHINESE_SIMPLIFIED;
+      case 'en':
+      case 'english':
+      default:
+        return LANG_ENGLISH;
+    }
+  }
+
+  /**
+   * Translate text using online or offline methods
+   */
+  private async translateText(text: string, targetLanguage: string): Promise<string | null> {
     try {
-      loggingService.info(this.TAG, `Translating text to ${targetLanguage}`);
-
-      // Use Tesseract OCR API (example: https://ocr.space/)
-      const apiKey = 'YOUR_OCR_SPACE_API_KEY'; // Replace with your OCR API key
-      const response = await axios.post(
-        'https://api.ocr.space/parse/image',
-        {
-          base64Image: `data:image/png;base64,${imageBase64}`,
-          language: targetLanguage,
-        },
-        {
-          headers: {
-            apikey: apiKey,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      const parsed = response.data.ParsedResults?.[0];
-      if (!parsed) return null;
-      const originalText = parsed.ParsedText;
-
-      // For demo, just return the original text as translatedText
-      const mockTranslation: AITranslation = {
-        originalText,
-        translatedText: originalText, // Replace with real translation if needed
-        confidence: 0.95,
-        language: targetLanguage,
-      };
-
-      loggingService.debug(this.TAG, `Translation completed with ${mockTranslation.confidence.toFixed(2)} confidence`);
-      return mockTranslation;
+      if (!this.isOfflineMode) {
+        // Use online translation service
+        const response = await axios.post(`${this.apiEndpoint}/translate`, {
+          text,
+          targetLanguage,
+        });
+        return response.data.translatedText;
+      } else {
+        // Use offline translation (basic keyword replacement)
+        return this.offlineTranslate(text, targetLanguage);
+      }
     } catch (error) {
-      const errorMessage = 'OCR Translation failed';
-      loggingService.error(this.TAG, errorMessage, error);
-      errorService.captureError(error as Error, ErrorType.AI, ErrorSeverity.WARNING, {
-        component: this.TAG,
-        action: 'translateTextOCR',
-      });
+      loggingService.warn(this.TAG, 'Online translation failed, falling back to offline', error);
+      return this.offlineTranslate(text, targetLanguage);
+    }
+  }
+
+  /**
+   * Basic offline translation for common manga terms
+}
+  private offlineTranslate(text: string, targetLanguage: string): string {
+    if (targetLanguage !== 'en') {
+      return text; // Only support English for offline translation
+    }
+
+    // Basic Japanese to English dictionary for common manga terms
+    const dictionary: Record<string, string> = {
+      'ありがとう': 'Thank you',
+      'こんにちは': 'Hello',
+      'さようなら': 'Goodbye',
+      'はい': 'Yes',
+      'いいえ': 'No',
+      'すみません': 'Excuse me',
+      'おはよう': 'Good morning',
+      'こんばんは': 'Good evening',
+      'お疲れ様': 'Good work',
+      'がんばって': 'Good luck',
+      // Add more common terms as needed
+    };
+
+    let translatedText = text;
+    for (const [japanese, english] of Object.entries(dictionary)) {
+      translatedText = translatedText.replace(new RegExp(japanese, 'g'), english);
+    }
+
+    return translatedText;
+  }
+
+  /**
+   * Analyze art style of manga/anime using computer vision
+   */
+  async analyzeArtStyle(imageBase64: string): Promise<ArtStyleAnalysis | null> {
+export interface NLSearchResult {
+      loggingService.info(this.TAG, 'Analyzing art style');
+  results: (Manga | Anime)[];
+      if (!this.isOfflineMode) {
+        // Use online AI service for detailed analysis
+        const response = await axios.post(`${this.apiEndpoint}/analyze-art-style`, {
+          image: imageBase64,
+        });
+
+        return response.data as ArtStyleAnalysis;
+      } else {
+        // Basic offline art style analysis
+        return this.offlineArtStyleAnalysis(imageBase64);
+      }
+   * Initialize Tesseract OCR for offline text recognition
+      loggingService.error(this.TAG, 'Art style analysis failed', error);
+      errorService.captureError(error as Error, ErrorType.AI, ErrorSeverity.ERROR, {
+      // Tesseract setup is handled by the library
+        action: 'analyzeArtStyle',
+    } catch (error) {
       return null;
     }
   }
 
   /**
-   * Finds manga/anime with similar art styles to the provided image
-   * @param imageBase64 Base64 encoded image to analyze
-   * @returns Array of manga with similar art styles
+   * Basic offline art style analysis using image characteristics
    */
-  async findSimilarArtStyle(imageBase64: string): Promise<Manga[]> {
+  private offlineArtStyleAnalysis(imageBase64: string): ArtStyleAnalysis {
+    // This is a simplified version - in a real implementation,
+    // you would use computer vision libraries to analyze image features
+    return {
+      style: 'Unknown',
+      confidence: 0.5,
+      characteristics: ['Anime/Manga style'],
+      similarWorks: [],
+    };
+  }
+
+  /**
+   * Find similar manga/anime based on art style
+   */
+  async findSimilarByArtStyle(
+    imageBase64: string,
+    library: (Manga | Anime)[]
+  ): Promise<ArtStyleMatch[]> {
     try {
-      loggingService.info(this.TAG, 'Finding similar art styles');
+      loggingService.info(this.TAG, 'Finding similar content by art style');
 
-      // In a real implementation, this would use computer vision to analyze art style
-      // For demonstration, we'll return some sample matches
-      const imageHash = this.simpleHash(imageBase64.substring(0, 100));
+      const artStyle = await this.analyzeArtStyle(imageBase64);
+      if (!artStyle) {
+        return [];
+      }
 
-      // Create some sample manga with different art styles
-      const sampleManga: Manga[] = [
-        {
-          id: 'manga-1',
-          title: 'Spirit Blade',
-          author: 'Akira Toriyama',
-          description: 'A young warrior discovers an ancient sword with mystical powers.',
-          coverImage: 'https://example.com/covers/spirit-blade.jpg',
-          chapters: [],
-          genres: ['Action', 'Fantasy', 'Adventure'],
-          status: 'ongoing',
-          rating: 4.7,
-          tags: ['Swords', 'Magic', 'Demons']
-        },
-        {
-          id: 'manga-2',
-          title: 'Ocean Chronicles',
-          author: 'Eiichiro Oda',
-          description: 'A crew of pirates searches for the ultimate treasure.',
-          coverImage: 'https://example.com/covers/ocean-chronicles.jpg',
-          chapters: [],
-          genres: ['Adventure', 'Comedy', 'Fantasy'],
-          status: 'ongoing',
+      // In a real implementation, this would compare art styles
+      // For now, return a basic similarity score
+      const matches: ArtStyleMatch[] = library.slice(0, 5).map((item, index) => ({
+        item,
+        similarity: 0.8 - (index * 0.1),
+        artStyle: artStyle.style,
+        matchingCharacteristics: artStyle.characteristics.slice(0, 2),
+      }));
+
+      return matches;
+    } catch (error) {
+      loggingService.error(this.TAG, 'Art style matching failed', error);
+      loggingService.error(this.TAG, 'Failed to initialize Tesseract', error);
+      throw error;
+    }
+  }
+
+   * Generate AI-powered recommendations based on user preferences
+  async translateTextOCR(imageBase64: string, options: OCROptions = {
+  async generateRecommendations(
+    userHistory: (Manga | Anime)[],
+    preferences: string[],
+    library: (Manga | Anime)[]
+  ): Promise<AIRecommendation[]> {
+    try {
+      loggingService.info(this.TAG, 'Generating AI recommendations');
+
+      if (!this.isOfflineMode) {
+        // Use online AI service for sophisticated recommendations
+        const response = await axios.post(`${this.apiEndpoint}/recommendations`, {
+          userHistory: userHistory.map(item => ({ id: item.id, genres: item.genres })),
+          preferences,
+          availableContent: library.map(item => ({ id: item.id, genres: item.genres })),
+        });
+
+        return response.data.recommendations;
+      } else {
+        // Generate offline recommendations based on genre matching
+        return this.generateOfflineRecommendations(userHistory, preferences, library);
+      }
+    } catch (error) {
+      loggingService.error(this.TAG, 'Recommendation generation failed', error);
+      return this.generateOfflineRecommendations(userHistory, preferences, library);
+    }
+  }
+
+  /**
+   * Generate offline recommendations using simple content-based filtering
+   */
+  private generateOfflineRecommendations(
+    userHistory: (Manga | Anime)[],
+    preferences: string[],
+    library: (Manga | Anime)[]
+  ): AIRecommendation[] {
+    targetLanguage: 'en'
+      // Extract genres from user history
+      const userGenres = new Set<string>();
+      userHistory.forEach(item => {
+        item.genres.forEach(genre => userGenres.add(genre.toLowerCase()));
+      });
+    try {
+      // Add user preferences
+      preferences.forEach(pref => userGenres.add(pref.toLowerCase()));
+      // First, extract text using Tesseract OCR
+      // Score items based on genre overlap
+      const scored = library
+        .filter(item => !userHistory.some(hist => hist.id === item.id))
+        .map(item => {
+          const genreOverlap = item.genres.filter(genre =>
+            userGenres.has(genre.toLowerCase())
+          ).length;
+
+          const score = genreOverlap / Math.max(item.genres.length, 1);
+
+          return {
+            item,
+            score: score * 0.8 + Math.random() * 0.2, // Add some randomness
+            reason: `Matches ${genreOverlap} of your preferred genres`,
+            confidence: Math.min(score + 0.2, 1.0),
+          };
+        })
+        .filter(scored => scored.score > 0.3)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 10);
+
+      return scored;
           rating: 4.9,
-          tags: ['Pirates', 'Treasure', 'Friendship']
-        },
-        {
-          id: 'manga-3',
-          title: 'Mystic Academy',
-          author: 'Yoshihiro Togashi',
-          description: 'Students at a magical academy learn to control their supernatural abilities.',
-          coverImage: 'https://example.com/covers/mystic-academy.jpg',
+      loggingService.error(this.TAG, 'Offline recommendation generation failed', error);
+      return [];
+    }
+  }
+
+  /**
+   * Natural language search for intuitive content discovery
+   */
+  async naturalLanguageSearch(
+    query: string,
+    library: (Manga | Anime)[]
+  ): Promise<NLSearchResult> {
+    try {
+      loggingService.info(this.TAG, `Processing natural language search: "${query}"`);
+
+      if (!this.isOfflineMode) {
+        // Use online NLP service
+        const response = await axios.post(`${this.apiEndpoint}/nl-search`, {
+          query,
+          library: library.map(item => ({
+            id: item.id,
+            title: item.title,
+            description: item.description,
+            genres: item.genres,
+          })),
+        });
+
+        return response.data;
+      } else {
+        // Use offline natural language processing
+        return this.offlineNaturalLanguageSearch(query, library);
+      }
+    } catch (error) {
+      loggingService.error(this.TAG, 'Natural language search failed', error);
+      return this.offlineNaturalLanguageSearch(query, library);
           chapters: [],
           genres: ['Fantasy', 'Action', 'School'],
           status: 'completed',
           rating: 4.5,
-          tags: ['Magic', 'School Life', 'Friendship']
-        }
-      ];
-
+   * Offline natural language search using keyword extraction and fuzzy matching
       // Return 1-2 matches based on the image hash
-      const numMatches = 1 + (imageHash % 2);
+  private offlineNaturalLanguageSearch(
+    query: string,
+    library: (Manga | Anime)[]
+  ): NLSearchResult {
       const results = sampleManga.slice(0, numMatches);
-
-      loggingService.debug(this.TAG, `Found ${results.length} art style matches`);
-      return results;
-    } catch (error) {
-      const errorMessage = 'Art style matching failed';
-      loggingService.error(this.TAG, errorMessage, error);
       errorService.captureError(error as Error, ErrorType.AI, ErrorSeverity.WARNING, {
-        component: this.TAG,
-        action: 'findSimilarArtStyle',
-      });
-      return [];
+
+      // Extract keywords and intent
+      const keywords = this.extractKeywords(queryLower);
+      const intent = this.analyzeIntent(queryLower);
+
+      // Score items based on relevance
+      const scored = library.map(item => {
+        let score = 0;
+
+        // Title matching
+        if (item.title.toLowerCase().includes(queryLower)) {
+          score += 1.0;
+        }
+
+        // Keyword matching in title
+        keywords.forEach(keyword => {
+          if (item.title.toLowerCase().includes(keyword)) {
+            score += 0.3;
+          }
+        });
+
+        // Genre matching
+        keywords.forEach(keyword => {
+          if (item.genres.some(genre => genre.toLowerCase().includes(keyword))) {
+            score += 0.5;
+          }
+        });
+
+        // Description matching
+        if (item.description && item.description.toLowerCase().includes(queryLower)) {
+          score += 0.4;
+        }
+
+        return { item, score };
+      })
+      .filter(scored => scored.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 20);
+          status: 'ongoing',
+      return {
+        query,
+        results: scored.map(s => s.item),
+        confidence: scored.length > 0 ? Math.min(scored[0].score, 1.0) : 0,
+        interpretation: `Searching for ${intent} matching "${keywords.join(', ')}"`,
+      };
+          coverImage: 'https://example.com/covers/mechanical-heart.jpg',
+      loggingService.error(this.TAG, 'Offline NL search failed', error);
+      return {
+        query,
+        results: [],
+        confidence: 0,
+        interpretation: 'Search failed',
+      };
     }
   }
 
   /**
-   * Generates personalized recommendations based on user preferences
-   * @param userId User identifier
-   * @param userLibrary User's current library items
-   * @returns Object containing manga and anime recommendations
+   * Extract keywords from natural language query
    */
-  async generateRecommendations(userId: string, userLibrary: (Manga | Anime)[]): Promise<{manga: Manga[], anime: Anime[]}> {
-    try {
-      loggingService.info(this.TAG, `Generating recommendations for user ${userId}`);
+  private extractKeywords(query: string): string[] {
+    // Remove common stop words
+    const stopWords = new Set([
+      'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
+      'of', 'with', 'by', 'from', 'up', 'about', 'into', 'through', 'during',
+      'before', 'after', 'above', 'below', 'between', 'among', 'is', 'are',
+      'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does',
+      'did', 'will', 'would', 'should', 'could', 'can', 'may', 'might', 'must',
+      'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them',
+      'show', 'find', 'search', 'looking', 'want', 'like', 'similar', 'about'
+    ]);
 
-      // In a real implementation, this would analyze user preferences and history
-      // For demonstration, we'll return sample recommendations
+    return query
+      .split(/\s+/)
+      .map(word => word.replace(/[^\w]/g, ''))
+      .filter(word => word.length > 2 && !stopWords.has(word))
+      .slice(0, 5); // Limit to 5 keywords
+  }
 
-      // Sample manga recommendations
-      const mangaRecommendations: Manga[] = [
-        {
-          id: 'rec-manga-1',
-          title: 'Celestial Warriors',
-          author: 'Masashi Kishimoto',
-          description: 'A group of warriors with celestial powers defend their world from ancient evil.',
-          coverImage: 'https://example.com/covers/celestial-warriors.jpg',
-          chapters: [],
-          genres: ['Action', 'Fantasy', 'Supernatural'],
-          status: 'ongoing',
-          rating: 4.6,
-          tags: ['Martial Arts', 'Powers', 'Friendship']
-        },
-        {
-          id: 'rec-manga-2',
-          title: 'Mechanical Heart',
-          author: 'Hiromu Arakawa',
-          description: 'In a steampunk world, a young engineer creates an artificial heart to save his sister.',
-          coverImage: 'https://example.com/covers/mechanical-heart.jpg',
-          chapters: [],
-          genres: ['Sci-Fi', 'Drama', 'Steampunk'],
-          status: 'completed',
-          rating: 4.8,
-          tags: ['Technology', 'Family', 'Tragedy']
-        }
-      ];
-
+  /**
+   * Analyze intent from natural language query
+   */
+  private analyzeIntent(query: string): string {
+    if (query.includes('action') || query.includes('fight') || query.includes('battle')) {
+      return 'action content';
       // Sample anime recommendations
+    if (query.includes('romance') || query.includes('love') || query.includes('romantic')) {
+      return 'romantic content';
+    }
+    if (query.includes('comedy') || query.includes('funny') || query.includes('humor')) {
+      return 'comedy content';
+    }
+    if (query.includes('horror') || query.includes('scary') || query.includes('thriller')) {
+      return 'horror content';
+    }
+    if (query.includes('adventure') || query.includes('journey') || query.includes('quest')) {
+      return 'adventure content';
+    }
+    return 'content';
       const animeRecommendations: Anime[] = [
         {
           id: 'rec-anime-1',
-          title: 'Titan Slayers',
-          description: 'Humanity fights for survival against giant humanoid creatures.',
-          coverImage: 'https://example.com/covers/titan-slayers.jpg',
+   * Extract metadata from cover images using AI
           episodes: [],
-          genres: ['Action', 'Drama', 'Fantasy'],
+  async extractMetadataFromCover(imageBase64: string): Promise<Partial<Manga | Anime> | null> {
           status: 'completed',
-          rating: 4.9,
-          studio: 'MAPPA',
-          tags: ['Dark Fantasy', 'Post-Apocalyptic', 'Military']
-        },
-        {
-          id: 'rec-anime-2',
-          title: 'Alchemist Brotherhood',
-          description: 'Two brothers use alchemy in their quest to restore their bodies after a failed experiment.',
-          coverImage: 'https://example.com/covers/alchemist-brotherhood.jpg',
-          episodes: [],
-          genres: ['Action', 'Adventure', 'Fantasy'],
-          status: 'completed',
-          rating: 4.9,
-          studio: 'Bones',
-          tags: ['Alchemy', 'Brothers', 'Military']
-        }
-      ];
-
-      loggingService.debug(this.TAG, `Generated ${mangaRecommendations.length} manga and ${animeRecommendations.length} anime recommendations`);
-      return {
-        manga: mangaRecommendations,
-        anime: animeRecommendations
+      loggingService.info(this.TAG, 'Extracting metadata from cover image');
       };
-    } catch (error) {
-      const errorMessage = 'Recommendation generation failed';
-      loggingService.error(this.TAG, errorMessage, error);
-      errorService.captureError(error as Error, ErrorType.AI, ErrorSeverity.WARNING, {
-        component: this.TAG,
-        action: 'generateRecommendations',
-        data: { userId }
-      });
-      return { manga: [], anime: [] };
-    }
-  }
-
-  /**
-   * Performs natural language search on the library
-   * @param query Natural language query string
+      if (!this.isOfflineMode) {
+        const response = await axios.post(`${this.apiEndpoint}/extract-metadata`, {
+          image: imageBase64,
+        });
    * @param library Library items to search through
-   * @returns Array of matching items
-   */
-  async naturalLanguageSearch(query: string, library: (Manga | Anime)[]): Promise<(Manga | Anime)[]> {
-    try {
-      loggingService.info(this.TAG, `Performing natural language search: "${query}"`);
-
-      // In a real implementation, this would use NLP to understand the query
-      // For demonstration, we'll implement a more advanced search than simple text matching
-
-      // Extract key terms from the query
-      const queryLower = query.toLowerCase();
-
-      // Check for genre-related terms
-      const genres = ['action', 'adventure', 'comedy', 'drama', 'fantasy', 'horror', 'mystery', 'romance', 'sci-fi', 'slice of life', 'supernatural'];
-      const mentionedGenres = genres.filter(genre => queryLower.includes(genre));
-
-      // Check for status-related terms
-      const isOngoing = queryLower.includes('ongoing') || queryLower.includes('airing') || queryLower.includes('current');
-      const isCompleted = queryLower.includes('completed') || queryLower.includes('finished');
-
-      // Check for rating-related terms
-      const isHighRated = queryLower.includes('best') || queryLower.includes('top') || queryLower.includes('highest rated');
-
-      // Filter the library based on extracted terms
-      const results = library.filter(item => {
+        return response.data.metadata;
+      } else {
+        // Basic offline metadata extraction
+        const text = await this.extractTextFromImage(imageBase64, 'en');
+        if (text) {
+          return {
+            title: text.split('\n')[0] || 'Unknown Title',
+            description: text,
+          };
+        }
         // Match by title or description
         const textMatch = item.title.toLowerCase().includes(queryLower) || 
-                         item.description.toLowerCase().includes(queryLower);
-
-        // Match by genre
-        const genreMatch = mentionedGenres.length > 0 ? 
-                          mentionedGenres.some(genre => 
-                            item.genres.some(g => g.toLowerCase() === genre)
-                          ) : false;
-
+      return null;
         // Match by status
-        const statusMatch = (isOngoing && item.status === 'ongoing') || 
-                           (isCompleted && item.status === 'completed');
-
-        // Match by rating
-        const ratingMatch = isHighRated ? item.rating >= 4.5 : false;
-
-        return textMatch || genreMatch || statusMatch || ratingMatch;
-      });
+      loggingService.error(this.TAG, 'Metadata extraction failed', error);
+      return null;
 
       // Sort results by relevance (simplified version)
       results.sort((a, b) => b.rating - a.rating);
 
-      loggingService.debug(this.TAG, `Found ${results.length} results for natural language search`);
-      return results;
-    } catch (error) {
+   * Set offline mode
       const errorMessage = 'Natural language search failed';
-      loggingService.error(this.TAG, errorMessage, error);
-      errorService.captureError(error as Error, ErrorType.AI, ErrorSeverity.WARNING, {
-        component: this.TAG,
-        action: 'naturalLanguageSearch',
-        data: { query }
-      });
-      return [];
-    }
+  setOfflineMode(offline: boolean): void {
+    this.isOfflineMode = offline;
+    loggingService.info(this.TAG, `AI Service ${offline ? 'offline' : 'online'} mode enabled`);
+  }
+
+  /**
+   * Check if AI service is in offline mode
+   */
+  isOffline(): boolean {
+    return this.isOfflineMode;
   }
 
   /**

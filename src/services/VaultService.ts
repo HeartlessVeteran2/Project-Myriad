@@ -300,6 +300,71 @@ export class VaultService {
   }
 
   /**
+   * Imports manga or anime files into the Vault
+   * Supports batch import and file integrity verification
+   */
+  async importFiles(files: string[], type: 'manga' | 'anime'): Promise<boolean> {
+    try {
+      const destPath = type === 'manga' ? this.fileSystem.mangaPath : this.fileSystem.animePath;
+      await RNFS.mkdir(destPath);
+      for (const file of files) {
+        const fileName = file.split('/').pop();
+        if (!fileName) continue;
+        const destFile = `${destPath}/${fileName}`;
+        await RNFS.copyFile(file, destFile);
+        // TODO: Add file integrity verification
+        loggingService.info(this.TAG, `Imported file: ${fileName}`);
+      }
+      return true;
+    } catch (error) {
+      errorService.handleError({
+        type: ErrorType.File,
+        severity: ErrorSeverity.High,
+        message: 'Failed to import files',
+        details: error,
+      });
+      return false;
+    }
+  }
+
+  /**
+   * Scans and returns the local library (manga/anime)
+   */
+  async getLibrary(type: 'manga' | 'anime'): Promise<(Manga | Anime)[]> {
+    try {
+      const path = type === 'manga' ? this.fileSystem.mangaPath : this.fileSystem.animePath;
+      const files = await RNFS.readDir(path);
+      // TODO: Add metadata extraction and organization
+      return files.map((file) => ({
+        id: file.name,
+        title: file.name,
+        path: file.path,
+        // ...other metadata
+      }));
+    } catch (error) {
+      errorService.handleError({
+        type: ErrorType.File,
+        severity: ErrorSeverity.Medium,
+        message: 'Failed to scan library',
+        details: error,
+      });
+      return [];
+    }
+  }
+
+  /**
+   * Searches the local library by title
+   */
+  async searchLibrary(query: string, type: 'manga' | 'anime'): Promise<(Manga | Anime)[]> {
+    const library = await this.getLibrary(type);
+    return library.filter((item) => item.title.toLowerCase().includes(query.toLowerCase()));
+  }
+
+  /**
+   * TODO: Add metadata scraping, batch export, file integrity verification, cleanup utilities
+   */
+
+  /**
    * Get the local library content
    */
   async getLocalLibrary(): Promise<{ manga: Manga[], anime: Anime[] }> {

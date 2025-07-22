@@ -1,3 +1,51 @@
+
+          {/* Status Filter */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Status</Text>
+            <View style={styles.chipContainer}>
+              {statusOptions.map(status => (
+                <TouchableOpacity
+                  key={status}
+                  style={[
+                    styles.chip,
+                    localFilters.status.includes(status) && styles.chipSelected
+                  ]}
+                  onPress={() => handleStatusToggle(status)}
+                >
+                  <Text style={[
+                    styles.chipText,
+                    localFilters.status.includes(status) && styles.chipTextSelected
+                  ]}>
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          {/* Rating Filter */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Minimum Rating</Text>
+            <View style={styles.ratingContainer}>
+              {[1, 2, 3, 4, 5].map(rating => (
+                <TouchableOpacity
+                  key={rating}
+                  style={[
+                    styles.ratingButton,
+                    localFilters.rating >= rating && styles.ratingButtonSelected
+                  ]}
+                  onPress={() => handleRatingChange(rating)}
+                >
+                  <Text style={[
+                    styles.ratingText,
+                    localFilters.rating >= rating && styles.ratingTextSelected
+                  ]}>
+                    ⭐
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
 import React, { useState } from 'react';
 import {
   View,
@@ -5,7 +53,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Switch,
   Modal,
   SafeAreaView,
 } from 'react-native';
@@ -33,6 +80,13 @@ interface FilterPanelProps {
   categories: FilterCategory[];
   initialFilters?: FilterState;
   contentType?: 'manga' | 'anime' | 'all';
+  filters: {
+    genre: string[];
+    status: string[];
+    rating: number;
+  };
+  onFiltersChange: (filters: any) => void;
+  availableGenres: string[];
 }
 
 const FilterPanel: React.FC<FilterPanelProps> = ({
@@ -42,23 +96,28 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   categories,
   initialFilters = {},
   contentType = 'all',
+  filters,
+  onFiltersChange,
+  availableGenres,
 }) => {
-  const [filters, setFilters] = useState<FilterState>(initialFilters);
+  const [localFilters, setLocalFilters] = useState(filters);
   const [contentTypeFilter, setContentTypeFilter] = useState<'manga' | 'anime' | 'all'>(contentType);
 
+  const statusOptions = ['ongoing', 'completed', 'hiatus', 'upcoming'];
+
   const handleReset = () => {
-    setFilters({});
+    setLocalFilters({ genre: [], status: [], rating: 0 });
     setContentTypeFilter('all');
   };
 
   const handleApply = () => {
-    const appliedFilters = { ...filters, contentType: contentTypeFilter };
+    const appliedFilters = { ...localFilters, contentType: contentTypeFilter };
     onApply(appliedFilters);
     onClose();
   };
 
   const toggleOption = (categoryId: string, optionId: string) => {
-    setFilters(prevFilters => {
+    setLocalFilters(prevFilters => {
       const category = categories.find(c => c.id === categoryId);
       
       if (!category) return prevFilters;
@@ -108,6 +167,93 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
     } else {
       return filters[categoryId] === optionId;
     }
+  };
+
+  const handleGenreToggle = (genre: string) => {
+    const newGenres = localFilters.genre.includes(genre)
+      ? localFilters.genre.filter(g => g !== genre)
+      : [...localFilters.genre, genre];
+
+    const newFilters = { ...localFilters, genre: newGenres };
+    setLocalFilters(newFilters);
+    onFiltersChange(newFilters);
+  };
+  section: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 12,
+  },
+  chipContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  chip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  chipSelected: {
+    backgroundColor: '#007AFF',
+    borderColor: '#007AFF',
+  },
+  chipText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  chipTextSelected: {
+    color: 'white',
+    fontWeight: '500',
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  ratingButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#f0f0f0',
+  },
+  ratingButtonSelected: {
+    backgroundColor: '#007AFF',
+  },
+  ratingText: {
+    fontSize: 18,
+  },
+  ratingTextSelected: {
+    color: 'white',
+  },
+
+  const handleStatusToggle = (status: string) => {
+    const newStatus = localFilters.status.includes(status)
+
+      ? localFilters.status.filter(s => s !== status)
+      : [...localFilters.status, status];
+
+    const newFilters = { ...localFilters, status: newStatus };
+    setLocalFilters(newFilters);
+    onFiltersChange(newFilters);
+  };
+
+  const handleRatingChange = (rating: number) => {
+    const newFilters = { ...localFilters, rating };
+    setLocalFilters(newFilters);
+    onFiltersChange(newFilters);
+  };
+
+  const clearFilters = () => {
+    const clearedFilters = { genre: [], status: [], rating: 0 };
+    setLocalFilters(clearedFilters);
+    onFiltersChange(clearedFilters);
   };
 
   const renderContentTypeSelector = () => {
@@ -212,6 +358,30 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
               </View>
             </View>
           ))}
+
+          {/* Genre Filter */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Genres</Text>
+            <View style={styles.chipContainer}>
+              {availableGenres.map(genre => (
+                <TouchableOpacity
+                  key={genre}
+                  style={[
+                    styles.chip,
+                    localFilters.genre.includes(genre) && styles.chipSelected
+                  ]}
+                  onPress={() => handleGenreToggle(genre)}
+                >
+                  <Text style={[
+                    styles.chipText,
+                    localFilters.genre.includes(genre) && styles.chipTextSelected
+                  ]}>
+                    {genre}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
         </ScrollView>
 
         <View style={styles.footer}>

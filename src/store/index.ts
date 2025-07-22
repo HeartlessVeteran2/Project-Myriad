@@ -6,12 +6,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import userReducer from './slices/userSlice';
 import libraryReducer from './slices/librarySlice';
 import settingsReducer from './slices/settingsSlice';
+import aiReducer from './slices/aiSlice';
 
 // Configure persistence
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
-  whitelist: ['user', 'library', 'settings'], // Only persist these reducers
+  whitelist: ['user', 'library', 'settings', 'ai'], // Persist all major slices
 };
 
 // Combine reducers
@@ -19,6 +20,7 @@ const rootReducer = combineReducers({
   user: userReducer,
   library: libraryReducer,
   settings: settingsReducer,
+  ai: aiReducer,
 });
 
 // Create persisted reducer
@@ -33,11 +35,12 @@ export const store = configureStore({
         // Ignore these action types
         ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
         // Ignore these field paths in all actions
-        ignoredActionPaths: ['meta.arg', 'payload.timestamp'],
+        ignoredActionPaths: ['meta.arg', 'payload.timestamp', 'payload.dateAdded'],
         // Ignore these paths in the state
-        ignoredPaths: ['items.dates'],
+        ignoredPaths: ['items.dates', 'library.stats.lastUpdated', 'ai.translations.timestamp'],
       },
     }),
+  devTools: __DEV__,
 });
 
 // Create persistor

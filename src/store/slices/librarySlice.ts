@@ -1,82 +1,243 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { RootState } from '../index';
-
-// Define types
-export type ContentType = 'manga' | 'anime';
-export type ContentStatus = 'reading' | 'watching' | 'completed' | 'on_hold' | 'dropped' | 'plan_to_read' | 'plan_to_watch';
-
-export interface ContentItem {
-  id: string;
-  title: string;
-  alternativeTitles?: string[];
-  type: ContentType;
-  path: string;
-  coverImage?: string;
-  description?: string;
-  genres?: string[];
-  authors?: string[];
-  status: ContentStatus;
-  progress: number; // Chapter/episode number
-  totalChapters?: number; // Total chapters/episodes if known
-  rating?: number; // User rating (1-5)
-  lastOpenedAt: number; // Timestamp
-  addedAt: number; // Timestamp
-  updatedAt: number; // Timestamp
-  metadata?: Record<string, any>; // Additional metadata
-}
-
+    setFilters: (state, action: PayloadAction<Partial<LibraryState['filters']>>) => {
+      state.filters = { ...state.filters, ...action.payload };
 export interface LibraryState {
-  items: Record<string, ContentItem>; // Map of id to ContentItem
-  collections: Record<string, string[]>; // Map of collection name to array of content ids
-  recentlyViewed: string[]; // Array of content ids
-  loading: boolean;
-  error: string | null;
-}
-
-// Define initial state
-const initialState: LibraryState = {
-  items: {},
-  collections: {
-    favorites: [],
+    clearSearchResults: (state) => {
+      state.searchResults = [];
+    status: string[];
+    updateMangaProgress: (state, action: PayloadAction<{ mangaId: string; chapterId: string; progress: number }>) => {
+      const manga = state.manga.find(m => m.id === action.payload.mangaId);
+      if (manga) {
+        const chapter = manga.chapters.find(c => c.id === action.payload.chapterId);
+        if (chapter) {
+          chapter.readProgress = action.payload.progress;
+          if (action.payload.progress >= 100) {
+            chapter.isRead = true;
+          }
+        }
   },
-  recentlyViewed: [],
-  loading: false,
-  error: null,
+  importTasks: [],
+    updateAnimeProgress: (state, action: PayloadAction<{ animeId: string; episodeId: string; progress: number }>) => {
+      const anime = state.anime.find(a => a.id === action.payload.animeId);
+      if (anime) {
+        const episode = anime.episodes.find(e => e.id === action.payload.episodeId);
+        if (episode) {
+          episode.watchProgress = action.payload.progress;
+          if (action.payload.progress >= 100) {
+            episode.isWatched = true;
+          }
+        }
 };
 
-// Define async thunks
-export const importContent = createAsyncThunk(
-  'library/importContent',
-  async (contentPath: string, { rejectWithValue }) => {
+    addImportTask: (state, action: PayloadAction<ImportTask>) => {
+      state.importTasks.push(action.payload);
+    },
+    updateImportTask: (state, action: PayloadAction<{ id: string; updates: Partial<ImportTask> }>) => {
+      const task = state.importTasks.find(t => t.id === action.payload.id);
+      if (task) {
+        Object.assign(task, action.payload.updates);
+);
+    },
+    removeImportTask: (state, action: PayloadAction<string>) => {
+      state.importTasks = state.importTasks.filter(t => t.id !== action.payload);
+    },
+    clearError: (state) => {
+      state.error = null;
+
+export const importManga = createAsyncThunk(
+  'library/importManga',
+    // Load Library
+  async (
+      .addCase(loadLibrary.pending, (state) => {
+        state.isLoading = true;
+  ) => {
     try {
-      // This would be replaced with actual file import logic
-      // Simulating content import
-      const id = `content_${Date.now()}`;
-      return {
-        id,
-        title: `Imported Content ${id}`,
-        type: 'manga' as ContentType,
-        path: contentPath,
-        status: 'plan_to_read' as ContentStatus,
-        progress: 0,
-        lastOpenedAt: Date.now(),
-        addedAt: Date.now(),
-        updatedAt: Date.now(),
-      };
-    } catch (error) {
-      return rejectWithValue('Failed to import content. Please try again.');
+      .addCase(loadLibrary.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.manga = action.payload.manga;
+        state.anime = action.payload.anime;
+        state.stats = {
+          totalManga: action.payload.manga.length,
+          totalAnime: action.payload.anime.length,
+          totalSize: 0, // Would be calculated
+          lastUpdated: new Date(),
+          recentlyAdded: [...action.payload.manga, ...action.payload.anime]
+            .sort((a, b) => new Date(b.chapters?.[0]?.dateAdded || b.episodes?.[0]?.dateAdded || 0).getTime() -
+                          new Date(a.chapters?.[0]?.dateAdded || a.episodes?.[0]?.dateAdded || 0).getTime())
+            .slice(0, 10),
+        };
+    } catch (error: any) {
+      .addCase(loadLibrary.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      });
+
+    // Import Manga
+    builder
+      .addCase(importManga.pending, (state) => {
+        state.isImporting = true;
+        state.error = null;
+      })
+      .addCase(importManga.fulfilled, (state, action) => {
+        state.isImporting = false;
+        if (action.payload) {
+          state.manga.push(action.payload);
+          state.stats.totalManga += 1;
+          state.stats.recentlyAdded.unshift(action.payload);
+          state.stats.recentlyAdded = state.stats.recentlyAdded.slice(0, 10);
+        }
+      })
+      .addCase(importManga.rejected, (state, action) => {
+        state.isImporting = false;
+        state.error = action.payload as string;
+      });
+
+    // Import Anime
+    builder
+      .addCase(importAnime.pending, (state) => {
+        state.isImporting = true;
+        state.error = null;
+      })
+      .addCase(importAnime.fulfilled, (state, action) => {
+        state.isImporting = false;
+        if (action.payload) {
+          state.anime.push(action.payload);
+          state.stats.totalAnime += 1;
+          state.stats.recentlyAdded.unshift(action.payload);
+          state.stats.recentlyAdded = state.stats.recentlyAdded.slice(0, 10);
+        }
+      })
+      .addCase(importAnime.rejected, (state, action) => {
+        state.isImporting = false;
+        state.error = action.payload as string;
+      });
+
+    // Delete Manga
+    builder
+      .addCase(deleteManga.fulfilled, (state, action) => {
+        state.manga = state.manga.filter(m => m.id !== action.payload);
+        state.stats.totalManga -= 1;
+        state.stats.recentlyAdded = state.stats.recentlyAdded.filter(item => item.id !== action.payload);
+      })
+      .addCase(deleteManga.rejected, (state, action) => {
+        state.error = action.payload as string;
+      });
+
+    // Delete Anime
+    builder
+      .addCase(deleteAnime.fulfilled, (state, action) => {
+        state.anime = state.anime.filter(a => a.id !== action.payload);
+        state.stats.totalAnime -= 1;
+        state.stats.recentlyAdded = state.stats.recentlyAdded.filter(item => item.id !== action.payload);
+      })
+      .addCase(deleteAnime.rejected, (state, action) => {
+        state.error = action.payload as string;
+      });
+
+    // Generate Recommendations
+    builder
+      .addCase(generateRecommendations.fulfilled, (state, action) => {
+        state.recommendations = action.payload;
+      })
+      .addCase(generateRecommendations.rejected, (state, action) => {
+        state.error = action.payload as string;
+      });
+
+    // Search Library
+    builder
+      .addCase(searchLibrary.fulfilled, (state, action) => {
+        state.searchResults = action.payload;
+      })
+      .addCase(searchLibrary.rejected, (state, action) => {
+  }
+);
+
+export const importAnime = createAsyncThunk(
+  'library/importAnime',
+    { filePath, options }: { filePath: string; options?: any },
+  setFilters,
+  clearSearchResults,
+  updateMangaProgress,
+  updateAnimeProgress,
+  addImportTask,
+  updateImportTask,
+  removeImportTask,
+  clearError,
+    }
+  }
     }
   }
 );
 
-// Create the slice
+export const deleteAnime = createAsyncThunk(
+  'library/deleteAnime',
+  async (animeId: string, { rejectWithValue }) => {
+    try {
+      const vaultService = VaultService.getInstance();
+      const success = await vaultService.deleteAnime(animeId);
+      if (success) {
+        return animeId;
+      } else {
+        throw new Error('Failed to delete anime');
+      }
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const generateRecommendations = createAsyncThunk(
+  'library/generateRecommendations',
+  async (
+    { userHistory, preferences }: { userHistory: (Manga | Anime)[]; preferences: string[] },
+    { getState, rejectWithValue }
+  ) => {
+    try {
+      const state = getState() as { library: LibraryState };
+      const aiService = AIService.getInstance();
+      const library = [...state.library.manga, ...state.library.anime];
+      const recommendations = await aiService.generateRecommendations(
+        userHistory,
+        preferences,
+        library
+      );
+      return recommendations;
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const searchLibrary = createAsyncThunk(
+  'library/searchLibrary',
+  async (query: string, { getState, rejectWithValue }) => {
+    try {
+      const state = getState() as { library: LibraryState };
+      const aiService = AIService.getInstance();
+      const library = [...state.library.manga, ...state.library.anime];
+
+      // Use natural language search if query is complex
+      if (query.split(' ').length > 2) {
+        const nlResult = await aiService.naturalLanguageSearch(query, library);
+        return nlResult.results;
+      } else {
+        // Simple text search
+        const results = library.filter(item =>
+          item.title.toLowerCase().includes(query.toLowerCase()) ||
+          item.description.toLowerCase().includes(query.toLowerCase()) ||
+          item.genres.some(genre => genre.toLowerCase().includes(query.toLowerCase()))
+        );
+        return results;
+      }
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const librarySlice = createSlice({
   name: 'library',
   initialState,
   reducers: {
-    addContent: (state, action: PayloadAction<ContentItem>) => {
-      state.items[action.payload.id] = action.payload;
-    },
     updateContent: (state, action: PayloadAction<Partial<ContentItem> & { id: string }>) => {
       const { id, ...updates } = action.payload;
       if (state.items[id]) {

@@ -1,134 +1,274 @@
-import React, {useState, useEffect} from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-} from 'react-native';
-import Card from '../components/Card';
-import Button from '../components/Button';
-import {VaultService} from '../services/VaultService';
-import {Manga, Anime} from '../types';
-import * as DocumentPicker from 'expo-document-picker';
-
-const LibraryScreen: React.FC = () => {
-  const [library, setLibrary] = useState<{manga: Manga[]; anime: Anime[]}>({
-    manga: [],
-    anime: [],
-  });
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'manga' | 'anime'>('manga');
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    loadLibrary();
-  }, []);
-
-  const loadLibrary = async () => {
-    try {
-      const vaultService = VaultService.getInstance();
-      const localLibrary = await vaultService.getLocalLibrary();
-      setLibrary(localLibrary);
-    } catch (error) {
-      console.error('Failed to load library:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleImportMedia = async () => {
-    try {
-      const result = await DocumentPicker.getDocumentAsync({
-        type: [
-          'application/x-cbz',
-          'application/x-cbr',
-          'application/zip',
-          'application/x-rar-compressed',
-          'application/pdf',
-          'video/mp4',
-          'video/x-matroska',
-          'video/x-msvideo',
-          'video/webm',
-        ],
-        copyToCacheDirectory: true,
-        multiple: false,
-      });
-      if (result.canceled || !result.assets || !result.assets[0].uri) return;
-      const fileUri = result.assets[0].uri;
-      const fileName = result.assets[0].name || '';
-      const ext = fileName.split('.').pop()?.toLowerCase();
-      const vaultService = VaultService.getInstance();
-      if (['cbz', 'cbr', 'zip', 'rar', 'pdf'].includes(ext)) {
-        await vaultService.importManga(fileUri, {
-          extractContent: true,
-          generateThumbnail: true,
-        });
-      } else if (['mp4', 'mkv', 'avi', 'webm'].includes(ext)) {
-        await vaultService.importAnime(fileUri, {generateThumbnail: true});
-      } else {
-        alert('Unsupported file type');
-        return;
+          content = anime;
+          break;
+        case 'recommendations':
+          content = recommendations.map(rec => rec.item);
+          break;
+        default:
+          content = [...manga, ...anime];
       }
-      await loadLibrary();
-      alert('Import successful!');
-    } catch (e) {
-      alert('Import failed: ' + e.message);
     }
+
+    // Apply filters
+    if (filters.genre.length > 0) {
+      content = content.filter(item =>
+        item.genres.some(genre => filters.genre.includes(genre))
+      );
+    }
+
+    if (filters.status.length > 0) {
+      content = content.filter(item => filters.status.includes(item.status));
+    }
+import React, { useEffect, useState } from 'react';
+    if (filters.rating > 0) {
+      content = content.filter(item => item.rating >= filters.rating);
+    }
+
+    return content;
   };
 
-  const filteredItems = searchQuery
-    ? library[activeTab].filter(item =>
-        item.title.toLowerCase().includes(searchQuery.toLowerCase()),
-      )
-    : library[activeTab];
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#007AFF" />
+        <Text style={styles.loadingText}>Loading your library...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>My Library</Text>
-        <Button
-          title="Import Media"
-          onPress={handleImportMedia}
-          style={styles.importButton}
-        />
-      </View>
+      <SearchBar
+        value={searchQuery}
+        onChangeText={handleSearch}
+        onFilterPress={() => setShowFilters(!showFilters)}
+        placeholder="Search your library or use natural language..."
+      />
 
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search your library..."
-          placeholderTextColor="#666"
-          value={searchQuery}
-          onChangeText={setSearchQuery}
+      {showFilters && (
+        <FilterPanel
+          filters={filters}
+          onFiltersChange={(newFilters) => dispatch(setFilters(newFilters))}
+          availableGenres={[...new Set([...manga, ...anime].flatMap(item => item.genres))]}
         />
-      </View>
+      )}
 
-      <View style={styles.tabContainer}>
+      {renderStatsCard()}
+      {renderImportButtons()}
+      {renderTabBar()}
+
+      {error && (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      )}
+
+      {isImporting && (
+        <View style={styles.importingContainer}>
+          <ActivityIndicator size="small" color="#007AFF" />
+          <Text style={styles.importingText}>Importing file...</Text>
+        </View>
+      )}
+
+      <ContentList
+        data={getFilteredContent()}
+        onItemPress={(item) => {
+          // Navigate to content viewer
+          console.log('Open content:', item.title);
+        }}
+        onItemLongPress={(item) => {
+          const type = 'chapters' in item ? 'manga' : 'anime';
+          handleDelete(item, type);
+        }}
+        refreshControl={
+          <RefreshControl
+            refreshing={isLoading}
+            onRefresh={() => dispatch(loadLibrary())}
+          />
+        }
+      />
+import { Manga, Anime } from '../types';
+
+export const LibraryScreen: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const {
+    manga,
+    anime,
+    backgroundColor: '#f5f5f5',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#666',
+  },
+  statsCard: {
+    margin: 16,
+    padding: 16,
+    recommendations,
+  statsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  statsRow: {
+    isImporting,
+    justifyContent: 'space-around',
+  },
+  statItem: {
+    searchResults,
+
+  statNumber: {
+  const { preferences } = useSelector((state: RootState) => state.user);
+
+    color: '#007AFF',
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4,
+  },
+  importContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginHorizontal: 16,
+    marginBottom: 16,
+  const [showFilters, setShowFilters] = useState(false);
+  const [activeTab, setActiveTab] = useState<'all' | 'manga' | 'anime' | 'recommendations'>('all');
+    flex: 1,
+    marginHorizontal: 8,
+    dispatch(loadLibrary());
+  tabBar: {
+    }
+    backgroundColor: 'white',
+    marginHorizontal: 16,
+
+    borderRadius: 8,
+    padding: 4,
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    if (query.trim()) {
+    paddingVertical: 8,
+    } else {
+    borderRadius: 6,
+
+  const handleImport = async (type: 'manga' | 'anime') => {
+    backgroundColor: '#007AFF',
+      const result = await DocumentPicker.pick({
+        type: type === 'manga'
+    fontSize: 14,
+    color: '#666',
+  },
+  activeTabText: {
+    color: 'white',
+          : [DocumentPicker.types.video],
+        allowMultiSelection: false,
+  errorContainer: {
+    backgroundColor: '#ffebee',
+    margin: 16,
+    padding: 12,
+    borderRadius: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: '#f44336',
+      if (result.length > 0) {
+  errorText: {
+    color: '#c62828',
+    fontSize: 14,
+          generateThumbnail: true,
+  importingContainer: {
+    flexDirection: 'row',
+
+        if (type === 'manga') {
+    backgroundColor: '#e3f2fd',
+    margin: 16,
+    padding: 12,
+    borderRadius: 8,
+    } catch (error) {
+  importingText: {
+    marginLeft: 8,
+    color: '#1976d2',
+    Alert.alert(
+        {
+          text: 'Delete',
+            if (type === 'manga') {
+              dispatch(deleteManga(item.id));
+            } else {
+              dispatch(deleteAnime(item.id));
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const renderStatsCard = () => (
+    <Card style={styles.statsCard}>
+      <Text style={styles.statsTitle}>Library Statistics</Text>
+      <View style={styles.statsRow}>
+        <View style={styles.statItem}>
+          <Text style={styles.statNumber}>{stats.totalManga}</Text>
+          <Text style={styles.statLabel}>Manga</Text>
+        </View>
+        <View style={styles.statItem}>
+          <Text style={styles.statNumber}>{stats.totalAnime}</Text>
+          <Text style={styles.statLabel}>Anime</Text>
+        </View>
+        <View style={styles.statItem}>
+          <Text style={styles.statNumber}>{recommendations.length}</Text>
+          <Text style={styles.statLabel}>Recommendations</Text>
+        </View>
+      </View>
+    </Card>
+  );
+
+  const renderImportButtons = () => (
+    <View style={styles.importContainer}>
+      <Button
+        title="Import Manga"
+        onPress={() => handleImport('manga')}
+        disabled={isImporting}
+        style={styles.importButton}
+      />
+      <Button
+        title="Import Anime"
+        onPress={() => handleImport('anime')}
+        disabled={isImporting}
+        style={styles.importButton}
+      />
+    </View>
+  );
+
+  const renderTabBar = () => (
+    <View style={styles.tabBar}>
+      {(['all', 'manga', 'anime', 'recommendations'] as const).map((tab) => (
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'manga' && styles.activeTab]}
-          onPress={() => setActiveTab('manga')}>
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'manga' && styles.activeTabText,
-            ]}>
-            Manga ({library.manga.length})
+          key={tab}
+          style={[styles.tab, activeTab === tab && styles.activeTab]}
+          onPress={() => setActiveTab(tab)}
+        >
+          <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
+            {tab.charAt(0).toUpperCase() + tab.slice(1)}
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'anime' && styles.activeTab]}
-          onPress={() => setActiveTab('anime')}>
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'anime' && styles.activeTabText,
-            ]}>
-            Anime ({library.anime.length})
-          </Text>
-        </TouchableOpacity>
-      </View>
+      ))}
+    </View>
+  );
+
+  const getFilteredContent = () => {
+    let content: (Manga | Anime)[] = [];
+
+    if (searchQuery && searchResults.length > 0) {
+      content = searchResults;
+    } else {
+      switch (activeTab) {
+        case 'manga':
+          content = manga;
+          break;
+        case 'anime':
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {isLoading ? (

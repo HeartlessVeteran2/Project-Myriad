@@ -47,10 +47,8 @@ class ErrorService {
   private handlers: ErrorHandler[] = [];
   private isInitialized = false;
 
-  // Private constructor for singleton pattern
   private constructor() {}
 
-  // Get singleton instance
   public static getInstance(): ErrorService {
     if (!ErrorService.instance) {
       ErrorService.instance = new ErrorService();
@@ -58,67 +56,77 @@ class ErrorService {
     return ErrorService.instance;
   }
 
-  // Initialize global error handlers
   public initialize(): void {
     if (this.isInitialized) {
       return;
     }
 
-    // Handle unhandled promise rejections
-    if (Platform.OS === 'web') {
-      window.addEventListener('unhandledrejection', this.handleUnhandledRejection);
-    } else {
-      // For React Native
-      const originalHandler = global.ErrorUtils.getGlobalHandler();
-      
-      global.ErrorUtils.setGlobalHandler((error, isFatal) => {
-        this.handleError({
-          message: error.message || 'An unknown error occurred',
-          originalError: error,
-          stack: error.stack,
-          type: ErrorType.UNKNOWN,
-          severity: isFatal ? ErrorSeverity.CRITICAL : ErrorSeverity.ERROR,
-          context: {
-            timestamp: Date.now(),
-          },
-          handled: false,
-        });
-        
-        // Call original handler
-        originalHandler(error, isFatal);
-      });
-    }
+    // Set up global error handler
+    const originalHandler = ErrorUtils.getGlobalHandler();
+    ErrorUtils.setGlobalHandler((error: any, isFatal?: boolean) => {
+      this.captureError(error, ErrorType.UNKNOWN, isFatal ? ErrorSeverity.CRITICAL : ErrorSeverity.ERROR);
+      originalHandler(error, isFatal);
+    });
 
     this.isInitialized = true;
   }
 
-  // Clean up event listeners
-  public cleanup(): void {
-    if (Platform.OS === 'web') {
-      window.removeEventListener('unhandledrejection', this.handleUnhandledRejection);
-    }
-    this.isInitialized = false;
-  }
-
-  // Register an error handler
-  public registerHandler(handler: ErrorHandler): () => void {
+  public addHandler(handler: ErrorHandler): void {
     this.handlers.push(handler);
-    
-    // Return a function to unregister the handler
-    return () => {
-      this.handlers = this.handlers.filter(h => h !== handler);
-    };
   }
 
-  // Handle an error
-  public handleError(error: ErrorObject): void {
-    // Mark as handled
-    error.handled = true;
-    
-    // Log the error
-    this.logError(error);
-    
-    // Call all registered handlers
+  public removeHandler(handler: ErrorHandler): void {
+    const index = this.handlers.indexOf(handler);
+    if (index > -1) {
+      this.handlers.splice(index, 1);
+    }
+  }
+
+  public captureError(
+    error: Error | string,
+    type: ErrorType = ErrorType.UNKNOWN,
+    severity: ErrorSeverity = ErrorSeverity.ERROR,
+    context?: Partial<ErrorContext>
+  ): void {
+    const errorObject: ErrorObject = {
+      message: typeof error === 'string' ? error : error.message,
+      originalError: typeof error === 'string' ? undefined : error,
+      stack: typeof error === 'string' ? undefined : error.stack,
+      type,
+      severity,
+      context: {
+        timestamp: Date.now(),
+        ...context,
+      },
+      handled: true,
+    };
+
+    this.notifyHandlers(errorObject);
+  }
+
+  public handleError(params: {
+    type: ErrorType;
+    severity: ErrorSeverity;
+    message: string;
+    details?: any;
+  }): void {
+    const errorObject: ErrorObject = {
+      message: params.message,
+      originalError: params.details instanceof Error ? params.details : undefined,
+      stack: params.details instanceof Error ? params.details.stack : undefined,
+      type: params.type,
+      severity: params.severity,
+      context: {
+        timestamp: Date.now(),
+        data: typeof params.details === 'object' ? params.details : { details: params.details },
+      },
+      handled: true,
+    };
+
+    this.notifyHandlers(errorObject);
+  }
+
+  private notifyHandlers(error: ErrorObject): void {
     this.handlers.forEach(handler => {
       try {
         handler(error);
@@ -126,74 +134,20 @@ class ErrorService {
         console.error('Error in error handler:', handlerError);
       }
     });
-  }
 
-  // Create and handle an error from various inputs
-  public captureError(
-    errorOrMessage: Error | string,
-    type: ErrorType = ErrorType.UNKNOWN,
-    severity: ErrorSeverity = ErrorSeverity.ERROR,
-    context: Partial<ErrorContext> = {}
-  ): void {
-    const errorObject: ErrorObject = {
-      message: typeof errorOrMessage === 'string' ? errorOrMessage : errorOrMessage.message,
-      originalError: typeof errorOrMessage === 'string' ? undefined : errorOrMessage,
-      stack: typeof errorOrMessage === 'string' ? undefined : errorOrMessage.stack,
-      type,
-      severity,
-      context: {
-        ...context,
-        timestamp: Date.now(),
-      },
-      handled: false,
-    };
-    
-    this.handleError(errorObject);
-  }
-
-  // Log an error to the console and potentially to a remote service
-  private logError(error: ErrorObject): void {
-    // Log to console
-    const logMethod = this.getLogMethodForSeverity(error.severity);
-    
-    logMethod(
-      `[${error.severity.toUpperCase()}][${error.type}] ${error.message}`,
-      error.originalError || '',
-      error.context
-    );
-    
-    // TODO: Send to remote logging service when implemented
-  }
-
-  // Get the appropriate console method based on severity
-  private getLogMethodForSeverity(severity: ErrorSeverity): (...args: any[]) => void {
-    switch (severity) {
-      case ErrorSeverity.INFO:
-        return console.info;
-      case ErrorSeverity.WARNING:
-        return console.warn;
-      case ErrorSeverity.ERROR:
-      case ErrorSeverity.CRITICAL:
-        return console.error;
-      default:
-        return console.log;
+    // Always log to console in development
+    if (__DEV__) {
+      console.error(`[${error.severity.toUpperCase()}] ${error.type}:`, error.message);
+      if (error.stack) {
+        console.error('Stack:', error.stack);
+      }
+      if (error.context.data) {
+        console.error('Context:', error.context.data);
+      }
     }
   }
-
-  // Handle unhandled promise rejections (for web)
-  private handleUnhandledRejection = (event: PromiseRejectionEvent): void => {
-    this.captureError(
-      event.reason || 'Unhandled Promise Rejection',
-      ErrorType.UNKNOWN,
-      ErrorSeverity.ERROR,
-      {
-        action: 'unhandledRejection',
-      }
-    );
-  };
 }
 
-// Export singleton instance
 export const errorService = ErrorService.getInstance();
 
 // Utility functions for common error scenarios

@@ -49,41 +49,162 @@ const ContentList: React.FC<ContentListProps> = ({
     // Get progress information
     const progressInfo = isManga
       ? `${item.chapters.filter(ch => ch.isRead).length}/${item.chapters.length} chapters`
-      : `${(item as Anime).episodes.filter(ep => ep.isWatched).length}/${(item as Anime).episodes.length} episodes`;
-    
+      : `${item.episodes.filter(ep => ep.isWatched).length}/${item.episodes.length} episodes`;
+
+    const progressPercentage = isManga
+      ? (item.chapters.filter(ch => ch.isRead).length / item.chapters.length) * 100
+      : (item.episodes.filter(ep => ep.isWatched).length / item.episodes.length) * 100;
+
     return (
-      <View style={viewMode === 'grid' ? styles.gridItem : styles.listItem}>
-        <Card
-          title={item.title}
-          imageUrl={item.coverImage}
-          tags={item.genres.slice(0, 3)}
-          onPress={() => onItemPress(item)}
-        />
-        {viewMode === 'list' && (
-          <View style={styles.additionalInfo}>
+      <TouchableOpacity
+        style={[
+          styles.itemContainer,
+          viewMode === 'list' && styles.listItemContainer
+        ]}
+        onPress={() => onItemPress(item)}
+        activeOpacity={0.7}
+      >
+        <Card style={[
+          styles.itemCard,
+          viewMode === 'list' && styles.listItemCard
+        ]}>
+          {/* Cover Image Placeholder */}
+          <View style={[
+            styles.coverImage,
+            viewMode === 'list' && styles.listCoverImage
+          ]}>
+            <Text style={styles.coverPlaceholder}>
+              {isManga ? '📖' : '🎬'}
+            </Text>
+          </View>
+
+          <View style={[
+            styles.itemDetails,
+            viewMode === 'list' && styles.listItemDetails
+          ]}>
+            <Text style={styles.itemTitle} numberOfLines={2}>
+              {item.title}
+            </Text>
+
+            {isManga && item.author && (
+              <Text style={styles.itemAuthor} numberOfLines={1}>
+                by {item.author}
+              </Text>
+            )}
+
+            {!isManga && item.studio && (
+              <Text style={styles.itemStudio} numberOfLines={1}>
+                {item.studio}
+              </Text>
+            )}
+
+            <Text style={styles.itemProgress}>
+              {progressInfo}
+            </Text>
+
             {showStatus && (
               <View style={styles.statusContainer}>
-                <Text style={styles.statusText}>{item.status}</Text>
+                <View style={[
+                  styles.statusBadge,
+                  { backgroundColor: getStatusColor(item.status) }
+                ]}>
+                  <Text style={styles.statusText}>
+                    {item.status.toUpperCase()}
+                  </Text>
+                </View>
               </View>
             )}
-            <Text style={styles.progressText}>{progressInfo}</Text>
-            {showRating && (
+
+            {showRating && item.rating > 0 && (
               <View style={styles.ratingContainer}>
-                <Text style={styles.ratingText}>{item.rating.toFixed(1)}</Text>
+                <Text style={styles.ratingText}>
+                  ⭐ {item.rating.toFixed(1)}
+                </Text>
+              </View>
+            )}
+
+            {/* Progress Bar */}
+            <View style={styles.progressBarContainer}>
+              <View style={styles.progressBarBackground}>
+                <View
+                  style={[
+                    styles.progressBarFill,
+                    { width: `${progressPercentage}%` }
+                  ]}
+                />
+              </View>
+              <Text style={styles.progressPercentage}>
+                {progressPercentage.toFixed(0)}%
+              </Text>
+            </View>
+
+            {/* Genres */}
+            {item.genres.length > 0 && (
+              <View style={styles.genresContainer}>
+                {item.genres.slice(0, 3).map((genre, index) => (
+                  <View key={index} style={styles.genreTag}>
+                    <Text style={styles.genreText}>{genre}</Text>
+                  </View>
+                ))}
+                {item.genres.length > 3 && (
+                  <Text style={styles.moreGenres}>
+                    +{item.genres.length - 3}
+                  </Text>
+                )}
               </View>
             )}
           </View>
-        )}
+        </Card>
+      </TouchableOpacity>
+    );
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'ongoing':
+        return '#4CAF50';
+      case 'completed':
+        return '#2196F3';
+      case 'hiatus':
+        return '#FF9800';
+      case 'upcoming':
+        return '#9C27B0';
+      default:
+        return '#757575';
+    }
+  };
+
+  const renderHeader = () => {
+    if (!title) return null;
+
+    return (
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>{title}</Text>
+        <TouchableOpacity
+          style={styles.viewModeButton}
+          onPress={toggleViewMode}
+        >
+          <Text style={styles.viewModeButtonText}>
+            {viewMode === 'grid' ? '☰' : '⊞'}
+          </Text>
+        </TouchableOpacity>
       </View>
     );
   };
 
+  const renderEmpty = () => (
+    <View style={styles.emptyContainer}>
+      <Text style={styles.emptyText}>{emptyMessage}</Text>
+    </View>
+  );
+
   if (isLoading) {
     return (
       <View style={[styles.container, style]}>
-        {title && <Text style={styles.title}>{title}</Text>}
+        {renderHeader()}
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#007BFF" />
+          <ActivityIndicator size="large" color="#007AFF" />
+          <Text style={styles.loadingText}>Loading content...</Text>
         </View>
       </View>
     );
@@ -91,32 +212,17 @@ const ContentList: React.FC<ContentListProps> = ({
 
   return (
     <View style={[styles.container, style]}>
-      {title && (
-        <View style={styles.headerContainer}>
-          <Text style={styles.title}>{title}</Text>
-          <TouchableOpacity onPress={toggleViewMode} style={styles.viewModeButton}>
-            <Text style={styles.viewModeText}>
-              {viewMode === 'grid' ? 'List View' : 'Grid View'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {items.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>{emptyMessage}</Text>
-        </View>
-      ) : (
-        <FlatList
-          data={items}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-          numColumns={viewMode === 'grid' ? 2 : 1}
-          key={viewMode} // Force re-render when view mode changes
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-        />
-      )}
+      {renderHeader()}
+      <FlatList
+        data={items}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id}
+        numColumns={viewMode === 'grid' ? 2 : 1}
+        key={viewMode} // Force re-render when view mode changes
+        contentContainerStyle={styles.listContainer}
+        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={renderEmpty}
+      />
     </View>
   );
 };
@@ -125,87 +231,182 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  headerContainer: {
+  header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
   },
-  title: {
+  headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: '#333',
   },
   viewModeButton: {
     padding: 8,
+    borderRadius: 6,
+    backgroundColor: '#f0f0f0',
   },
-  viewModeText: {
-    color: '#007BFF',
-    fontSize: 14,
+  viewModeButtonText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  listContainer: {
+    padding: 8,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#666',
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: 32,
   },
   emptyText: {
-    color: '#999',
     fontSize: 16,
+    color: '#999',
     textAlign: 'center',
   },
-  listContent: {
-    paddingBottom: 20,
-  },
-  gridItem: {
+  itemContainer: {
     flex: 1,
     margin: 8,
+    maxWidth: '47%',
   },
-  listItem: {
-    marginBottom: 16,
+  listItemContainer: {
+    maxWidth: '100%',
+    marginVertical: 4,
+    marginHorizontal: 8,
   },
-  additionalInfo: {
+  itemCard: {
+    padding: 12,
+    height: 280,
+  },
+  listItemCard: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    height: 120,
+    padding: 12,
+  },
+  coverImage: {
+    width: '100%',
+    height: 120,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    backgroundColor: '#2c2c2c',
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
-    marginTop: -8,
+    marginBottom: 8,
+  },
+  listCoverImage: {
+    width: 80,
+    height: 96,
+    marginBottom: 0,
+    marginRight: 12,
+  },
+  coverPlaceholder: {
+    fontSize: 32,
+  },
+  itemDetails: {
+    flex: 1,
+  },
+  listItemDetails: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  itemTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  itemAuthor: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 4,
+  },
+  itemStudio: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 4,
+  },
+  itemProgress: {
+    fontSize: 12,
+    color: '#999',
+    marginBottom: 8,
   },
   statusContainer: {
-    backgroundColor: '#444',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    marginBottom: 8,
+  },
+  statusBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
     borderRadius: 4,
   },
   statusText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    textTransform: 'capitalize',
-  },
-  progressText: {
-    color: '#CCCCCC',
-    fontSize: 12,
+    fontSize: 10,
+    color: 'white',
+    fontWeight: 'bold',
   },
   ratingContainer: {
-    backgroundColor: '#007BFF',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
+    marginBottom: 8,
   },
   ratingText: {
-    color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: 'bold',
+    color: '#FF9800',
+  },
+  progressBarContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  progressBarBackground: {
+    flex: 1,
+    height: 4,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 2,
+    marginRight: 8,
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: '#4CAF50',
+    borderRadius: 2,
+  },
+  progressPercentage: {
+    fontSize: 10,
+    color: '#666',
+    minWidth: 30,
+    textAlign: 'right',
+  },
+  genresContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 4,
+  },
+  genreTag: {
+    backgroundColor: '#e3f2fd',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginRight: 4,
+    marginBottom: 4,
+  },
+  genreText: {
+    fontSize: 10,
+    color: '#1976d2',
+  },
+  moreGenres: {
+    fontSize: 10,
+    color: '#666',
+    alignSelf: 'center',
   },
 });
 
