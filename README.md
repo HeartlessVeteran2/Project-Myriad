@@ -70,7 +70,7 @@ cd Project-Myriad
 # Install dependencies
 npm install
 
-# Note: The project uses .npmrc with legacy-peer-deps=true to handle React 19 compatibility and @react-native/metro-babel-preset
+# Note: The project uses .npmrc with legacy-peer-deps=true to handle React 19 compatibility and @react-native/babel-preset
 
 # Start Metro bundler
 npm start
