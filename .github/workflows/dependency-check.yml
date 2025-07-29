@@ -1,0 +1,44 @@
+name: Dependency Security Check
+
+on:
+  schedule:
+    # Run weekly on Mondays at 9 AM UTC
+    - cron: '0 9 * * 1'
+  pull_request:
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+      - 'android/build.gradle'
+      - 'android/app/build.gradle'
+  workflow_dispatch:
+
+jobs:
+  dependency-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Check for outdated packages
+      run: npm outdated || true
+      
+    - name: Run security audit
+      run: npm audit --audit-level=moderate
+      
+    - name: Check for deprecated packages
+      run: |
+        echo "Checking for deprecated packages..."
+        npx check-outdated --deprecated || true
+        
+    - name: Run tests
+      run: npm test
