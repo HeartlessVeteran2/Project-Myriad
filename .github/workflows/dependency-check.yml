@@ -29,6 +29,10 @@ jobs:
       with:
         path: ~/.npm
         
+        
+    - name: Clear npm cache if needed
+      run: npm cache clean --force
+      continue-on-error: true
     - name: Install dependencies
       run: npm install --legacy-peer-deps
       
