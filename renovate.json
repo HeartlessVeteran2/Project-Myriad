@@ -1,6 +1,36 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
-  ]
+    "config:recommended",
+    ":dependencyDashboard"
+  ],
+  "packageRules": [
+    {
+      "matchPackageNames": ["react-native"],
+      "groupName": "React Native core",
+      "automerge": false,
+      "reviewersFromCodeOwners": true
+    },
+    {
+      "matchPackagePatterns": ["^@react-native/", "^react-native-"],
+      "groupName": "React Native ecosystem",
+      "automerge": false
+    },
+    {
+      "matchPackageNames": ["metro-react-native-babel-preset"],
+      "replacementName": "@react-native/metro-babel-preset",
+      "replacementVersion": "^0.80.0"
+    },
+    {
+      "matchDepTypes": ["devDependencies"],
+      "automerge": true,
+      "automergeType": "pr"
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true
+  },
+  "lockFileMaintenance": {
+    "enabled": true
+  }
 }
