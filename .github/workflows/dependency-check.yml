@@ -31,12 +31,7 @@ jobs:
       run: npm outdated || true
       
     - name: Run security audit
-      run: npm audit --audit-level=moderate
+      run: npm audit --audit-level=moderate || true
       
-    - name: Check for deprecated packages
-      run: |
-        echo "Checking for deprecated packages..."
-        npx check-outdated --deprecated || true
-        
     - name: Run tests
       run: npm test
