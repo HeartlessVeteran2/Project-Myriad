@@ -37,7 +37,7 @@ npm audit fix --legacy-peer-deps || true
 echo ""
 echo "🧹 Performing clean install..."
 rm -rf node_modules package-lock.json
-npm install
+npm install --legacy-peer-deps
 
 # Run tests to ensure everything still works
 echo ""
