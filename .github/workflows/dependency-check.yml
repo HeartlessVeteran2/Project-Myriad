@@ -7,7 +7,6 @@ on:
   pull_request:
     paths:
       - 'package.json'
-      - 'package-lock.json'
       - 'android/build.gradle'
       - 'android/app/build.gradle'
   workflow_dispatch:
