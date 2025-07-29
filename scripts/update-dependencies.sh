@@ -31,7 +31,7 @@ npm audit
 # Fix security vulnerabilities if any
 echo ""
 echo "🔧 Attempting to fix security vulnerabilities..."
-npm audit fix || true
+npm audit fix --legacy-peer-deps || true
 
 # Clean install to ensure consistency
 echo ""
