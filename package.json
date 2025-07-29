@@ -24,7 +24,7 @@
     "react-native-fs": "^2.20.0",
     "react-native-sqlite-storage": "^6.0.1",
     "react-native-webview": "^13.8.6",
-    "react-native-document-picker": "^9.1.1",
+    "react-native-document-picker": "^9.3.0",
     "@react-native-async-storage/async-storage": "^2.0.0",
     "react-native-zip-archive": "^7.0.0",
     "@reduxjs/toolkit": "^2.2.1",
