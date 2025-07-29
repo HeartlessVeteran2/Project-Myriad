@@ -28,11 +28,8 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
         
-        
-    - name: Clear npm cache if needed
-      run: npm cache clean --force
-      continue-on-error: true
     - name: Install dependencies
       run: npm install --legacy-peer-deps
       
