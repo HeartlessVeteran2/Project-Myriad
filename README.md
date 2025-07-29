@@ -31,7 +31,7 @@
 - **Performance**: Hermes JavaScript engine enabled
 
 ### 🛠️ Technology Stack
-- **React Native 0.73.6** with TypeScript
+- **React Native 0.80.2** with TypeScript
 - **React Navigation** for seamless navigation
 - **AsyncStorage** for local data persistence
 - **SQLite** for structured data storage
