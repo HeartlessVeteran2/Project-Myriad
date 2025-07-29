@@ -64,5 +64,12 @@ The project uses Renovate for automated dependency management with the following
 
 1. **Gradle Plugin Compatibility**: Ensure React Native Gradle plugin version matches React Native version
 2. **Metro Configuration**: Update babel presets when Metro packages are updated
+
+### Known Issues
+
+1. **React 19 Compatibility**: Some packages like `react-native-fast-image@8.6.3` don't yet support React 19. We use `--legacy-peer-deps` flag for npm operations to handle peer dependency conflicts.
+2. **Peer Dependencies**: When installing dependencies, use `npm install --legacy-peer-deps` to avoid peer dependency resolution errors.
+3. **CI/CD**: All automated workflows use `--legacy-peer-deps` flag to ensure consistent builds.
+
 3. **Native Dependencies**: Run `cd ios && pod install` after updating native dependencies (iOS)
 4. **Android Build**: Clean and rebuild Android project after major dependency updates
