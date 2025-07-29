@@ -31,7 +31,7 @@
 - **Performance**: Hermes JavaScript engine enabled
 
 ### 🛠️ Technology Stack
-- **React Native 0.73.6** with TypeScript
+- **React Native 0.80.2** with TypeScript
 - **React Navigation** for seamless navigation
 - **AsyncStorage** for local data persistence
 - **SQLite** for structured data storage
@@ -69,6 +69,8 @@ cd Project-Myriad
 
 # Install dependencies
 npm install
+
+# Note: The project uses .npmrc with legacy-peer-deps=true to handle React 19 compatibility and @react-native/babel-preset
 
 # Start Metro bundler
 npm start
@@ -112,6 +114,10 @@ The project uses:
 - **Jest** for testing
 - **Metro** for bundling
 - **Hermes** for JavaScript engine
+
+### 📋 Documentation
+- [Development Guide](docs/DEVELOPMENT.md)
+- [Dependency Management](docs/dependency-management.md)
 
 ### 📄 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
