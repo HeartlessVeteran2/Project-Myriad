@@ -8,9 +8,9 @@ This document outlines the dependency management strategy for Project Myriad, ad
 
 The following deprecated packages have been updated or replaced:
 
-1. **metro-react-native-babel-preset** → **@react-native/metro-babel-preset**
-   - The old package is deprecated and has been replaced with the official React Native preset
-   - Updated in `package.json` and `babel.config.js`
+1. **metro-react-native-babel-preset** 
+   - Updated to version 0.80.2 to match React Native version
+   - This package is still the correct babel preset for React Native projects
 
 2. **react-native-document-picker** 
    - Updated to latest version (^9.3.0) which addresses deprecation warnings
