@@ -17,7 +17,7 @@ fi
 # Check for deprecated babel preset and warn user
 if grep -q "metro-react-native-babel-preset" package.json; then
     echo "⚠️  Warning: Found deprecated metro-react-native-babel-preset"
-    echo "   Consider updating to @react-native/metro-babel-preset for React Native 0.80+"
+    echo "   Consider updating to @react-native/babel-preset for React Native 0.80+"
     echo ""
 fi
 
