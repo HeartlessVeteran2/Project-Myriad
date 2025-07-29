@@ -21,7 +21,7 @@ npm outdated || true
 # Update dependencies
 echo ""
 echo "🔄 Updating dependencies..."
-npm update
+npm update --legacy-peer-deps
 
 # Check for security vulnerabilities
 echo ""
