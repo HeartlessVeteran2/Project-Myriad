@@ -63,7 +63,7 @@ The project uses Renovate for automated dependency management with the following
 ### Common Issues
 
 1. **Gradle Plugin Compatibility**: Ensure React Native Gradle plugin version matches React Native version
-2. **Metro Configuration**: Update babel presets when Metro packages are updated. For React Native 0.80+, use @react-native/metro-babel-preset instead of metro-react-native-babel-preset
+2. **Metro Configuration**: Update babel presets when Metro packages are updated. For React Native 0.80+, use @react-native/babel-preset instead of metro-react-native-babel-preset
 
 ### Known Issues
 
