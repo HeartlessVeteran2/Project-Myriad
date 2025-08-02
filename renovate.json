@@ -1,9 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended",
-    ":dependencyDashboard"
-  ],
+  "extends": ["config:recommended", ":dependencyDashboard"],
   "packageRules": [
     {
       "matchPackageNames": ["react-native"],
@@ -12,9 +9,9 @@
       "reviewersFromCodeOwners": true
     },
     {
-      "matchPackagePatterns": ["^@react-native/", "^react-native-"],
       "groupName": "React Native ecosystem",
-      "automerge": false
+      "automerge": false,
+      "matchPackageNames": ["/^@react-native//", "/^react-native-/"]
     },
     {
       "matchDepTypes": ["devDependencies"],
