@@ -44,6 +44,7 @@ describe('ContentViewer Component', () => {
     watchProgress: 0.5,
     isWatched: false,
     videoUrl: 'https://example.com/episode1.mp4',
+    dateAdded: new Date(),
   };
 
   const defaultProps = {
