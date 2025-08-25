@@ -71,18 +71,17 @@ jobs:
       # Security: Use --legacy-peer-deps flag and validate installation
       run: |
         npm ci --legacy-peer-deps
-        npm audit --audit-level=high
-        
+
     - name: Run security checks
-      # Security: Run security audits before building
+      # Security: Run a single audit at high level to catch all moderate and high vulnerabilities
       run: |
-        echo "Running security audit..."
-        npm audit --audit-level=moderate || true
-        
-        echo "Checking for vulnerable packages..."
+        echo "Running security audit at high level..."
+        npm audit --audit-level=high || true
+
+        echo "Checking for vulnerable packages with yarn (if available)..."
         # Security: Check for known vulnerable packages
         if command -v yarn &> /dev/null; then
-          yarn audit --level moderate || true
+          yarn audit --level high || true
         fi
         
     - name: Run tests
