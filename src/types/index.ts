@@ -32,6 +32,7 @@ export interface AnimeEpisode {
   isWatched: boolean;
   videoUrl?: string;
   localPath?: string;
+  dateAdded: Date;
 }
 
 export interface Anime {
