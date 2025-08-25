@@ -150,8 +150,14 @@ export interface ImportTask {
   status: 'pending' | 'processing' | 'completed' | 'failed';
   progress: number;
   errors: string[];
-  createdAt: Date;
-  completedAt?: Date;
+  /**
+   * ISO 8601 date string representing when the task was created.
+   * Example: "2024-06-10T12:34:56.789Z"
+   */
+  createdAt: string;
+  /**
+   * ISO 8601 date string representing when the task was completed.
+   * Example: "2024-06-10T12:34:56.789Z"
 }
 
 export interface LibraryStats {
