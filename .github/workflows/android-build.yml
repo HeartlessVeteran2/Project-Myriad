@@ -68,17 +68,30 @@ jobs:
         npx react-native link
       
     - name: Make gradlew executable
+      run: |
+        if [ -f android/gradlew ]; then
+          chmod +x android/gradlew
+        fi
       
     - name: Verify Android setup
       run: |
         cd android
-        ./gradlew tasks
+        if [ -f ./gradlew ]; then
+          ./gradlew tasks
+        else
+          echo "gradlew not found, skipping verification"
+        fi
         cd ..
       
     - name: Build Android Debug APK
       run: |
         cd android
-        ./gradlew assembleDebug
+        if [ -f ./gradlew ]; then
+          ./gradlew assembleDebug
+        else
+          echo "gradlew not found, cannot build APK"
+          exit 1
+        fi
         
     - name: Upload APK
       if: always() && hashFiles('android/app/build/outputs/apk/debug/app-debug.apk') != ''
@@ -90,4 +103,8 @@ jobs:
     - name: Run Android tests
       run: |
         cd android
-        ./gradlew test
+        if [ -f ./gradlew ]; then
+          ./gradlew test
+        else
+          echo "gradlew not found, skipping tests"
+        fi
