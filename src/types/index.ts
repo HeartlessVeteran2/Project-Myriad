@@ -164,7 +164,10 @@ export interface LibraryStats {
   totalManga: number;
   totalAnime: number;
   totalSize: number;
-  lastUpdated: Date;
+  /**
+   * ISO 8601 date string representing when the library was last updated.
+   * Example: "2024-06-10T12:34:56.789Z"
+   */
   recentlyAdded: (Manga | Anime)[];
 }
 
