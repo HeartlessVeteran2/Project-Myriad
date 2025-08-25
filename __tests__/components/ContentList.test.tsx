@@ -153,5 +153,7 @@ describe('ContentList Component', () => {
     
     // Check if onItemPress was called
     expect(onItemPressMock).toHaveBeenCalled();
+    // Check if onItemPress was called with the correct item
+    expect(onItemPressMock).toHaveBeenCalledWith(mockMangaItems[0]);
   });
 });
