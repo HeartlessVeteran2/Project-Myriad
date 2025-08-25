@@ -91,6 +91,39 @@ describe('ContentList Component', () => {
     expect(getByText('Test Manga 2')).toBeTruthy();
   });
 
+  it('removes loading indicator after items are loaded', async () => {
+    // Render with loading state
+    const { getByTestId, queryByTestId, rerender } = render(
+      <ContentList
+        title="Test List"
+        items={[]}
+        loading={true}
+      />
+    );
+
+    // Assert loading indicator is present
+    expect(getByTestId('loading-indicator')).toBeTruthy();
+
+    // Update to loaded state
+    rerender(
+      <ContentList
+        title="Test List"
+        items={[
+          { id: 1, title: 'Test Manga 1' },
+          { id: 2, title: 'Test Manga 2' }
+        ]}
+        loading={false}
+      />
+    );
+
+    // Assert loading indicator is absent
+    expect(queryByTestId('loading-indicator')).toBeNull();
+
+    // Assert items are rendered
+    expect(getByText('Test Manga 1')).toBeTruthy();
+    expect(getByText('Test Manga 2')).toBeTruthy();
+  });
+
   it('renders loading state correctly', () => {
     const { getByText } = render(
       <ContentList
