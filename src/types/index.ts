@@ -178,7 +178,10 @@ export interface AppError {
   severity: 'low' | 'medium' | 'high' | 'critical';
   message: string;
   details?: any;
-  timestamp: Date;
+  /**
+   * ISO 8601 date string representing when the error occurred.
+   * Example: "2024-06-10T12:34:56.789Z"
+   */
   resolved: boolean;
 }
 
