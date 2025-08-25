@@ -40,6 +40,7 @@ export interface AnimeEpisode {
    * Example: "2024-06-10T12:34:56.789Z"
    */
 }
+  dateAdded: string;
 
 export interface Anime {
   id: string;
