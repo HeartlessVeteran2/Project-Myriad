@@ -7,7 +7,9 @@ jest.mock('react-native-reanimated', () => {
 });
 
 // Silence the warning: Animated: `useNativeDriver` is not supported because the native animated module is missing
-jest.mock('react-native/Libraries/Animated/NativeAnimatedHelper');
+// Updated path for React Native 0.80+
+jest.mock('react-native/Libraries/Animated/animations/TimingAnimation');
+
 // Mock react-native-tesseract-ocr
 jest.mock('react-native-tesseract-ocr', () => ({
   recognize: jest.fn().mockResolvedValue('Mocked OCR Text'),

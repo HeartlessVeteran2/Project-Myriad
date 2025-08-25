@@ -1,0 +1,83 @@
+name: Android Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    # Setup steps BEFORE firewall restrictions kick in
+    - name: Checkout code
+      uses: actions/checkout@v5
+      
+    - name: Setup Java 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'npm'
+        
+    # Pre-download Gradle wrapper and dependencies BEFORE firewall restrictions
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+      with:
+        gradle-version: '9.0.0'
+        
+    - name: Cache Gradle dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+          android/.gradle
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+          
+    - name: Cache node modules
+      uses: actions/cache@v4
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+        
+    # Install JavaScript dependencies
+    - name: Install npm dependencies
+      run: npm install --legacy-peer-deps
+      
+    # Pre-download Android SDK components and dependencies
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      
+    # Validate Gradle setup and download dependencies offline-first
+    - name: Validate Gradle Wrapper
+      working-directory: android
+      run: gradle wrapper --gradle-version 9.0.0
+      
+    - name: Download Gradle dependencies
+      working-directory: android
+      run: ./gradlew dependencies --no-daemon --offline || ./gradlew dependencies --no-daemon
+      
+    # Build the Android app
+    - name: Build Android APK
+      working-directory: android
+      run: ./gradlew assembleDebug --no-daemon
+      
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-debug
+        path: android/app/build/outputs/apk/debug/app-debug.apk
+        retention-days: 30
