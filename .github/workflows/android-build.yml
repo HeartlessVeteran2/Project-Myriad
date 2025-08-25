@@ -69,6 +69,12 @@ jobs:
       
     - name: Make gradlew executable
       
+    - name: Verify Android setup
+      run: |
+        cd android
+        ./gradlew tasks
+        cd ..
+      
     - name: Build Android Debug APK
       run: |
         cd android
