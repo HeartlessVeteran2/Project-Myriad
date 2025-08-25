@@ -186,6 +186,7 @@ export interface AppError {
    * ISO 8601 date string representing when the error occurred.
    * Example: "2024-06-10T12:34:56.789Z"
    */
+  timestamp: string;
   resolved: boolean;
 }
 
