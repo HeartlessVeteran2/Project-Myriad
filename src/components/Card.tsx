@@ -1,17 +1,47 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import FastImage from 'react-native-fast-image';
 
 interface CardProps {
-  title: string;
-  imageUrl: string;
-  onPress: () => void;
+  // For legacy usage
+  title?: string;
+  imageUrl?: string;
+  onPress?: () => void;
   tags?: string[];
+  
+  // For container usage
+  children?: React.ReactNode;
+  style?: ViewStyle;
 }
 
-const Card: React.FC<CardProps> = ({ title, imageUrl, onPress, tags }) => {
+const Card: React.FC<CardProps> = ({ 
+  title, 
+  imageUrl, 
+  onPress, 
+  tags, 
+  children, 
+  style 
+}) => {
+  // If children are provided, use as container component
+  if (children) {
+    return (
+      <View style={[styles.containerCard, style]}>
+        {children}
+      </View>
+    );
+  }
+
+  // Legacy usage with specific props
+  if (!title || !imageUrl || !onPress) {
+    return (
+      <View style={[styles.containerCard, style]}>
+        {children}
+      </View>
+    );
+  }
+
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress}>
+    <TouchableOpacity style={[styles.card, style]} onPress={onPress}>
       <FastImage
         style={styles.image}
         source={{
@@ -37,6 +67,16 @@ const Card: React.FC<CardProps> = ({ title, imageUrl, onPress, tags }) => {
 };
 
 const styles = StyleSheet.create({
+  containerCard: {
+    backgroundColor: '#2c2c2c',
+    borderRadius: 8,
+    overflow: 'hidden',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+  },
   card: {
     backgroundColor: '#2c2c2c',
     borderRadius: 8,
@@ -80,4 +120,3 @@ const styles = StyleSheet.create({
 });
 
 export default Card;
-

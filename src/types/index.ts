@@ -7,7 +7,11 @@ export interface MangaChapter {
   pages: string[];
   readProgress: number;
   isRead: boolean;
-  dateAdded: Date;
+  /**
+   * ISO 8601 date string representing when the chapter was added.
+   * Example: "2024-06-10T12:34:56.789Z"
+   */
+  dateAdded: string;
 }
 
 export interface Manga {
@@ -32,6 +36,11 @@ export interface AnimeEpisode {
   isWatched: boolean;
   videoUrl?: string;
   localPath?: string;
+  /**
+   * ISO 8601 date string representing when the episode was added.
+   * Example: "2024-06-10T12:34:56.789Z"
+   */
+  dateAdded: string;
 }
 
 export interface Anime {
@@ -77,7 +86,11 @@ export interface AITranslation {
   targetLanguage: string;
   confidence: number;
   boundingBoxes: BoundingBox[];
-  timestamp: Date;
+  /**
+   * ISO 8601 date string representing when the translation was created.
+   * Example: "2024-06-10T12:34:56.789Z"
+   */
+  timestamp: string;
 }
 
 export interface BoundingBox {
@@ -140,15 +153,27 @@ export interface ImportTask {
   status: 'pending' | 'processing' | 'completed' | 'failed';
   progress: number;
   errors: string[];
-  createdAt: Date;
-  completedAt?: Date;
+  /**
+   * ISO 8601 date string representing when the task was created.
+   * Example: "2024-06-10T12:34:56.789Z"
+   */
+  createdAt: string;
+  /**
+   * ISO 8601 date string representing when the task was completed.
+   * Example: "2024-06-10T12:34:56.789Z"
+   */
+  completedAt?: string;
 }
 
 export interface LibraryStats {
   totalManga: number;
   totalAnime: number;
   totalSize: number;
-  lastUpdated: Date;
+  /**
+   * ISO 8601 date string representing when the library was last updated.
+   * Example: "2024-06-10T12:34:56.789Z"
+   */
+  lastUpdated: string;
   recentlyAdded: (Manga | Anime)[];
 }
 
@@ -159,7 +184,11 @@ export interface AppError {
   severity: 'low' | 'medium' | 'high' | 'critical';
   message: string;
   details?: any;
-  timestamp: Date;
+  /**
+   * ISO 8601 date string representing when the error occurred.
+   * Example: "2024-06-10T12:34:56.789Z"
+   */
+  timestamp: string;
   resolved: boolean;
 }
 
