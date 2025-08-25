@@ -1,22 +1,28 @@
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  Keyboard,
+  Animated,
+  ViewStyle,
 } from 'react-native';
 
-    marginLeft: 12,
-    padding: 8,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+interface SearchBarProps {
+  placeholder?: string;
+  onSearch: (query: string) => void;
+  onClear?: () => void;
+  initialValue?: string;
   style?: ViewStyle;
   autoFocus?: boolean;
-    fontSize: 18,
-    color: '#007AFF',
+  showFilterButton?: boolean;
+  onFilterPress?: () => void;
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({
-export { SearchBar };
+  placeholder = 'Search...',
   onSearch,
   onClear,
   initialValue = '',
@@ -152,3 +158,4 @@ const styles = StyleSheet.create({
 });
 
 export default SearchBar;
+export { SearchBar };
