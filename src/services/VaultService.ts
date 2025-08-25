@@ -5,7 +5,7 @@
 
 import RNFS from 'react-native-fs';
 import { zip, unzip } from 'react-native-zip-archive';
-import { Manga, Anime, MangaChapter, AnimeEpisode } from '../types';
+import { Manga, Anime, MangaChapter, AnimeEpisode, MangaStatus, AnimeStatus } from '../types';
 import { errorService, ErrorType, ErrorSeverity } from './ErrorService';
 import { loggingService } from './LoggingService';
 
@@ -173,7 +173,7 @@ export class VaultService {
           coverImage: coverImagePath,
           chapters: [chapter],
           genres: [],
-          status: 'completed',
+          status: MangaStatus.COMPLETED,
           rating: 0,
           tags: []
         };
@@ -193,7 +193,7 @@ export class VaultService {
           coverImage: '',
           chapters: [],
           genres: [],
-          status: 'completed',
+          status: MangaStatus.COMPLETED,
           rating: 0,
           tags: []
         };
@@ -277,7 +277,7 @@ export class VaultService {
         coverImage: '', // Would be generated from the video file
         episodes: [episode],
         genres: [],
-        status: 'completed',
+        status: AnimeStatus.COMPLETED,
         rating: 0,
         studio: 'Unknown',
         tags: []

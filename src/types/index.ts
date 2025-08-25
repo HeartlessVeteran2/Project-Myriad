@@ -1,5 +1,25 @@
 // Core type definitions for Project Myriad
 
+// Status Enums for type safety and consistency
+export enum MangaStatus {
+  ONGOING = 'ongoing',
+  COMPLETED = 'completed',
+  HIATUS = 'hiatus',
+}
+
+export enum AnimeStatus {
+  ONGOING = 'ongoing',
+  COMPLETED = 'completed',
+  UPCOMING = 'upcoming',
+}
+
+export enum ImportTaskStatus {
+  PENDING = 'pending',
+  PROCESSING = 'processing',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+}
+
 export interface MangaChapter {
   id: string;
   title: string;
@@ -22,7 +42,7 @@ export interface Manga {
   coverImage: string;
   chapters: MangaChapter[];
   genres: string[];
-  status: 'ongoing' | 'completed' | 'hiatus';
+  status: MangaStatus;
   rating: number;
   tags: string[];
 }
@@ -50,7 +70,7 @@ export interface Anime {
   coverImage: string;
   episodes: AnimeEpisode[];
   genres: string[];
-  status: 'ongoing' | 'completed' | 'upcoming';
+  status: AnimeStatus;
   rating: number;
   studio: string;
   tags: string[];
@@ -150,7 +170,7 @@ export interface ImportTask {
   id: string;
   files: string[];
   type: 'manga' | 'anime';
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: ImportTaskStatus;
   progress: number;
   errors: string[];
   /**

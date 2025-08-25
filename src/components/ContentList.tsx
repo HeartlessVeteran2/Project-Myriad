@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   ViewStyle,
 } from 'react-native';
-import { Manga, Anime } from '../types';
+import { Manga, Anime, MangaStatus, AnimeStatus } from '../types';
 import Card from './Card';
 
 export type ContentItem = Manga | Anime;
@@ -159,15 +159,17 @@ const ContentList: React.FC<ContentListProps> = ({
     );
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: MangaStatus | AnimeStatus) => {
     switch (status) {
-      case 'ongoing':
+      case MangaStatus.ONGOING:
+      case AnimeStatus.ONGOING:
         return '#4CAF50';
-      case 'completed':
+      case MangaStatus.COMPLETED:
+      case AnimeStatus.COMPLETED:
         return '#2196F3';
-      case 'hiatus':
+      case MangaStatus.HIATUS:
         return '#FF9800';
-      case 'upcoming':
+      case AnimeStatus.UPCOMING:
         return '#9C27B0';
       default:
         return '#757575';
