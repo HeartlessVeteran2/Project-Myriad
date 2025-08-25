@@ -47,7 +47,7 @@ android/app/release/
 android/app/debug/
 android/.gradle/
 android/build/
-android/gradle.properties
+# android/gradle.properties  # Allow gradle.properties to be committed for firewall configuration
 android/keystore.properties
 android/captures/
 .externalNativeBuild
