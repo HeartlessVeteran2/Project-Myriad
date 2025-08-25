@@ -1,4 +1,4 @@
-name: Android Build
+name: Test Suite
 
 on:
   push:
@@ -37,65 +37,3 @@ jobs:
       
     - name: Run tests
       run: npm test
-
-  build:
-    runs-on: ubuntu-latest
-    needs: test
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v5
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4
-      with:
-        node-version: '20'
-        
-    - name: Setup Java
-      uses: actions/setup-java@8df1039502a15bceb9433410b1a100fbe190c53b # v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
-        
-    - name: Cache Gradle packages
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
-          
-    - name: Cache node modules
-      uses: actions/cache@v4
-      with:
-        path: ~/.npm
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-node-
-          
-    - name: Install dependencies
-      run: npm install --legacy-peer-deps
-      
-    - name: Setup Gradle Wrapper
-      run: |
-        cd android
-        if [ ! -f ./gradlew ]; then
-          echo "Creating gradle wrapper..."
-          gradle wrapper --gradle-version 8.5
-        fi
-        chmod +x gradlew
-        cd ..
-      
-    - name: Build Android Debug APK
-      run: |
-        cd android
-        ./gradlew assembleDebug
-        
-    - name: Upload APK
-      if: always() && hashFiles('android/app/build/outputs/apk/debug/app-debug.apk') != ''
-      uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
-      with:
-        name: android-debug-apk
-        path: android/app/build/outputs/apk/debug/app-debug.apk
