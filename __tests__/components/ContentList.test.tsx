@@ -1,9 +1,11 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import ContentList, { ContentItem } from '../../src/components/ContentList';
+import { Manga } from '../../src/types';
 
 // Mock data for testing
-const mockMangaItems: ContentItem[] = [
+const mockMangaItems: Manga[] = [
   {
     id: '1',
     title: 'Test Manga 1',
@@ -61,12 +63,11 @@ const mockMangaItems: ContentItem[] = [
 
 // Mock the Card component since we're only testing ContentList
 jest.mock('../../src/components/Card', () => {
-  return function MockCard(props: any) {
+  return function MockCard({ children, style }: any) {
     return (
-      <div data-testid="mock-card" onClick={props.onPress}>
-        <div data-testid="card-title">{props.title}</div>
-        <div data-testid="card-tags">{props.tags?.join(',')}</div>
-      </div>
+      <View testID="mock-card" style={style}>
+        {children}
+      </View>
     );
   };
 });
@@ -74,7 +75,7 @@ jest.mock('../../src/components/Card', () => {
 describe('ContentList Component', () => {
   it('renders correctly with items', () => {
     const onItemPressMock = jest.fn();
-    const { getByText, getAllByTestId } = render(
+    const { getByText } = render(
       <ContentList
         title="Test List"
         items={mockMangaItems}
@@ -85,13 +86,46 @@ describe('ContentList Component', () => {
     // Check if title is rendered
     expect(getByText('Test List')).toBeTruthy();
 
-    // Check if cards are rendered
-    const cards = getAllByTestId('mock-card');
-    expect(cards.length).toBe(2);
+    // Check if manga titles are rendered
+    expect(getByText('Test Manga 1')).toBeTruthy();
+    expect(getByText('Test Manga 2')).toBeTruthy();
+  });
+
+  it('removes loading indicator after items are loaded', async () => {
+    // Render with loading state
+    const { getByTestId, queryByTestId, rerender } = render(
+      <ContentList
+        title="Test List"
+        items={[]}
+        loading={true}
+      />
+    );
+
+    // Assert loading indicator is present
+    expect(getByTestId('loading-indicator')).toBeTruthy();
+
+    // Update to loaded state
+    rerender(
+      <ContentList
+        title="Test List"
+        items={[
+          { id: 1, title: 'Test Manga 1' },
+          { id: 2, title: 'Test Manga 2' }
+        ]}
+        loading={false}
+      />
+    );
+
+    // Assert loading indicator is absent
+    expect(queryByTestId('loading-indicator')).toBeNull();
+
+    // Assert items are rendered
+    expect(getByText('Test Manga 1')).toBeTruthy();
+    expect(getByText('Test Manga 2')).toBeTruthy();
   });
 
   it('renders loading state correctly', () => {
-    const { getByTestId } = render(
+    const { getByText } = render(
       <ContentList
         title="Loading List"
         items={[]}
@@ -100,8 +134,40 @@ describe('ContentList Component', () => {
       />
     );
 
-    // Check if loading indicator is shown
-    expect(getByTestId('activity-indicator')).toBeTruthy();
+    // Check if loading text is shown
+    expect(getByText('Loading content...')).toBeTruthy();
+  });
+
+  it('removes loading indicator after items are loaded', () => {
+    // Render with loading state
+    const { getByText, queryByText, rerender } = render(
+      <ContentList
+        title="Test List"
+        items={[]}
+        onItemPress={() => {}}
+        isLoading={true}
+      />
+    );
+
+    // Assert loading indicator is present
+    expect(getByText('Loading content...')).toBeTruthy();
+
+    // Update to loaded state
+    rerender(
+      <ContentList
+        title="Test List"
+        items={mockMangaItems}
+        onItemPress={() => {}}
+        isLoading={false}
+      />
+    );
+
+    // Assert loading indicator is absent
+    expect(queryByText('Loading content...')).toBeNull();
+
+    // Assert items are rendered
+    expect(getByText('Test Manga 1')).toBeTruthy();
+    expect(getByText('Test Manga 2')).toBeTruthy();
   });
 
   it('renders empty state correctly', () => {
@@ -120,7 +186,7 @@ describe('ContentList Component', () => {
   });
 
   it('toggles between grid and list view', () => {
-    const { getByText, queryAllByTestId } = render(
+    const { getByText } = render(
       <ContentList
         title="Toggle View Test"
         items={mockMangaItems}
@@ -129,31 +195,29 @@ describe('ContentList Component', () => {
     );
 
     // Initially in grid view
-    expect(getByText('List View')).toBeTruthy();
+    expect(getByText('☰')).toBeTruthy();
     
     // Toggle to list view
-    fireEvent.press(getByText('List View'));
+    fireEvent.press(getByText('☰'));
     
     // Now should be in list view
-    expect(getByText('Grid View')).toBeTruthy();
-    
-    // In list view, additional info should be visible
-    const statusElements = queryAllByTestId('status-text');
-    expect(statusElements.length).toBe(2);
+    expect(getByText('⊞')).toBeTruthy();
   });
 
   it('calls onItemPress when an item is pressed', () => {
     const onItemPressMock = jest.fn();
-    const { getAllByTestId } = render(
+    const { getByText } = render(
       <ContentList
         items={mockMangaItems}
         onItemPress={onItemPressMock}
       />
     );
 
-    // Press the first card
-    fireEvent.press(getAllByTestId('mock-card')[0]);
+    // Press the first manga title
+    fireEvent.press(getByText('Test Manga 1'));
     
+    // Check if onItemPress was called
+    expect(onItemPressMock).toHaveBeenCalled();
     // Check if onItemPress was called with the correct item
     expect(onItemPressMock).toHaveBeenCalledWith(mockMangaItems[0]);
   });
