@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import ContentList, { ContentItem } from '../../src/components/ContentList';
 
 // Mock data for testing
@@ -63,10 +64,12 @@ const mockMangaItems: ContentItem[] = [
 jest.mock('../../src/components/Card', () => {
   return function MockCard(props: any) {
     return (
-      <div data-testid="mock-card" onClick={props.onPress}>
-        <div data-testid="card-title">{props.title}</div>
-        <div data-testid="card-tags">{props.tags?.join(',')}</div>
-      </div>
+      <TouchableOpacity testID="mock-card" onPress={props.onPress}>
+        <View>
+          <Text testID="card-title">{props.title}</Text>
+          <Text testID="card-tags">{props.tags?.join(',')}</Text>
+        </View>
+      </TouchableOpacity>
     );
   };
 });
