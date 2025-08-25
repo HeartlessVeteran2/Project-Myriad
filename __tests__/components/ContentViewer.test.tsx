@@ -33,7 +33,7 @@ describe('ContentViewer Component', () => {
     ],
     readProgress: 0,
     isRead: false,
-    dateAdded: new Date(),
+    dateAdded: new Date().toISOString(),
   };
 
   const mockAnimeEpisode: AnimeEpisode = {
