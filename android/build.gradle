@@ -9,10 +9,43 @@ buildscript {
         ndkVersion = "25.1.8937393"
         kotlinVersion = "2.2.10"
     }
+    repositories {
+        // Use Maven Central as primary repository (more firewall-friendly)
+        mavenCentral()
+        // Google's Maven repository
+        google()
+        // Gradle Plugin Portal
+        gradlePluginPortal()
+        // Use alternative CDN for Google repository if needed
+        maven {
+            url "https://maven.google.com"
+            name "Google"
+        }
+        // JitPack for dependencies not available elsewhere
+        maven { url "https://jitpack.io" }
+    }
     dependencies {
         classpath("com.android.tools.build:gradle:8.1.0")
         classpath("com.facebook.react:react-native-gradle-plugin:0.80.2")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+    }
+}
+
+allprojects {
+    repositories {
+        // Use Maven Central as primary repository (more firewall-friendly)
+        mavenCentral()
+        // Google's Maven repository
+        google()
+        // Use alternative CDN for Google repository if needed
+        maven {
+            url "https://maven.google.com"
+            name "Google"
+        }
+        // JitPack for dependencies not available elsewhere
+        maven { url "https://jitpack.io" }
+        // Local Maven repository for offline builds
+        mavenLocal()
     }
 }
 
