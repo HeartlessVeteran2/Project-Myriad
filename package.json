@@ -32,7 +32,7 @@
     "redux-persist": "^6.0.0",
     "react-redux": "^9.1.0",
     "react-native-reanimated": "^4.0.0",
-    "react-native-tesseract-ocr": "^2.6.0",
+    "react-native-tesseract-ocr": "^2.0.3",
     "react-native-image-picker": "^8.0.0",
     "axios": "^1.7.9"
   },
