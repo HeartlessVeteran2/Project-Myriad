@@ -56,6 +56,7 @@ import {
   Modal,
   SafeAreaView,
 } from 'react-native';
+import { MangaStatus, AnimeStatus } from '../types';
 
 export interface FilterOption {
   id: string;
@@ -103,7 +104,12 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   const [localFilters, setLocalFilters] = useState(filters);
   const [contentTypeFilter, setContentTypeFilter] = useState<'manga' | 'anime' | 'all'>(contentType);
 
-  const statusOptions = ['ongoing', 'completed', 'hiatus', 'upcoming'];
+  const statusOptions = [
+    MangaStatus.ONGOING,
+    MangaStatus.COMPLETED,
+    MangaStatus.HIATUS,
+    AnimeStatus.UPCOMING,
+  ];
 
   const handleReset = () => {
     setLocalFilters({ genre: [], status: [], rating: 0 });
