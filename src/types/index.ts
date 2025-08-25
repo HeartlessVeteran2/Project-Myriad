@@ -35,7 +35,10 @@ export interface AnimeEpisode {
   isWatched: boolean;
   videoUrl?: string;
   localPath?: string;
-  dateAdded: Date;
+  /**
+   * ISO 8601 date string representing when the episode was added.
+   * Example: "2024-06-10T12:34:56.789Z"
+   */
 }
 
 export interface Anime {
