@@ -89,6 +89,7 @@ export interface AITranslation {
    * ISO 8601 date string representing when the translation was created.
    * Example: "2024-06-10T12:34:56.789Z"
    */
+  timestamp: string;
 }
 
 export interface BoundingBox {
