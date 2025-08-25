@@ -7,7 +7,10 @@ export interface MangaChapter {
   pages: string[];
   readProgress: number;
   isRead: boolean;
-  dateAdded: Date;
+  /**
+   * ISO 8601 date string representing when the chapter was added.
+   * Example: "2024-06-10T12:34:56.789Z"
+   */
 }
 
 export interface Manga {
