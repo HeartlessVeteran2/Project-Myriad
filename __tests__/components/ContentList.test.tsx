@@ -2,9 +2,10 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import { View, Text, TouchableOpacity } from 'react-native';
 import ContentList, { ContentItem } from '../../src/components/ContentList';
+import { Manga } from '../../src/types';
 
 // Mock data for testing
-const mockMangaItems: ContentItem[] = [
+const mockMangaItems: Manga[] = [
   {
     id: '1',
     title: 'Test Manga 1',
@@ -132,10 +133,10 @@ describe('ContentList Component', () => {
     );
 
     // Initially in grid view
-    expect(getByText('List View')).toBeTruthy();
+    expect(getByText('☰')).toBeTruthy();
     
     // Toggle to list view
-    fireEvent.press(getByText('List View'));
+    fireEvent.press(getByText('☰'));
     
     // Now should be in list view
     expect(getByText('Grid View')).toBeTruthy();
