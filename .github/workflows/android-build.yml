@@ -52,14 +52,22 @@ jobs:
     - name: Install dependencies
       run: npm install --legacy-peer-deps
       
+    - name: Setup React Native
+      run: |
+        npm install -g @react-native-community/cli
+        npx react-native --version
+        
     - name: Initialize Android project
       run: |
         cd android
-        [ ! -f ./gradlew ] && gradle wrapper
+        if [ ! -f ./gradlew ]; then
+          gradle init
+          gradle wrapper
+        fi
         cd ..
+        npx react-native link
       
     - name: Make gradlew executable
-      run: chmod +x android/gradlew
       
     - name: Build Android Debug APK
       run: |
