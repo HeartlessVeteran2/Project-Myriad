@@ -102,8 +102,9 @@ jobs:
         fi
         
         # Security: Check for potential hardcoded secrets in gradle files
+        # Consider using a specialized secret scanning tool (e.g., gitleaks, truffleHog) for improved accuracy.
         echo "Checking for potential hardcoded secrets..."
-        SECRET_PATTERNS="password\s*[=:]\s*['\"][^'\"]+['\"]|secret\s*[=:]\s*['\"][^'\"]+['\"]|key\s*[=:]\s*['\"][^'\"]+['\"]|token\s*[=:]\s*['\"][^'\"]+['\"]"
+        SECRET_PATTERNS="(password|passwd|pwd|secret|key|token|api[_-]?key|auth[_-]?token|client[_-]?secret|access[_-]?key|private[_-]?key)\s*[=:]\s*['\"][^'\"]+['\"]"
         if grep -rE "$SECRET_PATTERNS" . --include="*.gradle" --exclude-dir=.git | grep -v "System.getenv\|project.hasProperty" | head -5; then
           echo "❌ Error: Potential hardcoded secrets found in gradle files"
           echo "Please use environment variables or gradle properties instead"
@@ -111,6 +112,13 @@ jobs:
         else
           echo "✅ No hardcoded secrets found in gradle files"
         fi
+
+        # Optional: Run a specialized secret scanning tool for improved accuracy (uncomment if tool is available)
+        # echo "Running gitleaks for advanced secret scanning..."
+        # gitleaks detect --source . --no-git --report-path gitleaks-report.json --exit-code 1 || {
+        #   echo "❌ Error: gitleaks detected potential secrets in the codebase"
+        #   exit 1
+        # }
         
     - name: Build Android APK
       # Security: Build with proper environment isolation
