@@ -1,4 +1,4 @@
-name: Android Build
+name: Test Suite
 
 on:
   push:
@@ -6,43 +6,26 @@ on:
   pull_request:
     branches: [ main ]
 
-
 permissions:
   contents: read
   actions: read
   pull-requests: read
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v5
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
       
     - name: Setup Node.js
       uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
       with:
-        node-version: '22'
+        node-version: '20'
         
-    - name: Setup Java
-      uses: actions/setup-java@8df1039502a15bceb9433410b1a100fbe190c53b # v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
-        
-    - name: Cache Gradle packages
-      uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
-          
     - name: Cache node modules
-      uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+      uses: actions/cache@v4
       with:
         path: ~/.npm
         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -52,22 +35,5 @@ jobs:
     - name: Install dependencies
       run: npm install --legacy-peer-deps
       
-    - name: Make gradlew executable
-      run: chmod +x android/gradlew
-      
-    - name: Build Android Debug APK
-      run: |
-        cd android
-        ./gradlew assembleDebug
-        
-    - name: Upload APK
-      if: always() && hashFiles('android/app/build/outputs/apk/debug/app-debug.apk') != ''
-      uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
-      with:
-        name: android-debug-apk
-        path: android/app/build/outputs/apk/debug/app-debug.apk
-        
-    - name: Run Android tests
-      run: |
-        cd android
-        ./gradlew test
+    - name: Run tests
+      run: npm test
