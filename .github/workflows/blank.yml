@@ -1,2 +1,2 @@
 - name: Setup Kotlin
-  uses: fwilhe2/setup-kotlin@c2b5b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8 # v1.2
+  uses: fwilhe2/setup-kotlin@5e7c3cf0d9b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8 # v1.2
