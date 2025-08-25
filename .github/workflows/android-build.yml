@@ -52,6 +52,12 @@ jobs:
     - name: Install dependencies
       run: npm install --legacy-peer-deps
       
+    - name: Initialize Android project
+      run: |
+        cd android
+        [ ! -f ./gradlew ] && gradle wrapper
+        cd ..
+      
     - name: Make gradlew executable
       run: chmod +x android/gradlew
       
