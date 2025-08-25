@@ -51,7 +51,7 @@ const mockMangaItems: Manga[] = [
         pages: ['page1.jpg', 'page2.jpg'],
         readProgress: 1,
         isRead: true,
-        dateAdded: new Date(),
+        dateAdded: new Date().toISOString(),
       },
     ],
     genres: ['Comedy', 'Slice of Life'],
