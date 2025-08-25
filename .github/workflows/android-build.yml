@@ -76,8 +76,6 @@ jobs:
       # Security: Run a single audit at high level to catch all moderate and high vulnerabilities
       run: |
         echo "Running security audit at high level..."
-        set -e
-        echo "Running security audit at high level..."
         npm audit --audit-level=high
 
         echo "Checking for vulnerable packages with yarn (if available)..."
