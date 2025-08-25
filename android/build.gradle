@@ -21,7 +21,7 @@ buildscript {
             url "https://maven.google.com"
             name "Google"
         }
-        // JitPack for dependencies not available elsewhere
+        // JitPack for dependencies not available elsewhere (should be last for reliability)
         maven { url "https://jitpack.io" }
     }
     dependencies {
