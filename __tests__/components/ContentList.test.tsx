@@ -104,8 +104,8 @@ describe('ContentList Component', () => {
       />
     );
 
-    // Check if loading indicator is shown
-    expect(getByTestId('activity-indicator')).toBeTruthy();
+    // Check if loading text is shown
+    expect(getByText('Loading content...')).toBeTruthy();
   });
 
   it('renders empty state correctly', () => {
