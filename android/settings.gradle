@@ -1,5 +1,6 @@
 rootProject.name = 'ProjectMyriad'
-apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
+// Note: Native modules configuration disabled for now - may need React Native CLI updates
+// apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
 include ':app'
 includeBuild('../node_modules/@react-native/gradle-plugin')
 

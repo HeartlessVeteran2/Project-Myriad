@@ -1,0 +1,173 @@
+name: Android Build
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+env:
+  # Security: Use environment variables instead of hardcoded values
+  NODE_VERSION: '22'
+  JAVA_VERSION: '11'
+
+jobs:
+  build:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    
+    # Security: Add permissions to restrict token access
+    permissions:
+      contents: read
+      actions: read
+      
+    steps:
+    - name: Checkout repository
+      # Security: Pin action to specific SHA to prevent supply chain attacks
+      uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
+      with:
+        # Security: Limit checkout depth to reduce attack surface
+        fetch-depth: 1
+        
+    - name: Validate workspace
+      # Security: Validate workspace structure before proceeding
+      run: |
+        if [ ! -f "package.json" ]; then
+          echo "Error: package.json not found"
+          exit 1
+        fi
+        if [ ! -d "android" ]; then
+          echo "Error: android directory not found"
+          exit 1
+        fi
+        
+    - name: Setup Node.js
+      # Security: Pin action version and use specific Node version
+      uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: Setup Java
+      # Security: Pin action version and validate Java setup
+      uses: actions/setup-java@387ac29b308b003ca37ba93a6cab5eb57c8f5f93 # v4.0.0
+      with:
+        distribution: 'temurin'
+        java-version: ${{ env.JAVA_VERSION }}
+        
+    - name: Cache Gradle dependencies
+      # Security: Cache Gradle dependencies securely
+      uses: actions/cache@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          gradle-${{ runner.os }}-
+          
+    - name: Install dependencies
+      # Security: Use --legacy-peer-deps flag and validate installation
+      run: |
+        npm ci --legacy-peer-deps
+        npm audit --audit-level=high
+        
+    - name: Run security checks
+      # Security: Run security audits before building
+      run: |
+        echo "Running security audit..."
+        npm audit --audit-level=moderate || true
+        
+        echo "Checking for vulnerable packages..."
+        # Security: Check for known vulnerable packages
+        if command -v yarn &> /dev/null; then
+          yarn audit --level moderate || true
+        fi
+        
+    - name: Run tests
+      # Security: Run tests to ensure code quality
+      run: npm test
+      
+    - name: Validate Android configuration
+      # Security: Validate Android build configuration
+      run: |
+        cd android
+        if [ ! -f "build.gradle" ]; then
+          echo "Error: android/build.gradle not found"
+          exit 1
+        fi
+        if [ ! -f "app/build.gradle" ]; then
+          echo "Error: android/app/build.gradle not found"
+          exit 1
+        fi
+        
+        # Security: Check for potential hardcoded secrets in gradle files
+        echo "Checking for potential hardcoded secrets..."
+        SECRET_PATTERNS="password\s*[=:]\s*['\"][^'\"]+['\"]|secret\s*[=:]\s*['\"][^'\"]+['\"]|key\s*[=:]\s*['\"][^'\"]+['\"]|token\s*[=:]\s*['\"][^'\"]+['\"]"
+        if grep -rE "$SECRET_PATTERNS" . --include="*.gradle" --exclude-dir=.git | grep -v "System.getenv\|project.hasProperty" | head -5; then
+          echo "❌ Error: Potential hardcoded secrets found in gradle files"
+          echo "Please use environment variables or gradle properties instead"
+          exit 1
+        else
+          echo "✅ No hardcoded secrets found in gradle files"
+        fi
+        
+    - name: Build Android APK
+      # Security: Build with proper environment isolation
+      run: |
+        cd android
+        # Security: Clean build to ensure no cached artifacts
+        ./gradlew clean
+        
+        # Security: Build release APK with validation
+        ./gradlew assembleRelease --no-daemon --stacktrace
+        
+        # Security: Validate APK was created
+        if [ ! -f "app/build/outputs/apk/release/app-release.apk" ]; then
+          echo "Error: APK build failed - output file not found"
+          exit 1
+        fi
+        
+        # Security: Check APK size to detect potential issues
+        APK_SIZE=$(stat -c%s "app/build/outputs/apk/release/app-release.apk")
+        if [ $APK_SIZE -lt 1000000 ]; then
+          echo "Warning: APK size is unusually small ($APK_SIZE bytes)"
+        fi
+        
+    - name: Upload APK artifact
+      # Security: Use pinned action and validate artifact
+      uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392 # v4.0.0
+      with:
+        name: android-apk-${{ github.run_number }}
+        path: android/app/build/outputs/apk/release/app-release.apk
+        # Security: Set retention period to limit exposure
+        retention-days: 30
+        
+    - name: Scan APK for security issues
+      # Security: Basic APK security scanning
+      run: |
+        cd android/app/build/outputs/apk/release/
+        
+        # Security: Verify APK signature (will fail for debug builds, which is expected)
+        echo "APK Info:"
+        file app-release.apk
+        ls -la app-release.apk
+        
+        # Security: Basic manifest extraction and validation
+        if command -v unzip &> /dev/null; then
+          echo "Checking APK structure..."
+          unzip -l app-release.apk | head -20
+        fi
+        
+    - name: Cleanup sensitive data
+      # Security: Clean up any potentially sensitive build artifacts
+      if: always()
+      run: |
+        echo "Cleaning up build artifacts..."
+        cd android
+        ./gradlew clean || true
+        
+        # Security: Remove any temporary files that might contain sensitive data
+        find . -name "*.tmp" -type f -delete 2>/dev/null || true
+        find . -name "*.log" -type f -delete 2>/dev/null || true

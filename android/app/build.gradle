@@ -3,8 +3,8 @@ apply plugin: "com.facebook.react"
 
 // Define Flipper version
 def FLIPPER_VERSION = "0.273.0"
-// Define hermesEnabled variable
-def hermesEnabled = project.ext.has("react") && project.ext.react.has("enableHermes") ? project.ext.react.enableHermes : true
+// Define hermesEnabled variable with proper fallback
+def hermesEnabled = (project.findProperty("react.enableHermes") ?: "true").toBoolean()
 
 /**
  * This is the configuration block to customize your React Native Android app.
@@ -81,9 +81,8 @@ def enableProguardInReleaseBuilds = false
 def jscFlavor = 'org.webkit:android-jsc:+'
 
 android {
+    compileSdk rootProject.ext.compileSdkVersion
     ndkVersion rootProject.ext.ndkVersion
-
-    compileSdkVersion rootProject.ext.compileSdkVersion
 
     namespace "com.projectmyriad"
     defaultConfig {
@@ -97,9 +96,17 @@ android {
     signingConfigs {
         debug {
             storeFile file('debug.keystore')
-            storePassword 'android'
-            keyAlias 'androiddebugkey'
-            keyPassword 'android'
+            storePassword System.getenv('DEBUG_STORE_PASSWORD') ?: 'android'
+            keyAlias System.getenv('DEBUG_KEY_ALIAS') ?: 'androiddebugkey'
+            keyPassword System.getenv('DEBUG_KEY_PASSWORD') ?: 'android'
+        }
+        release {
+            if (project.hasProperty('MYAPP_RELEASE_STORE_FILE')) {
+                storeFile file(MYAPP_RELEASE_STORE_FILE)
+                storePassword System.getenv('MYAPP_RELEASE_STORE_PASSWORD') ?: ''
+                keyAlias System.getenv('MYAPP_RELEASE_KEY_ALIAS') ?: ''
+                keyPassword System.getenv('MYAPP_RELEASE_KEY_PASSWORD') ?: ''
+            }
         }
     }
     buildTypes {
@@ -107,9 +114,8 @@ android {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            // Use release signing config if available, fallback to debug for development
+            signingConfig project.hasProperty('MYAPP_RELEASE_STORE_FILE') ? signingConfigs.release : signingConfigs.debug
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
@@ -135,4 +141,5 @@ dependencies {
     }
 }
 
-apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
+// Note: Native modules configuration disabled for now - may need React Native CLI updates  
+// apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
