@@ -11,6 +11,7 @@ export interface MangaChapter {
    * ISO 8601 date string representing when the chapter was added.
    * Example: "2024-06-10T12:34:56.789Z"
    */
+  dateAdded: string;
 }
 
 export interface Manga {
@@ -39,8 +40,8 @@ export interface AnimeEpisode {
    * ISO 8601 date string representing when the episode was added.
    * Example: "2024-06-10T12:34:56.789Z"
    */
-}
   dateAdded: string;
+}
 
 export interface Anime {
   id: string;
@@ -162,6 +163,7 @@ export interface ImportTask {
    * Example: "2024-06-10T12:34:56.789Z"
    */
   completedAt?: string;
+}
 
 export interface LibraryStats {
   totalManga: number;
