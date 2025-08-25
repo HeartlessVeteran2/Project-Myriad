@@ -103,9 +103,9 @@ android {
         release {
             if (project.hasProperty('MYAPP_RELEASE_STORE_FILE')) {
                 storeFile file(MYAPP_RELEASE_STORE_FILE)
-                storePassword System.getenv('MYAPP_RELEASE_STORE_PASSWORD') ?: ''
-                keyAlias System.getenv('MYAPP_RELEASE_KEY_ALIAS') ?: ''
-                keyPassword System.getenv('MYAPP_RELEASE_KEY_PASSWORD') ?: ''
+                storePassword System.getenv('MYAPP_RELEASE_STORE_PASSWORD') ?: '__MISSING_MYAPP_RELEASE_STORE_PASSWORD__'
+                keyAlias System.getenv('MYAPP_RELEASE_KEY_ALIAS') ?: '__MISSING_MYAPP_RELEASE_KEY_ALIAS__'
+                keyPassword System.getenv('MYAPP_RELEASE_KEY_PASSWORD') ?: '__MISSING_MYAPP_RELEASE_KEY_PASSWORD__'
             }
         }
     }
