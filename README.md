@@ -1,7 +1,7 @@
 # Project Myriad
-## The Definitive Manga and Anime Platform
+## The Definitive Android Manga and Anime Platform
 
-**Project Myriad** is a comprehensive Android application for manga and anime enthusiasts, featuring AI-powered tools, local media management, and seamless online content discovery.
+**Project Myriad** is a comprehensive Android application for manga and anime enthusiasts, built with modern Android technologies including Jetpack Compose, Kotlin, and MVVM Clean Architecture.
 
 ### 🚀 Features
 
@@ -10,10 +10,10 @@
 - Support for `.cbz`, `.cbr` manga formats
 - Support for `.mp4`, `.mkv`, `.avi` anime formats
 - Metadata scraping and organization
-- Local library management
+- Local library management with Room database
 
 #### 🧠 AI Core - Intelligent Features
-- **OCR Translation** for manga text
+- **OCR Translation** for manga text using ML Kit
 - **Art Style Matching** using computer vision
 - **AI-powered Recommendations** based on user preferences
 - **Natural Language Search** for intuitive content discovery
@@ -26,98 +26,96 @@
 - Source management and configuration
 
 ### 📱 Platform Support
-- **Android**: Primary target platform (API 21-34)
-- **Architecture**: ARM, ARM64, x86, x86_64 support
-- **Performance**: Hermes JavaScript engine enabled
+- **Android**: Primary target platform (API 21+)
+- **Architecture**: Modern Android with Jetpack Compose
+- **Performance**: Optimized for all Android devices
 
 ### 🛠️ Technology Stack
-- **React Native 0.80.2** with TypeScript
-- **React Navigation** for seamless navigation
-- **AsyncStorage** for local data persistence
-- **SQLite** for structured data storage
-- **Fast Image** for optimized image loading
-- **WebView** for online content integration
+- **Kotlin** - Primary programming language
+- **Jetpack Compose** - Modern UI toolkit with Material 3
+- **MVVM Clean Architecture** - Proper separation of concerns
+- **Hilt** - Dependency injection
+- **Room** - Local database with Flow support
+- **Retrofit** - Network operations
+- **Coil** - Image loading
+- **ML Kit** - OCR and text recognition
+- **WorkManager** - Background processing
 
 ### 🏗️ Project Structure
 ```
-src/
-├── components/          # Reusable UI components
-├── screens/            # Application screens
-├── navigation/         # Navigation configuration
-├── services/           # Core business logic
-│   ├── VaultService.ts    # Local media management
-│   ├── AIService.ts       # AI-powered features
-│   └── BrowserService.ts  # Online content discovery
-├── types/              # TypeScript type definitions
-├── utils/              # Utility functions
-└── stores/             # State management
+app/src/main/kotlin/com/projectmyriad/
+├── ui/                    # Presentation layer (Compose UI)
+│   ├── screens/             # Screen composables
+│   ├── navigation/          # Navigation setup
+│   └── theme/              # Material 3 theming
+├── domain/                # Domain layer (business logic)
+│   ├── model/              # Domain models
+│   ├── repository/         # Repository interfaces
+│   └── usecase/           # Use cases
+├── data/                  # Data layer
+│   ├── database/           # Room database
+│   ├── repository/         # Repository implementations
+│   └── network/           # API services
+├── di/                    # Dependency injection modules
+└── service/              # Background services
 ```
 
 ### 🚀 Getting Started
 
 #### Prerequisites
-- Node.js (>= 18.0.0)
 - Android Studio with Android SDK
-- React Native CLI
-- Java Development Kit (JDK) 11 or higher
+- JDK 11 or higher
+- Android device or emulator (API 21+)
 
 #### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/Project-Myriad.git
+git clone https://github.com/Heartless-Veteran/Project-Myriad.git
 cd Project-Myriad
 
-# Install dependencies
-npm install
-
-# Note: The project uses .npmrc with legacy-peer-deps=true to handle React 19 compatibility and @react-native/babel-preset
-
-# Start Metro bundler
-npm start
-
-# Run on Android device/emulator
-npm run android
+# Open in Android Studio or build from command line
+cd android
+./gradlew assembleDebug
 ```
 
 #### Building for Release
 ```bash
 # Build release APK
-npm run build:android
+./gradlew assembleRelease
 
 # The APK will be generated in:
-# android/app/build/outputs/apk/release/app-release.apk
+# app/build/outputs/apk/release/app-release.apk
 ```
 
 ### 🧪 Testing
 ```bash
-# Run tests
-npm test
+# Run unit tests
+./gradlew test
 
-# Run linting
-npm run lint
+# Run instrumented tests
+./gradlew connectedAndroidTest
 ```
 
 ### 📦 Key Dependencies
-- **@react-navigation/native**: Navigation framework
-- **react-native-fs**: File system operations
-- **react-native-sqlite-storage**: Local database
-- **react-native-fast-image**: Optimized image loading
-- **react-native-webview**: Web content integration
-- **react-native-document-picker**: File picker functionality
-- **react-native-zip-archive**: Archive handling
+- **Jetpack Compose** - Modern UI toolkit
+- **Hilt** - Dependency injection
+- **Room** - Local database
+- **Retrofit** - Network client
+- **Coil** - Image loading
+- **ML Kit** - Text recognition
+- **WorkManager** - Background tasks
 
-### 🔧 Configuration
-The project uses:
-- **TypeScript** for type safety
-- **ESLint** for code quality
-- **Prettier** for code formatting
-- **Jest** for testing
-- **Metro** for bundling
-- **Hermes** for JavaScript engine
+### 🔧 Architecture
+The app follows **MVVM Clean Architecture** principles:
+- **UI Layer**: Jetpack Compose screens and ViewModels
+- **Domain Layer**: Use cases, models, and repository interfaces
+- **Data Layer**: Repository implementations, Room database, and network APIs
 
 ### 📋 Documentation
 - [Development Guide](docs/DEVELOPMENT.md)
-- [Dependency Management](docs/dependency-management.md)
+- [Requirements](docs/requirements.md)
+- [Implementation Plan](docs/plan.md)
+- [Task List](docs/tasks.md)
 
 ### 📄 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -134,4 +132,4 @@ For support and questions, please open an issue on GitHub.
 
 ---
 
-**Project Myriad** - Bringing manga and anime content together with the power of AI and modern mobile technology.
+**Project Myriad** - The definitive Android platform for manga and anime, built with modern Android technologies and AI-powered features.
